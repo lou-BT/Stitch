@@ -1,0 +1,40 @@
+.appInput {
+    padding-left: .75rem;
+    padding-right: .75rem;
+    padding-top: .375rem;
+    padding-bottom: .375rem;
+    border-radius: 20px;
+    border: 1.5px solid black;
+}
+
+input::placeholder{
+    color: lightgrey;
+}
+
+.form-label {
+    margin-right: 5px;
+    //font-weight: bold;
+}
+
+.vertical {
+  display: flex;
+  height: 100vh; /* Set the container height to 100% of the viewport height */
+  flex-direction: column; /* Align flex items vertically */
+}
+
+.drop-area {
+    border-radius: 20px;
+    border: 1.5px solid black;
+    width: 100%;
+    height: 30vh;
+    padding-left: .75rem;
+    padding-right: .75rem;
+    padding-top: .375rem;
+    padding-bottom: .375rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: lightgrey
+}
+

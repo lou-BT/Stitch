@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { NgForm, FormsModule, FormControl } from '@angular/forms';
 import { Pattern, Category } from '../classes';
 import { NgFor } from '@angular/common';
@@ -8,10 +8,11 @@ import { NgFor } from '@angular/common';
   standalone: true,
   imports: [FormsModule, NgFor],
   templateUrl: './add-pattern.component.html',
-  styleUrl: './add-pattern.component.scss'
+  styleUrl: './add-pattern.component.scss',
+  encapsulation: ViewEncapsulation.None // Add this line
 })
 export class AddPatternComponent {
-  
+
   categoryKeys = Object.values(Category);
   patternName: string = '';
   files: File[] = [];

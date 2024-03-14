@@ -20,6 +20,8 @@ mat-tab-group.invisible-tabs  {
         display: none!important;
     }
     padding: 25px;
+    padding-right: 0px;
+    padding-bottom: 15px;
     background-color: white;
     color: black;
     // border-radius: 20px;
@@ -31,6 +33,13 @@ mat-tab-group.invisible-tabs  {
     font-weight: bold;
 }
 
+// ::ng-deep ::-webkit-scrollbar-track {
+//     background: #f1f1f1; /* Color of the track */
+// }
+
+// ::ng-deep ::-webkit-scrollbar-thumb {
+//     background: #888; /* Color of the scroll thumb */
+// }
 
 
 

@@ -1,0 +1,45 @@
+<div class="container-fluid" style="height: 100vh;" id="page">
+  <div class="row" style="height: 100%;">
+    <div class="col-3 col-lg-2" id="nav-column">
+      <div class="d-flex flex-column justify-content-between" id="nav">
+        <div class="p-2 center-col" id="nav-topper">
+            <img src="assets/illustrations/logoStitchLarge.png" alt="Logo" id="logo">
+            <h2 style="font-weight: bold;">stitch</h2>
+        </div>
+        <div class="p-2" id="nav-links" role="group">
+            <div class="nav-item" (click)="tabGroup.selectedIndex=0">
+                <fa-icon [icon]='images' size="xl" ></fa-icon>
+                <h5 class="item-name">patterns</h5>
+            </div>
+            <div class="nav-item" (click)="tabGroup.selectedIndex=1">
+                <fa-icon [icon]='plus' size="xl" style="margin-left: 5px;"></fa-icon>
+                <h5 class="item-name" >add pattern</h5>
+            </div>
+            <div class="nav-item" (click)="tabGroup.selectedIndex=0">
+                <fa-icon [icon]='clock' size="xl" style="margin-left: 2px;"></fa-icon>
+                <h5 class="item-name">next</h5>
+            </div>
+    
+        </div>
+        <div class="p-2 center-col" id="nav-bottom">
+            <a>bottom</a>
+        </div>
+    </div>
+    </div>
+    <div class="col-9 col-lg-10" id="main-div">
+      <mat-tab-group class="invisible-tabs" #tabGroup >
+        <mat-tab id="tab0"> 
+          <app-patterns></app-patterns> 
+        </mat-tab>
+        <mat-tab id="tab1"> 
+          <app-add-pattern></app-add-pattern> 
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
+</div>
+
+
+
+
+

@@ -1,14 +1,17 @@
-.appInput {
-    padding-left: .75rem;
-    padding-right: .75rem;
-    padding-top: .375rem;
-    padding-bottom: .375rem;
-    border-radius: 20px;
-    border: 1.5px solid black;
+#add-pattern-main-div {
+    //height: 100%;
+    max-height: calc(80vh - 76px);
+    padding: 20px;
+    padding-top: 40px;
 }
 
-input::placeholder{
-    color: lightgrey;
+.scrollable-div::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Color of the track */
+}
+
+.scrollable-div {
+    scrollbar-width: thin; /* 'thin' or 'auto' */
+    scrollbar-color: #888 #f1f1f1; /* thumb and track color */
 }
 
 .form-label {
@@ -16,25 +19,55 @@ input::placeholder{
     //font-weight: bold;
 }
 
-.vertical {
-  display: flex;
-  height: 100vh; /* Set the container height to 100% of the viewport height */
-  flex-direction: column; /* Align flex items vertically */
-}
+// .vertical {
+//   display: flex;
+//   height: 100vh; /* Set the container height to 100% of the viewport height */
+//   flex-direction: column; /* Align flex items vertically */
+// }
 
 .drop-area {
-    border-radius: 20px;
-    border: 1.5px solid black;
+    border-radius: 10px;
+    background-color: var(--background-color-grey);
     width: 100%;
-    height: 30vh;
+    // height: 30vh;
+    aspect-ratio: 1/1;
     padding-left: .75rem;
     padding-right: .75rem;
-    padding-top: .375rem;
-    padding-bottom: .375rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    // text-align: center;
     color: lightgrey
+}
+
+.image-box {
+    position: relative;
+    display: inline-block;
+}
+
+.imagePattern {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.deleteButton {
+    position:absolute;
+    // color: black;
+    top: 10%;
+    right: 10%;
+    color: white;
+    cursor: pointer;
+    padding: 0px;
+}
+
+.deleteFileButton {
+    position:absolute;
+    color: black;
+    //top: 10%;
+    right: 10%;
+    // color: white;
+    cursor: pointer;
+    padding: 0px;
 }
 

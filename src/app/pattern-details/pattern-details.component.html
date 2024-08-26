@@ -1,0 +1,49 @@
+<!-- carousel -->
+<div>
+    <mdb-carousel [controls]="true" [indicators]="true" >
+        <mdb-carousel-item *ngFor="let photo of pattern?.photos">
+          <img
+            style="height: 400px; object-fit: contain;"
+            [src]="photo"
+            class="d-block w-100"
+            alt="..."
+          />
+        </mdb-carousel-item>
+        <mdb-carousel-item *ngFor="let photo of pattern?.techDrawings">
+            <img
+            style="height: 400px; object-fit: contain;"
+              [src]="photo"
+              class="d-block w-100"
+              alt="..."
+            />
+          </mdb-carousel-item>
+      </mdb-carousel>
+</div>
+<!-- end of carousel -->
+
+<!-- pattern content -->
+<div style="padding: 20px;">
+    <h5 style="color: grey; margin-bottom: -3px;margin-top: 5px;">{{pattern?.category}}</h5>
+    <div class="pattern-header d-flex flex-row">
+        <h3>{{pattern?.name}}</h3>
+    </div>
+
+    <!-- files -->
+    <div class="container-fluid" style="margin-top: 20px;">
+        <div class="row justify-content-center">
+            <div class="col-8">
+                <h5 style="margin-left: 15px;">Files</h5>
+                <div *ngFor="let file of pattern?.files" class="file-block d-flex flex-row align-items-center justify-content-between">
+                    <div class="d-flex flex-row">
+                        <fa-icon [icon]='fileIcon' style="margin-right: 12px;"></fa-icon>
+                        {{file.split("\\").pop()}}
+                    </div>
+
+                    <button class="justify-self-end button"
+                            (click)="this.data.openFile(file)">open</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div> 

@@ -5,13 +5,24 @@
 
 mat-tab-group {
   border-left: 1.5px solid black;
+  // height: calc(100vh - 3% - 40px);
 }
+
+#tab0 {
+  height: 100%;
+}
+
+#tab1 {
+  height: 100%;
+}
+
 
 #main-div {
   padding-top: 1.5%;
   padding-bottom: 1.5%;
   padding-left: 0%;
-  padding-right: 1.5%;
+  padding-right: 0%;
+  height: 100vh;
   // background-color: white;
   // color: #151617;
 }

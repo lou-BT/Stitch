@@ -1,46 +1,117 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
 import { NgForm, FormsModule, FormControl } from '@angular/forms';
-import { Pattern, Category } from '../classes';
-import { NgFor } from '@angular/common';
+import { Pattern, Category, NewPattern } from '../classes';
+import { NgFor, NgIf } from '@angular/common';
+//import { PatternService } from '../services/pattern.service';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import * as icons from '@fortawesome/free-regular-svg-icons';
+import * as solidIcons from '@fortawesome/free-solid-svg-icons';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { DataService } from '../services/data.service';
 
 @Component({
   selector: 'app-add-pattern',
   standalone: true,
-  imports: [FormsModule, NgFor],
+  imports: [FormsModule, NgFor, NgIf, MatGridListModule, FontAwesomeModule, ScrollingModule],
   templateUrl: './add-pattern.component.html',
   styleUrl: './add-pattern.component.scss',
-  encapsulation: ViewEncapsulation.None // Add this line
+  encapsulation: ViewEncapsulation.None 
 })
 export class AddPatternComponent {
-
-  categoryKeys = Object.values(Category);
+  @Output() closeModalEvent = new EventEmitter<any>();
+  //patternService = new PatternService();
+  patternNameList : string[] = [];
   patternName: string = '';
-  files: File[] = [];
-  //pattern: Pattern;
+  pattern =  new Pattern();
 
-  onFileDrop(event: DragEvent): void {
+  pdf = icons.faFilePdf;
+  xmark = solidIcons.faCircleXmark; // faXmarkCircle;
+
+  constructor(private cdr: ChangeDetectorRef, private data: DataService) {
+    this.patternNameList = data.getPatternNameList()
+    console.log(this.patternNameList);
+  }
+
+  extractFileName(filePath: string): string {
+    // Split the filePath by '/' to separate into parts
+    const pathParts = filePath.split(/[\\/]/);
+
+    // Get the last part of the path, which is the filename
+    const fileName = pathParts[pathParts.length -1];
+    return fileName || ''; // Return the extracted filename or an empty string if not found
+  }
+  
+
+  onFileDrop(event: DragEvent, type: string): void {
     event.preventDefault();
     const files = event.dataTransfer!.files;
-    this.files = this.files.concat(Array.from(files));
-    console.log("new file", this.files[0].webkitRelativePath);
+    switch (type) {
+      case "photos" :
+        for(let i=0; i<files.length; i++) {
+          this.pattern.photos.push(files[i].path);
+        }
+        break;
+      case "techDrawings" :
+        for(let i=0; i<files.length; i++) {
+          this.pattern.techDrawings.push(files[i].path);
+        }
+        break;
+      case "files" :
+        for(let i=0; i<files.length; i++) {
+          this.pattern.files.push(files[i].path);
+        }
+        break;
+      default:
+        console.error("invalid type");
+        break;
+    }
+    this.cdr.detectChanges();
+    //console.log("new file",  this.files, this.pattern);
   }
 
   allowDrop(event: DragEvent): void {
     event.preventDefault();
   }
 
+  deleteItem(list: number , item: string) {
+    switch(list) {
+      case 0 :
+        var index = this.pattern.photos.indexOf(item);
+        if ( index != -1 ) this.pattern.photos.splice(index,1);
+        break;
+      case 1 :
+        var index = this.pattern.techDrawings.indexOf(item);
+        if ( index != -1 ) this.pattern.techDrawings.splice(index,1);
+        break;
+      case 2 :
+        var index = this.pattern.files.indexOf(item);
+        if ( index != -1 ) this.pattern.files.splice(index,1);
+        break;
+      default :
+        break;
+    }
+  }
+
   submitForm(): void {
     // Validate form data
-    if (!this.patternName || this.files.length === 0) {
+    if (!this.pattern.name || this.pattern.files.length === 0) {
       console.error('Pattern name and files are required.');
       return;
     }
 
-    var pattern = new Pattern(this.patternName, this.files);
+    else {
+      console.log(this.pattern);
+      this.data.addPattern(this.pattern);
+    }
+  }
 
-    //create pattern folder
-    window.ipcRenderer.send('add-pattern', pattern);
-    console.log('Files uploaded successfully.');
+  checkNameValidity() {
+    
+  }
+
+  closeModal() {
+    this.closeModalEvent.emit(true);
   }
 
 }

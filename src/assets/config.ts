@@ -1,0 +1,1 @@
+export var PATTERN_FOLDER_PATH = "C:/Users/louca/Documents/PatternFolder";

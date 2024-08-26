@@ -5,7 +5,7 @@
 
 mat-tab-group {
   border-left: 1.5px solid black;
-  max-height: 100%;
+  // height: calc(100vh - 3% - 40px);
 }
 
 #tab0 {

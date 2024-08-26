@@ -1,10 +1,74 @@
-<div *ngFor="let pattern of patterns">
-    <p>Name: {{ pattern.name }}</p>
-    <p>Filepath: {{ pattern.filepath }}</p>
-</div>
 <h1 class="title">Patterns</h1>
 
+<!-- search section -->
+<div class="d-flex flex-row" style="padding-bottom: 20px;">
+    <div class="category-item">
+        <a>all</a>
+    </div>
+    <div *ngFor="let category of categories">
+        <div class="category-item">
+            <a>{{category}}</a>
+        </div>
+    </div>
+</div>
+<!-- end of search section -->
 
+<!-- pattern list -->
+<div id="pattern-page-content" style="flex-grow: 1; overflow-y: auto;">
+    <div class="container-fluid">
+        <div class="row gy-4" id="patterns-list">
+            <div class="col-4" *ngFor="let pattern of patternList">
+                <!-- individual pattern block -->
+                <div class="pattern-block d-flex flex-column"
+                      (click)="openPatternModal(pattern)">
+                    <div class="image-container">
+                        <img [src]="pattern.photos[0]" alt="Logo">
+                    </div>
+                    <span class="subtitle" style="margin-left: 10px; margin-bottom: -5px;">{{pattern.category}}</span>
+                    <span style="margin-left: 10px;">{{pattern.name}}</span>
+                </div>
+                <!-- end of individual pattern block -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end of pattern list -->
+
+<button class="plus-button" (click)="openNewPatternModal()">
+  <fa-icon [icon]='plusIcon' size="xl" ></fa-icon>
+</button>
+  
+<!-- single pattern modal -->
+<div class="modal fade" id="patternModal" tabindex="-1" aria-labelledby="pattern Modal" aria-hidden="true" #patternModal>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="width: 80%; max-width: 800px;">
+    <div class="modal-content" style="border-radius: 10px;">
+      <div class="modal-body" *ngIf="selectedPattern" style="padding:3px; border-radius: 8px;">
+        <app-pattern-details [pattern]="selectedPattern"></app-pattern-details>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="secondary-button">edit</button>
+        <button type="button" class="button" data-bs-dismiss="modal">close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- add pattern modal -->
+<div class="modal fade" id="addPatternModal" tabindex="-1" aria-labelledby="add pattern Modal" aria-hidden="true" #addPatternModal>
+  <div class="modal-dialog modal-dialog-centered " style="width: 80%; max-width: 800px;">
+  <!-- <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="width: 80%; max-width: 800px;"></div> -->
+    <div class="modal-content" style="border-radius: 10px;">
+      <div class="modal-body" style="padding:3px; border-radius: 8px;">
+        <app-add-pattern></app-add-pattern>
+        <!-- <app-pattern-details [pattern]="selectedPattern"></app-pattern-details> -->
+      </div>
+      <!-- <div class="modal-footer">
+        <button type="button" class="secondary-button">cancel</button>
+        <button type="button" class="button" data-bs-dismiss="modal">add pattern</button>
+      </div> -->
+    </div>
+  </div>
+</div>
 
 
 

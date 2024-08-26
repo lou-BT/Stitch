@@ -1,14 +1,41 @@
 export class Pattern {
     name: string;
-    photos: string[] = [];
-    techDrawings: string[] = [];
+    category: Category;
+    photos: string[];
+    techDrawings: string[];
     files: string[];
-    //a0: File | null = null;
-    notes: Note[] = [];
-    category?: Category;
-    constructor(name: string, files: File[]) {
+    //notes: Note[] = [];
+
+    constructor() {
+        this.name = "";
+        this.category = Category.else;
+        this.photos = [];
+        this.techDrawings = [];
+        this.files = [];
+    }
+    
+    set(name: string, category: Category, photos: string[], techDrawings: string[], files: string[]) {
         this.name = name;
-        this.files = files.map(file  => file.path);
+        this.category = category;
+        this.photos = photos;
+        this.techDrawings = techDrawings;
+        this.files = files;
+    }
+}
+
+export class NewPattern {
+    name: string;
+    category: Category;
+    photos: string[];
+    techDrawings: string[];
+    files: string[];
+
+    constructor() {
+        this.name = "pattern";
+        this.category = Category.top;
+        this.photos = [];
+        this.techDrawings = [];
+        this.files = [];
     }
 }
 
@@ -22,6 +49,19 @@ export enum Category {
     "top",
     "bottom",
     "dress",
+    "one piece",
     "accessory",
     "else"
 }
+
+export const Categories = ["top",
+    "bottom",
+    "dress",
+    "one piece",
+    "accessory",
+    "else"]
+
+// class FileLink {
+//     name: string;
+//     path: string;
+// }

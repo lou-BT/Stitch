@@ -3,7 +3,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { AddPatternComponent } from './add-pattern/add-pattern.component';
 import { PatternsComponent } from './patterns/patterns.component';
 import { MatIconModule }  from '@angular/material/icon';
-import { NavComponent } from './nav/nav.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
 
@@ -12,7 +11,6 @@ import * as icons from '@fortawesome/free-regular-svg-icons';
   selector: 'app-root',
   standalone: true,
   imports: [MatTabsModule,
-            NavComponent,
             AddPatternComponent,
             PatternsComponent,
             FontAwesomeModule,

@@ -18,11 +18,13 @@ mat-tab-group {
 
 
 #main-div {
-  padding-top: 1.5%;
-  padding-bottom: 1.5%;
-  padding-left: 0%;
-  padding-right: 0%;
-  height: 100vh;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 0%;
+  margin-right: 0%;
+  height: calc(100vh - 40px);
+  border-left: 1.5px solid black;
+  overflow: hidden;
   // background-color: white;
   // color: #151617;
 }

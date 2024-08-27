@@ -5,6 +5,7 @@ import { PatternsComponent } from './patterns/patterns.component';
 import { MatIconModule }  from '@angular/material/icon';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
+import { RouterOutlet } from '@angular/router';
 
 
 @Component({
@@ -14,7 +15,8 @@ import * as icons from '@fortawesome/free-regular-svg-icons';
             AddPatternComponent,
             PatternsComponent,
             FontAwesomeModule,
-            MatIconModule],
+            MatIconModule,
+            RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   encapsulation: ViewEncapsulation.None

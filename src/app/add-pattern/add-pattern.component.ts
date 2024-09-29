@@ -1,7 +1,7 @@
 import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output, OnInit } from '@angular/core';
 import { NgForm, FormsModule, FormControl } from '@angular/forms';
 import { Pattern, Category, NewPattern } from '../classes';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 //import { PatternService } from '../services/pattern.service';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -13,7 +13,7 @@ import { DataService } from '../services/data.service';
 @Component({
   selector: 'app-add-pattern',
   standalone: true,
-  imports: [FormsModule, NgFor, NgIf, MatGridListModule, FontAwesomeModule, ScrollingModule],
+  imports: [FormsModule, NgFor, NgIf, NgClass, MatGridListModule, FontAwesomeModule, ScrollingModule],
   templateUrl: './add-pattern.component.html',
   styleUrl: './add-pattern.component.scss',
   encapsulation: ViewEncapsulation.None 
@@ -28,13 +28,9 @@ export class AddPatternComponent implements OnInit {
   pdf = icons.faFilePdf;
   xmark = solidIcons.faCircleXmark; // faXmarkCircle;
 
-  constructor(private cdr: ChangeDetectorRef, private data: DataService) {
-  }
+  constructor(private cdr: ChangeDetectorRef, private data: DataService) {}
 
-  ngOnInit(): void {
-    this.patternNameList = this.data.getPatternNameList();
-    // console.log("pattern list",this.patternNameList);
-  }
+  ngOnInit(): void {}
 
   extractFileName(filePath: string): string {
     // Split the filePath by '/' to separate into parts
@@ -45,6 +41,19 @@ export class AddPatternComponent implements OnInit {
     return fileName || ''; // Return the extracted filename or an empty string if not found
   }
   
+  checkNameValidity() {
+    if (!this.data.checkPatternNameValidity(this.pattern.name)) {
+      const inputField = document.getElementById('patternNameInput');
+      inputField?.classList.add('is-invalid');
+    } else {
+      const inputField = document.getElementById('patternNameInput');
+      inputField?.classList.remove('is-invalid');
+    }
+  }
+
+  checkNameValidityBis() {
+    return this.data.checkPatternNameValidity(this.pattern.name);
+  }
 
   onFileDrop(event: DragEvent, type: string): void {
     event.preventDefault();
@@ -98,7 +107,7 @@ export class AddPatternComponent implements OnInit {
 
   submitForm(): void {
     // Validate form data
-    if (!this.pattern.name || this.pattern.files.length === 0) {
+    if (!this.pattern.name || this.pattern.files.length === 0 || !this.data.checkPatternNameValidity(this.pattern.name)) {
       console.error('Pattern name and files are required.');
       return;
     }
@@ -108,10 +117,6 @@ export class AddPatternComponent implements OnInit {
       this.data.addPattern(this.pattern);
       this.closeModal();
     }
-  }
-
-  checkNameValidity() {
-    
   }
 
   closeModal() {

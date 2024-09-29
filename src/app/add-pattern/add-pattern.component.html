@@ -7,8 +7,23 @@
         <div class="row">
           <div class="col-12 col-md-6 col-lg-5 col-xl-4">
             <label class="form-label inputLabel">Pattern name *</label><br>
-            <input type="text" class="inputField form-control" name="patternName" id="name-input"
-              [(ngModel)]="pattern.name" required placeholder="Calliope">
+            <input type="text" 
+                   class="inputField form-control" 
+                   name="patternNameInput" 
+                   id="patternNameInput"
+                   #patternNameInput="ngModel"
+                   required
+                   [(ngModel)]="pattern.name"
+                   placeholder="Calliope"
+                   [ngClass]="{'is-invalid': patternNameInput.invalid && (patternNameInput.touched || patternNameInput.dirty)}"
+                   (ngModelChange)="checkNameValidity()">
+              <!-- <div  *ngIf="(patternNameInput && patternNameInput.invalid  && (patternNameInput.touched || patternNameInput.dirty))" id="validationNameFeedback" class="invalid-feedback">
+                Pattern name already used.
+              </div> -->
+              <div  *ngIf="!checkNameValidityBis()" id="validationNameFeedback" class="invalid-feedback">
+                Pattern name already used or invalid characters.
+              </div>
+        
           </div>
           <div class="col-12 col-md-6 col-lg-5 col-xl-4">
             <label class="form-label inputLabel">Category</label><br>

@@ -35,6 +35,11 @@ export class DataService {
     return this._patternList.value.map(pattern => pattern.name);
   }
 
+  checkPatternNameValidity(patternName: string) {
+    const invalidChars = /[<>:"/\\|?*]/;
+    return !this._patternList.value.find((pattern => pattern.name === patternName)) && !invalidChars.test(patternName);
+  }
+
   addPattern( pattern: Pattern ) {
     window.ipcRenderer.send('patterns:addNew', pattern);
   }

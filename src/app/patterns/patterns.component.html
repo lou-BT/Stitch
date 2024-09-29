@@ -21,9 +21,7 @@
           <div class="row gy-4" id="patterns-list">
               <div class="col-4" *ngFor="let pattern of patternList.filter(filterCategory)">
                   <!-- individual pattern block -->
-                  <div class="pattern-block d-flex flex-column"
-                        (click)="openPatternModal(pattern)"
-                        >
+                  <div class="pattern-block d-flex flex-column" (click)="openPatternModal(pattern)">
                       <div class="image-container">
                           <img [src]="pattern.photos[0]" alt="Logo">
                       </div>

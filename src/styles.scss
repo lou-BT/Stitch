@@ -68,15 +68,6 @@ mat-tab-group.invisible-tabs  {
     color: lightgray;
 }
 
-// .inputField:focus {
-//     box-shadow: 0 0 5 5px var(--tertiary-color);
-//     //border-style: solid;
-//     //border-width: 2px;
-//     //border-color: var(--tertiary-color);
-// }
-
-
-
 .inputLabel {
     font-size: small;
     color: gray;
@@ -160,23 +151,6 @@ mat-tab-group.invisible-tabs  {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
 }
-
-// .file-block {
-//     border-color: black;
-//     border-radius: 10px;
-//     border-width: 1.5px;
-//     border-style: solid;
-//     padding: 15px;
-//     margin-bottom: 15px;
-// }
-
-// ::ng-deep ::-webkit-scrollbar-track {
-//     background: #f1f1f1; /* Color of the track */
-// }
-
-// ::ng-deep ::-webkit-scrollbar-thumb {
-//     background: #888; /* Color of the scroll thumb */
-// }
 
 ::ng-deep .modal-backdrop {
     z-index: 1040 !important;

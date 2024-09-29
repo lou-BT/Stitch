@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild} from '@angular/core';
 import { DataService } from '../services/data.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { Categories, Pattern } from '../classes';
 import * as bootstrap from 'bootstrap';
 import { Subscription } from 'rxjs';
@@ -16,7 +16,7 @@ import { PatternEditComponent } from '../pattern-edit/pattern-edit.component';
 @Component({
   selector: 'app-patterns',
   standalone: true,
-  imports: [CommonModule, PatternDetailsComponent, FontAwesomeModule, AddPatternComponent, PatternEditComponent],
+  imports: [CommonModule, PatternDetailsComponent, FontAwesomeModule, AddPatternComponent, PatternEditComponent, NgClass],
   templateUrl: './patterns.component.html',
   styleUrl: './patterns.component.scss'
 })
@@ -31,12 +31,12 @@ export class PatternsComponent implements OnInit, AfterViewInit{
   selectedPattern: Pattern | null = null;
 
   categories = Categories;
-  selectedCategory: string;
+  selectedCategory: string = 'all';
 
   plusIcon = iconsSolid.faPlus;
 
   constructor(private data: DataService) {
-    this.selectedCategory = "all";
+    //this.selectedCategory = "all";
   }
 
   ngOnInit(): void {
@@ -53,7 +53,16 @@ export class PatternsComponent implements OnInit, AfterViewInit{
   }
  
   setCategory(category: string) {
-    this.selectedCategory = category;
+    if( category !== this.selectedCategory) {
+      this.selectedCategory = category; 
+    } else {
+      this.selectedCategory = "all"; 
+    } 
+  }
+
+  filterCategory = (pattern: Pattern): boolean => {
+    if (!this.selectedCategory || this.selectedCategory === 'all') return true;
+    return pattern.category as unknown as string === this.selectedCategory;
   }
 
   openModal( modalName: string, pattern? : any ) {
@@ -83,7 +92,7 @@ export class PatternsComponent implements OnInit, AfterViewInit{
 
   async closeModal() {
     this.modalInstance.hide();
-    setTimeout(() => {this.selectedPattern = null}, 100);
+    setTimeout(() => {this.selectedPattern = null}, 10);
     //this.selectedPattern = null;
   }
 

@@ -67,7 +67,6 @@ ipcMain.handle('patterns:getAll', (event) => {
   const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
   if(fs.existsSync(patternIndexPath)) {
     const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-    console.log(JSON.parse(patternsJSON))
     return JSON.parse(patternsJSON);
   }
   else return [];
@@ -148,7 +147,6 @@ ipcMain.on('patterns:openFile', (event, file) => {
 ipcMain.on('patterns:delete', (event, pattern) => {
   //delete folder
   const folderPath = path.join(patternFolderPath, pattern.name);
-  console.log(folderPath);
   if(fs.existsSync(folderPath)) {
     fs.rm(folderPath, { recursive: true, force: true }, (err) => {
       if (err) {

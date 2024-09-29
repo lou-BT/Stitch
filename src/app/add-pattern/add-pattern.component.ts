@@ -33,7 +33,7 @@ export class AddPatternComponent implements OnInit {
 
   ngOnInit(): void {
     this.patternNameList = this.data.getPatternNameList();
-    console.log("pattern list",this.patternNameList);
+    // console.log("pattern list",this.patternNameList);
   }
 
   extractFileName(filePath: string): string {
@@ -106,6 +106,7 @@ export class AddPatternComponent implements OnInit {
     else {
       console.log(this.pattern);
       this.data.addPattern(this.pattern);
+      this.closeModal();
     }
   }
 
@@ -114,6 +115,7 @@ export class AddPatternComponent implements OnInit {
   }
 
   closeModal() {
+    console.log('close modale 1');
     this.closeModalEvent.emit(true);
     this.pattern = new Pattern();
   }

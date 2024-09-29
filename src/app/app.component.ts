@@ -5,6 +5,7 @@ import { PatternsComponent } from './patterns/patterns.component';
 import { MatIconModule }  from '@angular/material/icon';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
+import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 import { RouterOutlet } from '@angular/router';
 
 
@@ -25,7 +26,8 @@ export class AppComponent {
   title = 'Stitch';
 
   //nav icons
-  images = icons.faImages;
+  images = solidIcons.faImages;
+  scroll = solidIcons.faScroll;
   plus = icons.faSquarePlus;
   clock = icons.faClock;
 }

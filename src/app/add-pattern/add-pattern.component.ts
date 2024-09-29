@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
+import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output, OnInit } from '@angular/core';
 import { NgForm, FormsModule, FormControl } from '@angular/forms';
 import { Pattern, Category, NewPattern } from '../classes';
 import { NgFor, NgIf } from '@angular/common';
@@ -18,7 +18,7 @@ import { DataService } from '../services/data.service';
   styleUrl: './add-pattern.component.scss',
   encapsulation: ViewEncapsulation.None 
 })
-export class AddPatternComponent {
+export class AddPatternComponent implements OnInit {
   @Output() closeModalEvent = new EventEmitter<any>();
   //patternService = new PatternService();
   patternNameList : string[] = [];
@@ -29,8 +29,11 @@ export class AddPatternComponent {
   xmark = solidIcons.faCircleXmark; // faXmarkCircle;
 
   constructor(private cdr: ChangeDetectorRef, private data: DataService) {
-    this.patternNameList = data.getPatternNameList()
-    console.log(this.patternNameList);
+  }
+
+  ngOnInit(): void {
+    this.patternNameList = this.data.getPatternNameList();
+    console.log("pattern list",this.patternNameList);
   }
 
   extractFileName(filePath: string): string {
@@ -112,6 +115,7 @@ export class AddPatternComponent {
 
   closeModal() {
     this.closeModalEvent.emit(true);
+    this.pattern = new Pattern();
   }
 
 }

@@ -44,11 +44,11 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="width: 80%; max-width: 800px;">
       <div class="modal-content" style="border-radius: 10px;">
         <div class="modal-body" *ngIf="selectedPattern" style="padding:3px; border-radius: 8px;">
-          <app-pattern-details [pattern]="selectedPattern"></app-pattern-details>
+          <app-pattern-details [pattern]="selectedPattern" (editEvent)="openModal('edit')"></app-pattern-details>
         </div>
         <div class="modal-footer">
-          <button type="button" class="secondary-button">edit</button>
-          <button type="button" class="button" data-bs-dismiss="modal">close</button>
+          <button type="button" class="secondary-button" (click)="openModal('edit', selectedPattern)">edit</button>
+          <button type="button" class="button" (click)="closeModal()">close</button>
         </div>
       </div>
     </div>
@@ -60,7 +60,24 @@
     <!-- <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="width: 80%; max-width: 800px;"></div> -->
       <div class="modal-content" style="border-radius: 10px;">
         <div class="modal-body" style="padding:3px; border-radius: 8px;">
-          <app-add-pattern></app-add-pattern>
+          <app-add-pattern (closeModalEvent)="closeModal()"></app-add-pattern>
+          <!-- <app-pattern-details [pattern]="selectedPattern"></app-pattern-details> -->
+        </div>
+        <!-- <div class="modal-footer">
+          <button type="button" class="secondary-button">cancel</button>
+          <button type="button" class="button" data-bs-dismiss="modal">add pattern</button>
+        </div> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- edit pattern modal -->
+  <div class="modal fade" id="patternEditModal" tabindex="-1" aria-labelledby="pattern edit Modal" aria-hidden="true" #patternEditModal>
+    <div class="modal-dialog modal-dialog-centered " style="width: 80%; max-width: 800px;">
+    <!-- <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="width: 80%; max-width: 800px;"></div> -->
+      <div class="modal-content" style="border-radius: 10px;">
+        <div class="modal-body" *ngIf="selectedPattern" style="padding:3px; border-radius: 8px;">
+          <app-pattern-edit [oldPattern]="selectedPattern"></app-pattern-edit>
           <!-- <app-pattern-details [pattern]="selectedPattern"></app-pattern-details> -->
         </div>
         <!-- <div class="modal-footer">
@@ -71,6 +88,8 @@
     </div>
   </div>
 </div>
+
+
 
 
 

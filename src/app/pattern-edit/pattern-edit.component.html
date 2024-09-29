@@ -1,0 +1,74 @@
+<form (ngSubmit)="submitForm()" #editPatternForm="ngForm">
+    <div class="scrollable-div overflow-auto" id="pattern-edit-main-div">
+        <h1 class="title">{{newPattern.name}}</h1>
+        <div class="container">
+          <label class="form-label inputLabel">Category</label><br>
+          <select name="category" class="form-select inputField form-control"  [(ngModel)]="newPattern.category">
+            <!-- <option *ngFor="let key of categoryKeys" [value]="key">{{key}}</option> -->
+            <option value="top">top</option>
+            <option value="bottom">bottom</option>
+            <option value="dress">dress</option>
+            <option value="one piece">one piece</option>
+            <option value="accesory">accesory</option>
+            <option value="else">else</option>
+          </select>
+          <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Photos</label><br>
+          <div *ngFor="let photo of photosList" class="image-block d-flex flex-row align-items-center justify-content-between">
+            <div class="d-flex flex-row align-items-center">
+              <div class="image-container">
+                <img [src]="photo[0]" alt="Photo">
+                
+              </div>
+              <span style="margin-left: 10px">{{photo[0].split("\\").pop()}}</span>
+              <!-- <fa-icon [icon]='fileIcon' style="margin-right: 12px;"></fa-icon>
+              {{file.split("\\").pop()}} -->
+            </div>
+            <div class="form-check form-switch" style="margin-right: 12px;">
+              <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+              <!-- <label class="form-check-label" for="flexSwitchCheckChecked">Checked switch checkbox input</label> -->
+            </div>
+            
+          </div>
+
+          <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Technical drawings</label><br>
+          <div *ngFor="let drawing of techDrawingsList" class="image-block d-flex flex-row align-items-center justify-content-between">
+            <div class="d-flex flex-row align-items-center">
+              <div class="image-container">
+                <img [src]="drawing[0]" alt="Photo">
+                
+              </div>
+              <span style="margin-left: 10px">{{drawing[0].split("\\").pop()}}</span>
+              <!-- <fa-icon [icon]='fileIcon' style="margin-right: 12px;"></fa-icon>
+              {{file.split("\\").pop()}} -->
+            </div>
+            <div class="form-check form-switch"  style="margin-right: 12px;">
+              <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+              <!-- <label class="form-check-label" for="flexSwitchCheckChecked">Checked switch checkbox input</label> -->
+            </div>
+            
+          </div>
+
+          <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Files</label><br>
+          <div *ngFor="let file of filesList" class="file-block d-flex flex-row align-items-center justify-content-between">
+            <div class="d-flex flex-row align-items-center">
+              <fa-icon [icon]='fileIcon'  style="margin-right: 12px;"></fa-icon>
+              <span style="margin-left: 10px">{{file[0].split("\\").pop()}}</span>
+              <!-- <fa-icon [icon]='fileIcon' style="margin-right: 12px;"></fa-icon>
+              {{file.split("\\").pop()}} -->
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+              <!-- <label class="form-check-label" for="flexSwitchCheckChecked">Checked switch checkbox input</label> -->
+            </div>
+            
+          </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="subtle-warning-button"  type="submit" (click)="deletePattern()" data-bs-dismiss="modal">delete pattern</button>
+        <button type="button" class="action-button"  type="submit">save</button>
+        <button type="button" class="button" data-bs-dismiss="modal">cancel</button>
+        
+      </div>
+</form>

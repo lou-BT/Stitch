@@ -22,6 +22,7 @@ body {
     --tertiary-color: #D6D8FF;
     --background-color-grey: #F4F5F6;
     --light-black: #1F1F1F;
+    --warning-pink: #A1025C;
 }
 
 mat-tab-group.invisible-tabs  {
@@ -116,9 +117,58 @@ mat-tab-group.invisible-tabs  {
     background-color: var(--light-black);
 }
 
+.subtle-warning-button {
+    padding-left: 12.1px;
+    padding-right: 12.1px;
+    padding-top: 8.1px;
+    padding-bottom: 8.1px;
+    border-radius: 10px;
+    color: black;
+    background-color: white;
+
+    border-style: solid;
+    border-width: 1.5px;
+    border-color: black;
+}
+
+.subtle-warning-button:hover {
+    color: white;
+    background-color: var(--warning-pink);
+    border-color: var(--warning-pink);
+}
+
 .button:disabled {
     background-color: var(--light-black);
 }
+
+.action-button {
+    padding-left: 12.1px;
+    padding-right: 12.1px;
+    padding-top: 8.1px;
+    padding-bottom: 8.1px;
+    border-radius: 10px;
+    color: black;
+    background-color: white;
+
+    border-style: solid;
+    border-width: 1.5px;
+    border-color: black;
+}
+
+.action-button:hover {
+    color: white;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+// .file-block {
+//     border-color: black;
+//     border-radius: 10px;
+//     border-width: 1.5px;
+//     border-style: solid;
+//     padding: 15px;
+//     margin-bottom: 15px;
+// }
 
 // ::ng-deep ::-webkit-scrollbar-track {
 //     background: #f1f1f1; /* Color of the track */

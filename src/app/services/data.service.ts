@@ -42,4 +42,8 @@ export class DataService {
   openFile( file: string ) {
     window.ipcRenderer.send('patterns:openFile', file);
   }
+
+  deletePattern( pattern: Pattern ) {
+    window.ipcRenderer.send('patterns:delete', pattern);
+  }
 }

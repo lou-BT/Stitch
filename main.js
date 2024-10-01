@@ -165,8 +165,11 @@ ipcMain.on('patterns:delete', (event, pattern) => {
     
     //delete pattern from list
     patterns = patterns.filter(obj => obj.name !== pattern.name);
-
-    fs.writeFileSync(patternIndexPath, JSON.stringify(patterns));
+    try {
+      fs.writeFileSync(patternIndexPath, JSON.stringify(patterns, null, 2));
+    } catch (err) {
+      console.error('Error writing JSON file:', err);
+    }
     event.sender.send('patterns:update', patterns);
   }
 
@@ -176,6 +179,7 @@ ipcMain.on('patterns:delete', (event, pattern) => {
 })
 
 ipcMain.on('patterns:edit', (event, newPattern, patternEdit) => {
+  console.log('edit is called')
   var pattern = newPattern;
   const folderPath = path.join(patternFolderPath, newPattern.name);
   //delete files

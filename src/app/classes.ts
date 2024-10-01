@@ -23,6 +23,24 @@ export class Pattern {
     }
 }
 
+export class PatternEdit {
+    delPhotos: string[];
+    delTechDrawings: string[];
+    delFiles: string[];
+    newPhotos: string[];
+    newTechDrawings: string[];
+    newFiles: string[];
+
+    constructor( pattern: Pattern ) {
+        this.delPhotos = [];
+        this.delTechDrawings = [];
+        this.delFiles = [];
+        this.newPhotos = [];
+        this.newTechDrawings = [];
+        this.newFiles = [];
+    }
+}
+
 export class NewPattern {
     name: string;
     category: Category;

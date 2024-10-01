@@ -1,5 +1,5 @@
 import { Injectable, OnInit } from '@angular/core';
-import { Category, Pattern, NewPattern } from '../classes';
+import { Category, Pattern, NewPattern, PatternEdit } from '../classes';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
@@ -50,5 +50,9 @@ export class DataService {
 
   deletePattern( pattern: Pattern ) {
     window.ipcRenderer.send('patterns:delete', pattern);
+  }
+
+  editPattern( newPattern: Pattern, patternEdit: PatternEdit) {
+    window.ipcRenderer.send('patterns:edit', newPattern, patternEdit);
   }
 }

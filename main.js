@@ -156,7 +156,6 @@ ipcMain.on('patterns:delete', (event, pattern) => {
       }
     });   
   }
-  
 
   //get old list
   const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
@@ -176,24 +175,78 @@ ipcMain.on('patterns:delete', (event, pattern) => {
   }
 })
 
-ipcMain.on('patterns:update', (event, pattern) => {
-  var photos = [];
-  var techDrawings = [];
-  var files = [];
+ipcMain.on('patterns:edit', (event, newPattern, patternEdit) => {
+  var pattern = newPattern;
+  const folderPath = path.join(patternFolderPath, newPattern.name);
+  //delete files
+  for( let i = 0; i < patternEdit.delPhotos.length; i++) {
+    console.log('photo', patternEdit.delPhotos[i])
+    if(fs.existsSync(patternEdit.delPhotos[i])) 
+      fs.unlinkSync(patternEdit.delPhotos[i], { recursive: true, force: true }, (err) => {
+        if (err) {
+          console.error('Error while deleting the folder:', err);
+        } else {
+          console.log('Folder and its contents deleted successfully');
+        }
+      })
+  }
+  for( let i=0; i < patternEdit.delTechDrawings.length; i++) {
+    if(fs.existsSync(patternEdit.delTechDrawings[i])) 
+      fs.unlinkSync(patternEdit.delTechDrawings[i], { recursive: true, force: true }, (err) => {
+      if (err) {
+        console.error('Error while deleting the folder:', err);
+      } else {
+        console.log('Folder and its contents deleted successfully');
+      }
+    })
+  }
+  for( let i=0; i < patternEdit.delFiles.length; i++) {
+    if(fs.existsSync(patternEdit.delFiles[i])) 
+      fs.unlinkSync(patternEdit.delFiles[i], { recursive: true, force: true }, (err) => {
+      if (err) {
+        console.error('Error while deleting the folder:', err);
+      } else {
+        console.log('Folder and its contents deleted successfully');
+      }
+    })
+  }
+  
+  //add files
+  patternEdit.newFiles.forEach(filePath => {
+    const fileName = path.basename(filePath);
+    const destPath = path.join(folderPath, fileName);
+    
+    fs.copyFileSync(filePath, destPath);
+    pattern.files.push(destPath);
+  })
+  //and add pictures
+  patternEdit.newPhotos.forEach(filePath => {
+    const fileName = path.basename(filePath);
+    const destPath = path.join(folderPath, "pictures", fileName);
 
-  const folderPath = path.join(patternFolderPath, pattern.name);
+    fs.copyFileSync(filePath, destPath);
+    pattern.photos.push(destPath);
+  })
+  patternEdit.newTechDrawings.forEach(filePath => {
+    const fileName = path.basename(filePath);
+    const destPath = path.join(folderPath, "pictures", fileName);
+
+    fs.copyFileSync(filePath, destPath);
+    pattern.techDrawings.push(destPath);
+  })
+
+  //update json
+  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
+  if(fs.existsSync(patternIndexPath)) {
+    const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
+    var patterns = JSON.parse(patternsJSON);
+    const index = patterns.findIndex((item) => item.name == pattern.name);
+    //console.log("index", index, patterns[index])
+    patterns.splice(index, 1, pattern);
+    fs.writeFileSync(patternIndexPath, JSON.stringify(patterns));
+    event.sender.send('patterns:update', patterns);
+  }
+
+  
 
 })
-
-// ipcMain.on('patterns:getAll', (event) => {
-//   db.all('SELECT * FROM patterns', (err, rows) => {
-//     if (err) {
-//       console.error('Error fetching patterns:', err);
-//       event.sender.send('patterns:getAll:response', []);
-//       return;
-//     }
-//     event.sender.send('patterns:getAll:response', rows);
-//   });
-// });
-
-// ipcMain.on('')

@@ -32,7 +32,7 @@ The project is built with Angular and Electron.
 
 ## Visuals
 
-<img src="screens/stitchMain.png" alt="Project Screenshot" width="400"/>
+![Project Screenshot](screens/stitchMain.png)
 
 
 ## Usage

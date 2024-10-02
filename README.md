@@ -32,7 +32,7 @@ The project is built with Angular and Electron.
 
 ## Visuals
 
-![Project Screenshot](screens/stitchMain.png)
+![Project Screenshot](https://gitlab.com/lou.bt5/stitch/-/blob/main/screens/stitchMain.PNG)
 
 
 ## Usage

@@ -1,26 +1,26 @@
 <div class="container-fluid" style="height: 100vh;" id="page">
   <div class="row" style="height: 100%;">
     <div class="col-3 col-xl-2" id="nav-column">
-      <div class="d-flex flex-column justify-content-between" id="nav">
-        <div class="p-2 center-col" id="nav-topper">
+      <div class="d-flex flex-column" id="nav">
+        <div class="p-2" id="nav-topper">
             <img src="assets/illustrations/logoStitchLarge.png" alt="Logo" id="logo">
             <h2 style="font-weight: bold;">stitch</h2>
         </div>
         <div class="p-2" id="nav-links" role="group">
             <!-- <div class="nav-item" (click)="tabGroup.selectedIndex=0"> -->
-            <div class="nav-item">
-                <fa-icon [icon]='images' size="xl" ></fa-icon>
+            <div class="nav-item" [routerLink]="['/patterns']" routerLinkActive="router-link-active" >
+                <!-- <fa-icon [icon]='images' size="xl" ></fa-icon> -->
                 <h5 class="item-name">patterns</h5>
             </div>
             <div class="nav-item">
             <!-- <div class="nav-item" (click)="tabGroup.selectedIndex=0"> -->
-                <fa-icon [icon]='scroll' size="xl" style="margin-left: 2px;"></fa-icon>
+                <!-- <fa-icon [icon]='scroll' size="xl" style="margin-left: 2px;"></fa-icon> -->
                 <h5 class="item-name">fabrics</h5>
             </div>
     
         </div>
-        <div class="p-2 center-col" id="nav-bottom">
-            <a>settings</a>
+        <div class="mt-auto p-2 align-self-center" id="nav-bottom" [routerLink]="['/settings']" routerLinkActive="router-link-active">
+          <a><span><fa-icon [icon]='settingsIcon' style="margin-right: 5px;"></fa-icon></span>settings</a>
         </div>
     </div>
     </div>

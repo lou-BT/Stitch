@@ -40,8 +40,14 @@ mat-tab-group {
 }
 
 #nav-topper {
-  margin-top: 20px;
+  // margin-top: 20px;
   color: black;
+  width: 100%;
+  aspect-ratio: 1/1!important;
+  display: flex;
+  flex-direction: column; /* Align flex items vertically */
+  justify-content: center; /* Center align content horizontally */
+  align-items: center; /* Center align content vertically */
 }
 
 #logo {
@@ -51,20 +57,16 @@ mat-tab-group {
 
 #nav-bottom {
   margin-bottom: 20px;
+  cursor: pointer;
 }
 
-.center-col {
-  display: flex;
-  flex-direction: column; /* Align flex items vertically */
-  justify-content: center; /* Center align content horizontally */
-  align-items: center; /* Center align content vertically */
-}
 
 #nav-links {
   display: flex;
   flex-direction: column; /* Align flex items vertically */
   justify-content: center; /* Center align content horizontally */
   // align-items: center; /* Center align content vertically */
+  // border-top: 1.5px solid black;
 }
 
 .item-name {
@@ -82,7 +84,7 @@ mat-tab-group {
   padding-bottom: 10px;
   padding-right: 15px;
   padding-left: 15px;
-  border-radius: 30px;
+  border-radius: 10px;
   margin-bottom: 5px;
   cursor: pointer;
   color: black;

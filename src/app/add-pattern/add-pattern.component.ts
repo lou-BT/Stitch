@@ -61,6 +61,7 @@ export class AddPatternComponent implements OnInit {
     switch (type) {
       case "photos" :
         for(let i=0; i<files.length; i++) {
+          console.log("file",files[i])
           this.pattern.photos.push(files[i].path);
         }
         break;

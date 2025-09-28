@@ -11,12 +11,11 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { DataService } from '../services/data.service';
 
 @Component({
-  selector: 'app-add-pattern',
-  standalone: true,
-  imports: [FormsModule, NgFor, NgIf, NgClass, MatGridListModule, FontAwesomeModule, ScrollingModule],
-  templateUrl: './add-pattern.component.html',
-  styleUrl: './add-pattern.component.scss',
-  encapsulation: ViewEncapsulation.None 
+    selector: 'app-add-pattern',
+    imports: [FormsModule, NgFor, NgIf, NgClass, MatGridListModule, FontAwesomeModule, ScrollingModule],
+    templateUrl: './add-pattern.component.html',
+    styleUrl: './add-pattern.component.scss',
+    encapsulation: ViewEncapsulation.None
 })
 export class AddPatternComponent implements OnInit {
   @Output() closeModalEvent = new EventEmitter<any>();

@@ -8,11 +8,10 @@ import * as icons from '@fortawesome/free-regular-svg-icons';
 import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 
 @Component({
-  selector: 'app-pattern-edit',
-  standalone: true,
-  imports: [FormsModule, NgIf, NgFor, FontAwesomeModule],
-  templateUrl: './pattern-edit.component.html',
-  styleUrl: './pattern-edit.component.scss'
+    selector: 'app-pattern-edit',
+    imports: [FormsModule, NgIf, NgFor, FontAwesomeModule],
+    templateUrl: './pattern-edit.component.html',
+    styleUrl: './pattern-edit.component.scss'
 })
 export class PatternEditComponent implements OnInit, OnChanges{
   @Input() oldPattern! : Pattern;

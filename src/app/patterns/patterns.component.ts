@@ -14,11 +14,10 @@ import { PatternDetailsComponent } from "../pattern-details/pattern-details.comp
 import { PatternEditComponent } from '../pattern-edit/pattern-edit.component';
 
 @Component({
-  selector: 'app-patterns',
-  standalone: true,
-  imports: [CommonModule, PatternDetailsComponent, FontAwesomeModule, AddPatternComponent, PatternEditComponent, NgClass],
-  templateUrl: './patterns.component.html',
-  styleUrl: './patterns.component.scss'
+    selector: 'app-patterns',
+    imports: [CommonModule, PatternDetailsComponent, FontAwesomeModule, AddPatternComponent, PatternEditComponent, NgClass],
+    templateUrl: './patterns.component.html',
+    styleUrl: './patterns.component.scss'
 })
 export class PatternsComponent implements OnInit, AfterViewInit{
   @ViewChild('patternModal') patternModal!: ElementRef;

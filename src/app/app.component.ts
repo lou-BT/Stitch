@@ -10,18 +10,17 @@ import { RouterOutlet, RouterLink } from '@angular/router';
 
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [MatTabsModule,
-            AddPatternComponent,
-            PatternsComponent,
-            FontAwesomeModule,
-            MatIconModule,
-            RouterOutlet,
-            RouterLink],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-root',
+    imports: [MatTabsModule,
+        AddPatternComponent,
+        PatternsComponent,
+        FontAwesomeModule,
+        MatIconModule,
+        RouterOutlet,
+        RouterLink],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss',
+    encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
   title = 'Stitch';

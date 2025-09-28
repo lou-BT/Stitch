@@ -14,75 +14,88 @@
           </select>
 
           <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Photos</label><br>
-          <div *ngFor="let photo of newPattern.photos; let i = index" class="image-block d-flex flex-row align-items-center justify-content-between">
-            <div class="d-flex flex-row align-items-center">
-              <div class="image-container">
-                <img [src]="photo" alt="Photo">
+          @for (photo of newPattern.photos; track $index; let i = $index) {
+            <div class="image-block d-flex flex-row align-items-center justify-content-between">
+              <div class="d-flex flex-row align-items-center">
+                <div class="image-container">
+                  <img [src]="photo" alt="Photo">
+                </div>
+                <span style="margin-left: 10px">{{photo.split("\\").pop()}}</span>
               </div>
-              <span style="margin-left: 10px">{{photo.split("\\").pop()}}</span>
+              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(0,i)">delete</button>
             </div>
-            <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(0,i)">delete</button>
-          </div>
-          <div *ngFor="let photo of patternEdit.newPhotos; let i = index" class="image-block d-flex flex-row align-items-center justify-content-between">
-            <div class="d-flex flex-row align-items-center">
-              <div class="image-container">
-                <img [src]="photo" alt="Photo">
+          }
+          @for (photo of patternEdit.newPhotos; track $index; let i = $index) {
+            <div class="image-block d-flex flex-row align-items-center justify-content-between">
+              <div class="d-flex flex-row align-items-center">
+                <div class="image-container">
+                  <img [src]="photo" alt="Photo">
+                </div>
+                <span style="margin-left: 10px">{{photo.split("\\").pop()}}</span>
               </div>
-              <span style="margin-left: 10px">{{photo.split("\\").pop()}}</span>
+              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(0,i)">delete</button>
             </div>
-            <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(0,i)">delete</button>
-          </div>
+          }
+
           <div class="new-item-block d-flex align-items-center justify-content-center" 
                (drop)="onFileDrop($event, 0)" (dragover)="allowDrop($event)">
             <fa-icon [icon]='plusIcon'  style="color:gray"></fa-icon>
           </div>
 
           <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Technical drawings</label><br>
-          <div *ngFor="let drawing of newPattern.techDrawings; let i = index" class="image-block d-flex flex-row align-items-center justify-content-between">
-            <div class="d-flex flex-row align-items-center">
-              <div class="image-container">
-                <img [src]="drawing" alt="Photo">
+          @for (drawing of newPattern.techDrawings; track $index; let i = $index) {
+            <div class="image-block d-flex flex-row align-items-center justify-content-between">
+              <div class="d-flex flex-row align-items-center">
+                <div class="image-container">
+                  <img [src]="drawing" alt="Photo">
+                </div>
+                <span style="margin-left: 10px">{{drawing.split("\\").pop()}}</span>
               </div>
-              <span style="margin-left: 10px">{{drawing.split("\\").pop()}}</span>
+              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(1,i)">delete</button>
             </div>
-            <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(1,i)">delete</button>
-          </div>
-          <div *ngFor="let drawing of patternEdit.newTechDrawings; let i = index" class="image-block d-flex flex-row align-items-center justify-content-between">
-            <div class="d-flex flex-row align-items-center">
-              <div class="image-container">
-                <img [src]="drawing" alt="Photo">
+          }
+          @for (drawing of patternEdit.newTechDrawings; track $index; let i = $index) {
+            <div class="image-block d-flex flex-row align-items-center justify-content-between">
+              <div class="d-flex flex-row align-items-center">
+                <div class="image-container">
+                  <img [src]="drawing" alt="Photo">
+                </div>
+                <span style="margin-left: 10px">{{drawing.split("\\").pop()}}</span>
               </div>
-              <span style="margin-left: 10px">{{drawing.split("\\").pop()}}</span>
+              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(1,i)">delete</button>
             </div>
-            <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(1,i)">delete</button>
-          </div>
+          }
+
           <div class="new-item-block d-flex align-items-center justify-content-center" 
                 (drop)="onFileDrop($event, 1)" (dragover)="allowDrop($event)">
             <fa-icon [icon]='plusIcon'  style="color:gray"></fa-icon>
           </div>
 
           <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Files</label><br>
-          <div *ngFor="let file of newPattern.files; let i = index" class="file-block d-flex flex-row align-items-center justify-content-between">
-            <div class="d-flex flex-row align-items-center">
-              <fa-icon [icon]='fileIcon'  style="margin-right: 12px;"></fa-icon>
-              <span style="margin-left: 10px">{{file.split("\\").pop()}}</span>
+          @for (file of newPattern.files; track $index; let i = $index) {
+            <div class="file-block d-flex flex-row align-items-center justify-content-between">
+              <div class="d-flex flex-row align-items-center">
+                <fa-icon [icon]='fileIcon'  style="margin-right: 12px;"></fa-icon>
+                <span style="margin-left: 10px">{{file.split("\\").pop()}}</span>
+              </div>
+              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(2,i)">delete</button>
             </div>
-            <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(2,i)">delete</button>
-          </div>
-          <div *ngFor="let file of patternEdit.newFiles; let i = index" class="file-block d-flex flex-row align-items-center justify-content-between">
-            <div class="d-flex flex-row align-items-center">
-              <fa-icon [icon]='fileIcon'  style="margin-right: 12px;"></fa-icon>
-              <span style="margin-left: 10px">{{file.split("\\").pop()}}</span>
+          }
+          @for (file of patternEdit.newFiles; track $index; let i = $index) {
+            <div class="file-block d-flex flex-row align-items-center justify-content-between">
+              <div class="d-flex flex-row align-items-center">
+                <fa-icon [icon]='fileIcon'  style="margin-right: 12px;"></fa-icon>
+                <span style="margin-left: 10px">{{file.split("\\").pop()}}</span>
+              </div>
+              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(2,i)">delete</button>
             </div>
-            <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(2,i)">delete</button>
-          </div>
-        
+          }
+
           <div class="new-item-block d-flex align-items-center justify-content-center" 
                 (drop)="onFileDrop($event, 2)" (dragover)="allowDrop($event)">
             <fa-icon [icon]='plusIcon'  style="color:gray"></fa-icon>
           </div>
         </div>
-
 
     </div>
     <div class="modal-footer">

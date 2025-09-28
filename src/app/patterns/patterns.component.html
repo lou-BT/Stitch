@@ -6,12 +6,14 @@
       <div class="category-item" (click)="setCategory('all')">
           <a>all</a>
       </div>
-      <div *ngFor="let category of categories">
-          <div [ngClass]="{'category-item': selectedCategory !== category, 'selected-category-item': selectedCategory === category}"
-                (click)="setCategory(category)">
-              <a>{{category}}</a>
-          </div>
-      </div>
+      @for (category of categories; track category) {
+        <div>
+            <div [ngClass]="{'category-item': selectedCategory !== category, 'selected-category-item': selectedCategory === category}"
+                  (click)="setCategory(category)">
+                <a>{{category}}</a>
+            </div>
+        </div>
+      }
   </div>
   <!-- end of search section -->
 
@@ -19,7 +21,8 @@
   <div id="pattern-page-content" style="flex-grow: 1; overflow-y: auto;">
       <div class="container-fluid">
           <div class="row gy-4" id="patterns-list">
-              <div class="col-4" *ngFor="let pattern of patternList.filter(filterCategory)">
+            @for (pattern of patternList.filter(filterCategory); track pattern) {
+              <div class="col-4">
                   <!-- individual pattern block -->
                   <div class="pattern-block d-flex flex-column" (click)="openPatternModal(pattern)">
                       <div class="image-container">
@@ -30,6 +33,7 @@
                   </div>
                   <!-- end of individual pattern block -->
               </div>
+            }
           </div>
       </div>
   </div>
@@ -43,9 +47,11 @@
   <div class="modal fade" id="patternModal" tabindex="-1" aria-labelledby="pattern Modal" aria-hidden="true" #patternModal>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="width: 80%; max-width: 800px;">
       <div class="modal-content" style="border-radius: 10px;">
-        <div class="modal-body" *ngIf="selectedPattern" style="padding:3px; border-radius: 8px;">
-          <app-pattern-details [pattern]="selectedPattern" (editEvent)="openModal('edit')"></app-pattern-details>
-        </div>
+        @if (selectedPattern) {
+          <div class="modal-body" style="padding:3px; border-radius: 8px;">
+            <app-pattern-details [pattern]="selectedPattern" (editEvent)="openModal('edit')"></app-pattern-details>
+          </div>
+        }
         <div class="modal-footer">
           <button type="button" class="secondary-button" (click)="openModal('edit', selectedPattern)">edit</button>
           <button type="button" class="button" (click)="closeModal()">close</button>
@@ -69,9 +75,11 @@
   <div class="modal fade" id="patternEditModal" tabindex="-1" aria-labelledby="pattern edit Modal" aria-hidden="true" #patternEditModal>
     <div class="modal-dialog modal-dialog-centered " style="width: 80%; max-width: 800px;">
       <div class="modal-content" style="border-radius: 10px;">
-        <div class="modal-body" *ngIf="selectedPattern" style="padding:3px; border-radius: 8px;">
-          <app-pattern-edit [oldPattern]="selectedPattern"></app-pattern-edit>
-        </div>
+        @if (selectedPattern) {
+          <div class="modal-body" style="padding:3px; border-radius: 8px;">
+            <app-pattern-edit [oldPattern]="selectedPattern"></app-pattern-edit>
+          </div>
+        }
       </div>
     </div>
   </div>

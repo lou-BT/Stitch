@@ -1,5 +1,5 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter, Routes } from '@angular/router';
+import { provideRouter, Routes, withComponentInputBinding, withInMemoryScrolling, withRouterConfig, withViewTransitions } from '@angular/router';
 import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { PatternsComponent } from './patterns/patterns.component';
@@ -14,7 +14,11 @@ const routes: Routes = [
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
+    provideRouter(routes, 
+      withComponentInputBinding(), 
+      withViewTransitions(),
+      withInMemoryScrolling(), // New recommended
+      withRouterConfig({ paramsInheritanceStrategy: 'always' })),
     provideAnimations(),
   ]
 };

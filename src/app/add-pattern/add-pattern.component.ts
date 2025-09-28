@@ -1,7 +1,7 @@
-import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output, OnInit, inject } from '@angular/core';
 import { NgForm, FormsModule, FormControl } from '@angular/forms';
 import { Pattern, Category, NewPattern } from '../classes';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass} from '@angular/common';
 //import { PatternService } from '../services/pattern.service';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -12,7 +12,7 @@ import { DataService } from '../services/data.service';
 
 @Component({
     selector: 'app-add-pattern',
-    imports: [FormsModule, NgFor, NgIf, NgClass, MatGridListModule, FontAwesomeModule, ScrollingModule],
+    imports: [FormsModule, NgClass, MatGridListModule, FontAwesomeModule, ScrollingModule],
     templateUrl: './add-pattern.component.html',
     styleUrl: './add-pattern.component.scss',
     encapsulation: ViewEncapsulation.None
@@ -27,8 +27,9 @@ export class AddPatternComponent implements OnInit {
   pdf = icons.faFilePdf;
   xmark = solidIcons.faCircleXmark; // faXmarkCircle;
 
-  constructor(private cdr: ChangeDetectorRef, private data: DataService) {}
-
+  private cdr = inject(ChangeDetectorRef);
+  private data = inject(DataService);
+  
   ngOnInit(): void {}
 
   extractFileName(filePath: string): string {

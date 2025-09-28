@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
-import { NgIf, NgFor } from '@angular/common';
 import { Pattern, PatternEdit } from '../classes';
 import { DataService } from '../services/data.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -9,7 +8,7 @@ import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-pattern-edit',
-    imports: [FormsModule, NgIf, NgFor, FontAwesomeModule],
+    imports: [FormsModule, FontAwesomeModule],
     templateUrl: './pattern-edit.component.html',
     styleUrl: './pattern-edit.component.scss'
 })

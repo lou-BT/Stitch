@@ -1,22 +1,27 @@
 <!-- carousel -->
 <div>
     <mdb-carousel [controls]="true" [indicators]="true" >
-        <mdb-carousel-item *ngFor="let photo of pattern?.photos">
-          <img
-            style="height: 400px; object-fit: contain;"
-            [src]="photo"
-            class="d-block w-100"
-            alt="..."
-          />
-        </mdb-carousel-item>
-        <mdb-carousel-item *ngFor="let photo of pattern?.techDrawings">
+        @for (photo of pattern?.photos; track photo) {
+          <mdb-carousel-item>
             <img
-            style="height: 400px; object-fit: contain;"
-              [src]="photo"
-              class="d-block w-100"
-              alt="..."
+                style="height: 400px; object-fit: contain;"
+                [src]="photo"
+                class="d-block w-100"
+                alt="..."
             />
           </mdb-carousel-item>
+        }
+        @for (photo of pattern?.techDrawings; track photo) {
+            <mdb-carousel-item>
+                <img
+                style="height: 400px; object-fit: contain;"
+                [src]="photo"
+                class="d-block w-100"
+                alt="..."
+                />
+            </mdb-carousel-item>
+        }
+
       </mdb-carousel>
 </div>
 <!-- end of carousel -->
@@ -33,15 +38,17 @@
         <div class="row justify-content-center">
             <div class="col-8">
                 <h5 style="margin-left: 15px;">Files</h5>
-                <div *ngFor="let file of pattern?.files" class="file-block d-flex flex-row align-items-center justify-content-between">
-                    <div class="d-flex flex-row">
-                        <fa-icon [icon]='fileIcon' style="margin-right: 12px;"></fa-icon>
-                        {{file.split("\\").pop()}}
-                    </div>
+                @for (file of pattern?.files; track file) {
+                    <div class="file-block d-flex flex-row align-items-center justify-content-between">
+                        <div class="d-flex flex-row">
+                            <fa-icon [icon]='fileIcon' style="margin-right: 12px;"></fa-icon>
+                            {{file.split("\\").pop()}}
+                        </div>
 
-                    <button class="justify-self-end button"
-                            (click)="this.data.openFile(file)">open</button>
-                </div>
+                        <button class="justify-self-end button"
+                                (click)="data.openFile(file)">open</button>
+                    </div>
+                }
             </div>
         </div>
     </div>

@@ -1,12 +1,11 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild} from '@angular/core';
 import { DataService } from '../services/data.service';
-import { CommonModule, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Categories, Pattern } from '../classes';
 import * as bootstrap from 'bootstrap';
 import { Subscription } from 'rxjs';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import * as icons from '@fortawesome/free-regular-svg-icons';
 import * as iconsSolid from '@fortawesome/free-solid-svg-icons';
 
 import { AddPatternComponent } from "../add-pattern/add-pattern.component";
@@ -15,7 +14,7 @@ import { PatternEditComponent } from '../pattern-edit/pattern-edit.component';
 
 @Component({
     selector: 'app-patterns',
-    imports: [CommonModule, PatternDetailsComponent, FontAwesomeModule, AddPatternComponent, PatternEditComponent, NgClass],
+    imports: [PatternDetailsComponent, FontAwesomeModule, AddPatternComponent, PatternEditComponent, NgClass],
     templateUrl: './patterns.component.html',
     styleUrl: './patterns.component.scss'
 })

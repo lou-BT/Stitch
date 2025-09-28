@@ -20,9 +20,12 @@
               <!-- <div  *ngIf="(patternNameInput && patternNameInput.invalid  && (patternNameInput.touched || patternNameInput.dirty))" id="validationNameFeedback" class="invalid-feedback">
                 Pattern name already used.
               </div> -->
-              <div  *ngIf="!checkNameValidityBis()" id="validationNameFeedback" class="invalid-feedback">
-                Pattern name already used or invalid characters.
-              </div>
+              @if (!checkNameValidityBis()) {
+                <div id="validationNameFeedback" class="invalid-feedback">
+                  Pattern name already used or invalid characters.
+                </div>
+              }
+
         
           </div>
           <div class="col-12 col-md-6 col-lg-5 col-xl-4">
@@ -44,56 +47,78 @@
           <div class="col">
             <label class="form-label mt-4 inputLabel">Photos</label>
             <div class="drop-area " (drop)="onFileDrop($event, 'photos')" (dragover)="allowDrop($event)" >
-              <mat-grid-list *ngIf="!pattern.photos.length" cols="1" rowHeight="1:1">
-                <mat-grid-tile>
-                  Drag & Drop<br> Files Here
-                </mat-grid-tile>
-              </mat-grid-list>
-              <mat-grid-list *ngIf="pattern.photos.length" cols="3" gutterSize="5" rowHeight="1:1">
-                <mat-grid-tile *ngFor="let item of pattern.photos" >
-                  <fa-icon [icon]='xmark' size="sm" class="deleteButton" (click)="deleteItem(0, item)"></fa-icon>
-                  <img [src]="item" alt="photo"  class="imagePattern">
-                </mat-grid-tile>
-              </mat-grid-list>
+              @if (!pattern.photos.length) {
+                <mat-grid-list cols="1" rowHeight="1:1">
+                  <mat-grid-tile>
+                    Drag & Drop<br> Files Here
+                  </mat-grid-tile>
+                </mat-grid-list>
+              } @else {
+                <mat-grid-list cols="3" gutterSize="5" rowHeight="1:1">
+                  @for (item of pattern.photos; track item) {
+                    <mat-grid-tile>
+                      <fa-icon [icon]='xmark' size="sm" class="deleteButton" (click)="deleteItem(0, item)"></fa-icon>
+                      <img [src]="item" alt="photo"  class="imagePattern">
+                    </mat-grid-tile>
+                  }
+                </mat-grid-list>
+              }
+
+
             </div>
           </div>
           <!-- TECHNICAL DRAWINGS DROPBOX -->
           <div class="col">
             <label class="form-label mt-4 inputLabel">Technical drawings</label>
             <div class="drop-area" (drop)="onFileDrop($event, 'techDrawings')" (dragover)="allowDrop($event)" >
-              <mat-grid-list *ngIf="!pattern.techDrawings.length" cols="1" rowHeight="1:1">
-                <mat-grid-tile>
-                  Drag & Drop<br> Files Here
-                </mat-grid-tile>
-              </mat-grid-list>
-              <mat-grid-list *ngIf="pattern.techDrawings.length" cols="3" gutterSize="5" rowHeight="1:1">
-                <mat-grid-tile *ngFor="let item of pattern.techDrawings">
-                  <fa-icon [icon]='xmark' class="deleteButton" size="sm" (click)="deleteItem(1, item)"></fa-icon>
-                  <img [src]="item" alt="techDrawing"  class="imagePattern">
-                </mat-grid-tile>
-              </mat-grid-list>
+              @if (!pattern.techDrawings.length) {
+                <mat-grid-list cols="1" rowHeight="1:1">
+                  <mat-grid-tile>
+                    Drag & Drop<br> Files Here
+                  </mat-grid-tile>
+                </mat-grid-list>
+              } @else {
+                <mat-grid-list cols="3" gutterSize="5" rowHeight="1:1">
+                  @for (item of pattern.techDrawings; track item) {
+                    <mat-grid-tile>
+                      <fa-icon [icon]='xmark' class="deleteButton" size="sm" (click)="deleteItem(1, item)"></fa-icon>
+                      <img [src]="item" alt="techDrawing"  class="imagePattern">
+                    </mat-grid-tile>
+                  }
+
+                </mat-grid-list>
+              }
+
             </div>
           </div>
           <!-- PATTERN FILES DROPBOX -->
           <div class="col">
             <label class="form-label mt-4 inputLabel">Pattern files *</label>
             <div class="drop-area scrollable-div overflow-auto" (drop)="onFileDrop($event, 'files')" (dragover)="allowDrop($event)" >
-              <mat-grid-list *ngIf="!pattern.files.length" cols="1" rowHeight="1:1">
-                <mat-grid-tile>
-                  Drag & Drop<br> Files Here
-                </mat-grid-tile>
-              </mat-grid-list>
-              <mat-grid-list *ngIf="pattern.files.length" cols="4" gutterSize="5" rowHeight="1:1">
-                <div *ngFor="let item of pattern.files; index as i;">
-                  <mat-grid-tile [colspan]="1" [rowspan]="1">
-                    <fa-icon [icon]='pdf' size="xl"></fa-icon>
+              @if (!pattern.files.length) {
+                <mat-grid-list cols="1" rowHeight="1:1">
+                  <mat-grid-tile>
+                    Drag & Drop<br> Files Here
                   </mat-grid-tile>
-                  <mat-grid-tile [colspan]="3" [rowspan]="1">
-                    <a>{{extractFileName(item)}}</a>
-                    <fa-icon [icon]='xmark' class="deleteFileButton" size="sm" (click)="deleteItem(2, item)"></fa-icon>
-                  </mat-grid-tile>
-                </div>  
-              </mat-grid-list>
+                </mat-grid-list>
+              } @else {
+                <mat-grid-list cols="4" gutterSize="5" rowHeight="1:1">
+                  @for (item of pattern.files; track item) {
+                    <div>
+                      <mat-grid-tile [colspan]="1" [rowspan]="1">
+                        <fa-icon [icon]='pdf' size="xl"></fa-icon>
+                      </mat-grid-tile>
+                      <mat-grid-tile [colspan]="3" [rowspan]="1">
+                        <a>{{extractFileName(item)}}</a>
+                        <fa-icon [icon]='xmark' class="deleteFileButton" size="sm" (click)="deleteItem(2, item)"></fa-icon>
+                      </mat-grid-tile>
+                    </div> 
+                  }
+ 
+                </mat-grid-list>
+              }
+
+
             </div>
           </div>
         </div>

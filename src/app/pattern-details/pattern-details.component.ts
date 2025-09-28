@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { MdbCarouselModule } from 'mdb-angular-ui-kit/carousel';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -7,7 +7,7 @@ import { DataService } from '../services/data.service';
 
 @Component({
     selector: 'app-pattern-details',
-    imports: [CommonModule, MdbCarouselModule, FontAwesomeModule],
+    imports: [MdbCarouselModule, FontAwesomeModule],
     templateUrl: './pattern-details.component.html',
     styleUrl: './pattern-details.component.scss'
 })
@@ -16,6 +16,6 @@ export class PatternDetailsComponent {
 
   fileIcon = icons.faFile;
 
-  constructor(public data: DataService) {}
+  public data = inject(DataService);
   
 }

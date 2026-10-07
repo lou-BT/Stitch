@@ -1,37 +1,36 @@
 <form (ngSubmit)="submitForm()" #patternForm="ngForm">
-  <div class="scrollable-div overflow-auto" id="add-pattern-main-div">
+  <div class="modal-form-wrapper scrollable-div">
     <h1 class="title">Add a new pattern</h1>
     
       <div class="container">
         <!-- name & category -->
         <div class="row">
           <div class="col-12 col-md-6 col-lg-5 col-xl-4">
-            <label class="form-label inputLabel">Pattern name *</label><br>
+            <label class="form-label">Pattern name *</label><br>
             <input type="text" 
                    class="inputField form-control" 
-                   name="patternNameInput" 
-                   id="patternNameInput"
-                   #patternNameInput="ngModel"
+                   name="name" 
+                   id="name"
+                   #name="ngModel"
                    required
                    [(ngModel)]="pattern.name"
                    placeholder="Calliope"
-                   [ngClass]="{'is-invalid': patternNameInput.invalid && (patternNameInput.touched || patternNameInput.dirty)}"
+                   [ngClass]="{'is-invalid': name.invalid && (name.touched || name.dirty)}"
                    (ngModelChange)="checkNameValidity()">
-              <!-- <div  *ngIf="(patternNameInput && patternNameInput.invalid  && (patternNameInput.touched || patternNameInput.dirty))" id="validationNameFeedback" class="invalid-feedback">
+              <!-- <div  *ngIf="(name && name.invalid  && (name.touched || name.dirty))" id="validationNameFeedback" class="invalid-feedback">
                 Pattern name already used.
               </div> -->
-              @if (!checkNameValidityBis()) {
-                <div id="validationNameFeedback" class="invalid-feedback">
-                  Pattern name already used or invalid characters.
-                </div>
-              }
-
-        
+              <!-- @if (!checkNameValidityBis()) { -->
+              <div [hidden]="name.valid || name.pristine" id="validationNameFeedback" class="invalid-feedback">
+                Pattern name already used or invalid characters.
+              </div>
+              <!-- } -->
           </div>
           <div class="col-12 col-md-6 col-lg-5 col-xl-4">
-            <label class="form-label inputLabel">Category</label><br>
-
-            <select name="category" class="form-select inputField form-control"  [(ngModel)]="pattern.category">
+            <label class="form-label">Category</label><br>
+            <select name="category" 
+                    class="form-select inputField form-control"  
+                    [(ngModel)]="pattern.category">
               <!-- <option *ngFor="let key of categoryKeys" [value]="key">{{key}}</option> -->
               <option value="top">top</option>
               <option value="bottom">bottom</option>
@@ -42,93 +41,208 @@
             </select>
           </div>
         </div>
-        <div class="row ">
-          <!-- PHOTOS DROPBOX -->
+        <div class="row">
           <div class="col">
-            <label class="form-label mt-4 inputLabel">Photos</label>
-            <div class="drop-area " (drop)="onFileDrop($event, 'photos')" (dragover)="allowDrop($event)" >
-              @if (!pattern.photos.length) {
-                <mat-grid-list cols="1" rowHeight="1:1">
-                  <mat-grid-tile>
-                    Drag & Drop<br> Files Here
-                  </mat-grid-tile>
-                </mat-grid-list>
-              } @else {
-                <mat-grid-list cols="3" gutterSize="5" rowHeight="1:1">
-                  @for (item of pattern.photos; track item) {
-                    <mat-grid-tile>
-                      <fa-icon [icon]='xmark' size="sm" class="deleteButton" (click)="deleteItem(0, item)"></fa-icon>
-                      <img [src]="item" alt="photo"  class="imagePattern">
-                    </mat-grid-tile>
-                  }
-                </mat-grid-list>
-              }
-
-
-            </div>
+            <label class="form-label">Brand</label><br>
+            <input type="text" 
+              class="inputField form-control" 
+              name="patternBrandInput" 
+              id="patternBrandInput"
+              #patternBrandInput="ngModel"
+              [(ngModel)]="pattern.brand"
+              placeholder="Simplicity">
           </div>
-          <!-- TECHNICAL DRAWINGS DROPBOX -->
           <div class="col">
-            <label class="form-label mt-4 inputLabel">Technical drawings</label>
-            <div class="drop-area" (drop)="onFileDrop($event, 'techDrawings')" (dragover)="allowDrop($event)" >
-              @if (!pattern.techDrawings.length) {
-                <mat-grid-list cols="1" rowHeight="1:1">
-                  <mat-grid-tile>
-                    Drag & Drop<br> Files Here
-                  </mat-grid-tile>
-                </mat-grid-list>
-              } @else {
-                <mat-grid-list cols="3" gutterSize="5" rowHeight="1:1">
-                  @for (item of pattern.techDrawings; track item) {
-                    <mat-grid-tile>
-                      <fa-icon [icon]='xmark' class="deleteButton" size="sm" (click)="deleteItem(1, item)"></fa-icon>
-                      <img [src]="item" alt="techDrawing"  class="imagePattern">
-                    </mat-grid-tile>
-                  }
-
-                </mat-grid-list>
+            <label class="form-label">Difficulty</label>
+            <div class="difficulty-radios">
+              @for (n of [1,2,3,4,5]; track n) {
+                <div class="form-check difficulty-radio">
+                  <input class="form-check-input" type="radio" name="patternDifficulty"
+                         [value]="n" [(ngModel)]="pattern.difficulty"
+                         [class.filled]="n <= pattern.difficulty">
+                </div>
               }
-
-            </div>
-          </div>
-          <!-- PATTERN FILES DROPBOX -->
-          <div class="col">
-            <label class="form-label mt-4 inputLabel">Pattern files *</label>
-            <div class="drop-area scrollable-div overflow-auto" (drop)="onFileDrop($event, 'files')" (dragover)="allowDrop($event)" >
-              @if (!pattern.files.length) {
-                <mat-grid-list cols="1" rowHeight="1:1">
-                  <mat-grid-tile>
-                    Drag & Drop<br> Files Here
-                  </mat-grid-tile>
-                </mat-grid-list>
-              } @else {
-                <mat-grid-list cols="4" gutterSize="5" rowHeight="1:1">
-                  @for (item of pattern.files; track item) {
-                    <div>
-                      <mat-grid-tile [colspan]="1" [rowspan]="1">
-                        <fa-icon [icon]='pdf' size="xl"></fa-icon>
-                      </mat-grid-tile>
-                      <mat-grid-tile [colspan]="3" [rowspan]="1">
-                        <a>{{extractFileName(item)}}</a>
-                        <fa-icon [icon]='xmark' class="deleteFileButton" size="sm" (click)="deleteItem(2, item)"></fa-icon>
-                      </mat-grid-tile>
-                    </div> 
-                  }
- 
-                </mat-grid-list>
-              }
-
-
             </div>
           </div>
         </div>
+        <div class="row">
+          <div class="col">
+            <label class="form-label">Description</label><br>
+            <textarea
+              class="inputField form-control auto-grow-textarea" 
+              rows="1"
+              name="patternDescriptionInput" 
+              id="patternDescriptionInput"
+              #patternDescriptionInput="ngModel"
+              [(ngModel)]="pattern.description"
+              placeholder=""></textarea>
+          </div>
+        </div>
+        <div class="row" style="margin-top: var(--space-3);">
+          <div class="col-12 col-md-6 d-flex align-items-center gap-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="patternFree" name="patternFree" [(ngModel)]="pattern.free">
+              <label class="form-check-label" for="patternFree">Free</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="patternUsed" name="patternUsed" [(ngModel)]="pattern.used">
+              <label class="form-check-label" for="patternUsed">Used</label>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="margin-top: var(--space-2);">
+          <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+              <label class="form-label">Fabrics</label>
+              <button type="button" class="primary-button" (click)="addResourceRow('fabric')">Add fabric</button>
+            </div>
+            @if (!pattern.fabric.length) {
+              <p class="text-muted">No fabric added yet.</p>
+            }
+            @for (fabric of pattern.fabric; track $index; let i = $index) {
+              <div class="row g-2 mb-2 align-items-end">
+                <div class="col-6">
+                  <input type="text"
+                    class="inputField form-control"
+                    [name]="'fabricType' + i"
+                    [(ngModel)]="fabric.type"
+                    placeholder="Cotton poplin">
+                </div>
+                <div class="col-5">
+                  <input type="text"
+                    class="inputField form-control"
+                    [name]="'fabricRequirement' + i"
+                    [(ngModel)]="fabric.requirement"
+                    placeholder="1.5m at 140cm wide">
+                </div>
+                <div class="col-1 d-flex justify-content-end">
+                  <button type="button" class="subtle-warning-button" (click)="removeResourceRow('fabric', i)">x</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="col-12" style="margin-top: var(--space-4);">
+            <div class="d-flex align-items-center justify-content-between">
+              <label class="form-label">Materials</label>
+              <button type="button" class="primary-button" (click)="addResourceRow('materials')">Add material</button>
+            </div>
+            @if (!pattern.materials.length) {
+              <p class="text-muted">No material added yet.</p>
+            }
+            @for (material of pattern.materials; track $index; let i = $index) {
+              <div class="row g-2 mb-2 align-items-end">
+                <div class="col-6">
+                  <input type="text"
+                    class="inputField form-control"
+                    [name]="'materialType' + i"
+                    [(ngModel)]="material.type"
+                    placeholder="Buttons">
+                </div>
+                <div class="col-5">
+                  <input type="text"
+                    class="inputField form-control"
+                    [name]="'materialRequirement' + i"
+                    [(ngModel)]="material.requirement"
+                    placeholder="6">
+                </div>
+                <div class="col-1 d-flex justify-content-end">
+                  <button type="button" class="subtle-warning-button" (click)="removeResourceRow('materials', i)">x</button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <!-- PHOTOS -->
+        <label class="form-label" style="margin-top: var(--space-5)!important;">Photos</label><br>
+        <div class="reorder-list" cdkDropList [cdkDropListData]="pattern.photos" (cdkDropListDropped)="onReorderDrop($event, 0)">
+          @for (photo of pattern.photos; track $index; let i = $index) {
+            <div class="black-box image-block d-flex flex-row align-items-center justify-content-between" [class.cover-item]="i === 0" cdkDrag>
+              <div class="d-flex flex-row align-items-center">
+                <div class="item-thumbnail">
+                  <img [src]="photo" alt="Photo">
+                </div>
+                <div class="d-flex flex-column" style="margin-left: var(--space-3)">
+                  @if (i === 0) { <span class="label-upper cover-badge">cover</span> }
+                  <span>{{extractFileName(photo)}}</span>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
+                <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+                  <fa-icon [icon]='dragHandleIcon'></fa-icon>
+                </button>
+                <button type="button" class="subtle-warning-button" (click)="removeItem(0, i)">delete</button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <input #photosInput type="file" hidden multiple accept="image/*" (change)="onFileSelect($event, 'photos')">
+        <div class="grey-box new-item-block d-flex align-items-center justify-content-center"
+             (drop)="onFileDrop($event, 'photos')" (dragover)="allowDrop($event)" (click)="openFilePicker(photosInput)">
+          <fa-icon [icon]='plusIcon' style="color:var(--medium-grey)"></fa-icon>
+        </div>
+
+        <!-- TECHNICAL DRAWINGS -->
+        <label class="form-label" style="margin-top: var(--space-5)!important;">Technical drawings</label><br>
+        <div class="reorder-list" cdkDropList [cdkDropListData]="pattern.techDrawings" (cdkDropListDropped)="onReorderDrop($event, 1)">
+          @for (drawing of pattern.techDrawings; track $index; let i = $index) {
+            <div class="black-box image-block d-flex flex-row align-items-center justify-content-between" [class.cover-item]="i === 0" cdkDrag>
+              <div class="d-flex flex-row align-items-center">
+                <div class="item-thumbnail">
+                  <img [src]="drawing" alt="Technical drawing">
+                </div>
+                <div class="d-flex flex-column" style="margin-left: var(--space-3)">
+                  @if (i === 0) { <span class="label-upper cover-badge">cover</span> }
+                  <span>{{extractFileName(drawing)}}</span>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
+                <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+                  <fa-icon [icon]='dragHandleIcon'></fa-icon>
+                </button>
+                <button type="button" class="subtle-warning-button" (click)="removeItem(1, i)">delete</button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <input #drawingsInput type="file" hidden multiple accept="image/*" (change)="onFileSelect($event, 'techDrawings')">
+        <div class="grey-box new-item-block d-flex align-items-center justify-content-center"
+             (drop)="onFileDrop($event, 'techDrawings')" (dragover)="allowDrop($event)" (click)="openFilePicker(drawingsInput)">
+          <fa-icon [icon]='plusIcon' style="color:var(--medium-grey)"></fa-icon>
+        </div>
+
+        <!-- PATTERN FILES -->
+        <label class="form-label" style="margin-top: var(--space-5)!important;">Pattern files *</label><br>
+        <div class="reorder-list" cdkDropList [cdkDropListData]="pattern.files" (cdkDropListDropped)="onReorderDrop($event, 2)">
+          @for (file of pattern.files; track $index; let i = $index) {
+            <div class="black-box d-flex flex-row align-items-center justify-content-between" cdkDrag>
+              <div class="d-flex flex-row align-items-center">
+                <fa-icon [icon]='fileIcon' style="margin-right: var(--space-3);"></fa-icon>
+                <span style="margin-left: var(--space-3)">{{extractFileName(file)}}</span>
+              </div>
+              <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
+                <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+                  <fa-icon [icon]='dragHandleIcon'></fa-icon>
+                </button>
+                <button type="button" class="subtle-warning-button" (click)="removeItem(2, i)">delete</button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <input #filesInput type="file" hidden multiple (change)="onFileSelect($event, 'files')">
+        <div class="grey-box new-item-block d-flex align-items-center justify-content-center"
+             (drop)="onFileDrop($event, 'files')" (dragover)="allowDrop($event)" (click)="openFilePicker(filesInput)">
+          <fa-icon [icon]='plusIcon' style="color:var(--medium-grey)"></fa-icon>
+        </div>
       </div>
       <!-- <button class="btn btn-outline-dark align-self-end justify-self-center" type="submit" [disabled]="patternForm.invalid">Submit</button> -->
-    
   </div>
   <div class="modal-footer">
+    <button type="button" class="primary-button"  type="submit" [disabled]="patternForm.invalid">add pattern</button>
     <button type="button" class="secondary-button" (click)="closeModal()">cancel</button>
-    <button type="button" class="button"  type="submit" [disabled]="patternForm.invalid">add pattern</button>
   </div>
 </form>
   

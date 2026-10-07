@@ -1,107 +1,211 @@
 <form (ngSubmit)="submitForm()" #editPatternForm="ngForm">
-    <div class="scrollable-div overflow-auto" id="pattern-edit-main-div">
-        <h1 class="title">{{newPattern.name}}</h1>
+    <div class="modal-form-wrapper">
+        <h1 class="title">{{newPattern?.name}}</h1>
         <div class="container">
-          <label class="form-label inputLabel">Category</label><br>
-          <select name="category" class="form-select inputField form-control"  [(ngModel)]="newPattern.category">
-            <!-- <option *ngFor="let key of categoryKeys" [value]="key">{{key}}</option> -->
-            <option value="top">top</option>
-            <option value="bottom">bottom</option>
-            <option value="dress">dress</option>
-            <option value="one piece">one piece</option>
-            <option value="accessory">accessory</option>
-            <option value="else">else</option>
-          </select>
+          <label class="form-label">Brand</label><br>
+          <input
+            type="text"
+            name="brand"
+            class="form-control inputField"
+            [(ngModel)]="newPattern!.brand"
+            placeholder="Simplicity">
 
-          <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Photos</label><br>
-          @for (photo of newPattern.photos; track $index; let i = $index) {
-            <div class="image-block d-flex flex-row align-items-center justify-content-between">
-              <div class="d-flex flex-row align-items-center">
-                <div class="image-container">
-                  <img [src]="photo" alt="Photo">
-                </div>
-                <span style="margin-left: 10px">{{photo.split("\\").pop()}}</span>
-              </div>
-              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(0,i)">delete</button>
+          <div class="row" style="margin-top: var(--space-5);">
+            <div class="col">
+              <label class="form-label">Category</label><br>
+              <select name="category" class="form-select inputField form-control"  [(ngModel)]="newPattern!.category">
+                <!-- <option *ngFor="let key of categoryKeys" [value]="key">{{key}}</option> -->
+                <option value="top">top</option>
+                <option value="bottom">bottom</option>
+                <option value="dress">dress</option>
+                <option value="one piece">one piece</option>
+                <option value="accessory">accessory</option>
+                <option value="else">else</option>
+              </select>
             </div>
-          }
-          @for (photo of patternEdit.newPhotos; track $index; let i = $index) {
-            <div class="image-block d-flex flex-row align-items-center justify-content-between">
-              <div class="d-flex flex-row align-items-center">
-                <div class="image-container">
-                  <img [src]="photo" alt="Photo">
-                </div>
-                <span style="margin-left: 10px">{{photo.split("\\").pop()}}</span>
+            <div class="col">
+              <label class="form-label">Difficulty</label>
+              <div class="difficulty-radios" style="margin-bottom: 0;">
+                @for (n of [1,2,3,4,5]; track n) {
+                  <div class="form-check difficulty-radio">
+                    <input class="form-check-input" type="radio" name="difficulty" 
+                           [value]="n" [(ngModel)]="newPattern!.difficulty"
+                           [class.filled]="n <= newPattern!.difficulty">
+                  </div>
+                }
               </div>
-              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(0,i)">delete</button>
             </div>
-          }
-
-          <div class="new-item-block d-flex align-items-center justify-content-center" 
-               (drop)="onFileDrop($event, 0)" (dragover)="allowDrop($event)">
-            <fa-icon [icon]='plusIcon'  style="color:gray"></fa-icon>
           </div>
 
-          <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Technical drawings</label><br>
-          @for (drawing of newPattern.techDrawings; track $index; let i = $index) {
-            <div class="image-block d-flex flex-row align-items-center justify-content-between">
-              <div class="d-flex flex-row align-items-center">
-                <div class="image-container">
-                  <img [src]="drawing" alt="Photo">
-                </div>
-                <span style="margin-left: 10px">{{drawing.split("\\").pop()}}</span>
-              </div>
-              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(1,i)">delete</button>
-            </div>
-          }
-          @for (drawing of patternEdit.newTechDrawings; track $index; let i = $index) {
-            <div class="image-block d-flex flex-row align-items-center justify-content-between">
-              <div class="d-flex flex-row align-items-center">
-                <div class="image-container">
-                  <img [src]="drawing" alt="Photo">
-                </div>
-                <span style="margin-left: 10px">{{drawing.split("\\").pop()}}</span>
-              </div>
-              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(1,i)">delete</button>
-            </div>
-          }
+          <label class="form-label" style="margin-top: var(--space-5)!important;">Description</label><br>
+          <textarea
+            name="description"
+            class="form-control inputField auto-grow-textarea"
+            rows="3"
+            [(ngModel)]="newPattern!.description"
+            placeholder="Add notes about the pattern"></textarea>
 
-          <div class="new-item-block d-flex align-items-center justify-content-center" 
-                (drop)="onFileDrop($event, 1)" (dragover)="allowDrop($event)">
-            <fa-icon [icon]='plusIcon'  style="color:gray"></fa-icon>
+          <div class="d-flex align-items-center gap-4" style="margin-top: var(--space-4);">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="editPatternFree" name="free" [(ngModel)]="newPattern!.free">
+              <label class="form-check-label" for="editPatternFree">Free</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="editPatternUsed" name="used" [(ngModel)]="newPattern!.used">
+              <label class="form-check-label" for="editPatternUsed">Used</label>
+            </div>
           </div>
 
-          <label class="form-label inputLabel" style="margin-top: 1.5rem!important;">Files</label><br>
-          @for (file of newPattern.files; track $index; let i = $index) {
-            <div class="file-block d-flex flex-row align-items-center justify-content-between">
-              <div class="d-flex flex-row align-items-center">
-                <fa-icon [icon]='fileIcon'  style="margin-right: 12px;"></fa-icon>
-                <span style="margin-left: 10px">{{file.split("\\").pop()}}</span>
-              </div>
-              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeItem(2,i)">delete</button>
-            </div>
+          <div class="d-flex align-items-center justify-content-between" style="margin-top: var(--space-5)!important;">
+            <label class="form-label">Fabrics</label>
+            <button type="button" class="primary-button" (click)="addResourceRow('fabric')">Add fabric</button>
+          </div>
+          @if (!newPattern!.fabric.length) {
+            <p class="text-muted">No fabric added yet.</p>
           }
-          @for (file of patternEdit.newFiles; track $index; let i = $index) {
-            <div class="file-block d-flex flex-row align-items-center justify-content-between">
-              <div class="d-flex flex-row align-items-center">
-                <fa-icon [icon]='fileIcon'  style="margin-right: 12px;"></fa-icon>
-                <span style="margin-left: 10px">{{file.split("\\").pop()}}</span>
+          @for (fabric of newPattern!.fabric; track $index; let i = $index) {
+            <div class="row g-2 mb-2 align-items-end">
+              <div class="col-6">
+                <input
+                  type="text"
+                  [name]="'editFabricType' + i"
+                  class="form-control inputField"
+                  [(ngModel)]="fabric.type"
+                  placeholder="Cotton poplin">
               </div>
-              <button class="justify-self-end button" style="margin-right: 13px;" (click)="removeNewItem(2,i)">delete</button>
+              <div class="col-5">
+                <input
+                  type="text"
+                  [name]="'editFabricRequirement' + i"
+                  class="form-control inputField"
+                  [(ngModel)]="fabric.requirement"
+                  placeholder="1.5m at 140cm wide">
+              </div>
+              <div class="col-1 d-flex justify-content-end">
+                <button type="button" class="subtle-warning-button" (click)="removeResourceRow('fabric', i)">x</button>
+              </div>
             </div>
           }
 
-          <div class="new-item-block d-flex align-items-center justify-content-center" 
-                (drop)="onFileDrop($event, 2)" (dragover)="allowDrop($event)">
-            <fa-icon [icon]='plusIcon'  style="color:gray"></fa-icon>
+          <div class="d-flex align-items-center justify-content-between" style="margin-top: var(--space-5)!important;">
+            <label class="form-label">Materials</label>
+            <button type="button" class="primary-button" (click)="addResourceRow('materials')">Add material</button>
+          </div>
+          @if (!newPattern!.materials.length) {
+            <p class="text-muted">No material added yet.</p>
+          }
+          @for (material of newPattern!.materials; track $index; let i = $index) {
+            <div class="row g-2 mb-2 align-items-end">
+              <div class="col-6">
+                <input
+                  type="text"
+                  [name]="'editMaterialType' + i"
+                  class="form-control inputField"
+                  [(ngModel)]="material.type"
+                  placeholder="Buttons">
+              </div>
+              <div class="col-5">
+                <input
+                  type="text"
+                  [name]="'editMaterialRequirement' + i"
+                  class="form-control inputField"
+                  [(ngModel)]="material.requirement"
+                  placeholder="6">
+              </div>
+              <div class="col-1 d-flex justify-content-end">
+                <button type="button" class="subtle-warning-button" (click)="removeResourceRow('materials', i)">x</button>
+              </div>
+            </div>
+          }
+
+          <label class="form-label" style="margin-top: var(--space-5)!important;">Photos</label><br>
+          <div class="reorder-list" cdkDropList [cdkDropListData]="newPattern?.photos || []" (cdkDropListDropped)="onReorderDrop($event, 0)">
+            @for (photo of newPattern?.photos; track $index; let i = $index) {
+              <div class="black-box image-block d-flex flex-row align-items-center justify-content-between" [class.cover-item]="i === 0" cdkDrag>
+                <div class="d-flex flex-row align-items-center">
+                  <div class="item-thumbnail">
+                    <img [src]="photo" alt="Photo">
+                  </div>
+                  <div class="d-flex flex-column" style="margin-left: var(--space-3)">
+                    @if (i === 0) { <span class="label-upper cover-badge">cover</span> }
+                    <span>{{photo.split("\\").pop()}}</span>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
+                  <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+                    <fa-icon [icon]='dragHandleIcon'></fa-icon>
+                  </button>
+                  <button type="button" class="subtle-warning-button" (click)="removeItem(0,i)">delete</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <input #photosInput type="file" hidden multiple accept="image/*" (change)="onFileSelect($event, 0)">
+          <div class="grey-box new-item-block d-flex align-items-center justify-content-center" 
+               (drop)="onFileDrop($event, 0)" (dragover)="allowDrop($event)" (click)="openFilePicker(photosInput)">
+            <fa-icon [icon]='plusIcon'  style="color:var(--medium-grey)"></fa-icon>
+          </div>
+
+          <label class="form-label" style="margin-top: var(--space-5)!important;">Technical drawings</label><br>
+          <div class="reorder-list" cdkDropList [cdkDropListData]="newPattern?.techDrawings || []" (cdkDropListDropped)="onReorderDrop($event, 1)">
+            @for (drawing of newPattern?.techDrawings; track $index; let i = $index) {
+              <div class="black-box image-block d-flex flex-row align-items-center justify-content-between" [class.cover-item]="i === 0" cdkDrag>
+                <div class="d-flex flex-row align-items-center">
+                  <div class="item-thumbnail">
+                    <img [src]="drawing" alt="Photo">
+                  </div>
+                  <div class="d-flex flex-column" style="margin-left: var(--space-3)">
+                    @if (i === 0) { <span class="label-upper cover-badge">cover</span> }
+                    <span>{{drawing.split("\\").pop()}}</span>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
+                  <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+                    <fa-icon [icon]='dragHandleIcon'></fa-icon>
+                  </button>
+                  <button type="button" class="subtle-warning-button" (click)="removeItem(1,i)">delete</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <input #drawingsInput type="file" hidden multiple accept="image/*" (change)="onFileSelect($event, 1)">
+          <div class="grey-box new-item-block d-flex align-items-center justify-content-center" 
+                (drop)="onFileDrop($event, 1)" (dragover)="allowDrop($event)" (click)="openFilePicker(drawingsInput)">
+            <fa-icon [icon]='plusIcon'  style="color:var(--medium-grey)"></fa-icon>
+          </div>
+
+          <label class="form-label" style="margin-top: var(--space-5)!important;">Files</label><br>
+          <div class="reorder-list" cdkDropList [cdkDropListData]="newPattern?.files || []" (cdkDropListDropped)="onReorderDrop($event, 2)">
+            @for (file of newPattern?.files; track $index; let i = $index) {
+              <div class="black-box d-flex flex-row align-items-center justify-content-between" cdkDrag>
+                <div class="d-flex flex-row align-items-center">
+                  <fa-icon [icon]='fileIcon'  style="margin-right: var(--space-3);"></fa-icon>
+                  <span style="margin-left: var(--space-3)">{{file.split("\\").pop()}}</span>
+                </div>
+                <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
+                  <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+                    <fa-icon [icon]='dragHandleIcon'></fa-icon>
+                  </button>
+                  <button type="button" class="subtle-warning-button" (click)="removeItem(2,i)">delete</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <input #filesInput type="file" hidden multiple (change)="onFileSelect($event, 2)">
+          <div class="grey-box new-item-block d-flex align-items-center justify-content-center" 
+                (drop)="onFileDrop($event, 2)" (dragover)="allowDrop($event)" (click)="openFilePicker(filesInput)">
+            <fa-icon [icon]='plusIcon'  style="color:var(--medium-grey)"></fa-icon>
           </div>
         </div>
 
     </div>
     <div class="modal-footer">
         <button type="button" class="subtle-warning-button" (click)="deletePattern()" data-bs-dismiss="modal">delete pattern</button>
-        <button type="button" class="action-button"  type="submit" (click)="testFunction()">save</button>
-        <button type="button" class="button" data-bs-dismiss="modal" (click)="closeModal()">cancel</button>
+        <button type="button" class="primary-button"  type="submit" (click)="testFunction()">save</button>
+        <button type="button" class="secondary-button" data-bs-dismiss="modal" (click)="closeModal()">cancel</button>
         
       </div>
 </form>

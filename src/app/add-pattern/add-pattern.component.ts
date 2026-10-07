@@ -1,19 +1,19 @@
 import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output, OnInit, inject } from '@angular/core';
-import { NgForm, FormsModule, FormControl } from '@angular/forms';
-import { Pattern, Category, NewPattern } from '../classes';
+import { FormsModule } from '@angular/forms';
+import { Material, Pattern } from '../classes';
 import { NgClass} from '@angular/common';
 //import { PatternService } from '../services/pattern.service';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
 import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DataService } from '../services/data.service';
 
 @Component({
     selector: 'app-add-pattern',
-    imports: [FormsModule, NgClass, MatGridListModule, FontAwesomeModule, ScrollingModule],
-    templateUrl: './add-pattern.component.html',
+    imports: [FormsModule, NgClass, FontAwesomeModule, ScrollingModule, DragDropModule],
+    templateUrl: './add-pattern.component.html', 
     styleUrl: './add-pattern.component.scss',
     encapsulation: ViewEncapsulation.None
 })
@@ -24,8 +24,9 @@ export class AddPatternComponent implements OnInit {
   patternName: string = '';
   pattern =  new Pattern();
 
-  pdf = icons.faFilePdf;
-  xmark = solidIcons.faCircleXmark; // faXmarkCircle;
+  fileIcon = icons.faFile;
+  plusIcon = solidIcons.faPlus;
+  dragHandleIcon = solidIcons.faGripVertical;
 
   private cdr = inject(ChangeDetectorRef);
   private data = inject(DataService);
@@ -33,20 +34,16 @@ export class AddPatternComponent implements OnInit {
   ngOnInit(): void {}
 
   extractFileName(filePath: string): string {
-    // Split the filePath by '/' to separate into parts
     const pathParts = filePath.split(/[\\/]/);
-
-    // Get the last part of the path, which is the filename
-    const fileName = pathParts[pathParts.length -1];
-    return fileName || ''; // Return the extracted filename or an empty string if not found
+    return pathParts[pathParts.length - 1] || '';
   }
   
   checkNameValidity() {
     if (!this.data.checkPatternNameValidity(this.pattern.name)) {
-      const inputField = document.getElementById('patternNameInput');
+      const inputField = document.getElementById('name');
       inputField?.classList.add('is-invalid');
     } else {
-      const inputField = document.getElementById('patternNameInput');
+      const inputField = document.getElementById('name');
       inputField?.classList.remove('is-invalid');
     }
   }
@@ -55,24 +52,28 @@ export class AddPatternComponent implements OnInit {
     return this.data.checkPatternNameValidity(this.pattern.name);
   }
 
-  onFileDrop(event: DragEvent, type: string): void {
-    event.preventDefault();
-    const files = event.dataTransfer!.files;
+  onDifficultyChange(): void {
+    this.pattern.difficulty = Math.min(5, Math.max(1, Number(this.pattern.difficulty) || 1));
+  }
+
+  private addFiles(files: FileList, type: string): void {
     switch (type) {
-      case "photos" :
-        for(let i=0; i<files.length; i++) {
-          console.log("file",files[i])
-          this.pattern.photos.push(files[i].path);
+      case "photos":
+        for (let i = 0; i < files.length; i++) {
+          const filePath = window.getFilePath(files[i]);
+          this.pattern.photos.push(filePath);
         }
         break;
-      case "techDrawings" :
-        for(let i=0; i<files.length; i++) {
-          this.pattern.techDrawings.push(files[i].path);
+      case "techDrawings":
+        for (let i = 0; i < files.length; i++) {
+          const filePath = window.getFilePath(files[i]);
+          this.pattern.techDrawings.push(filePath);
         }
         break;
-      case "files" :
-        for(let i=0; i<files.length; i++) {
-          this.pattern.files.push(files[i].path);
+      case "files":
+        for (let i = 0; i < files.length; i++) {
+          const filePath = window.getFilePath(files[i]);
+          this.pattern.files.push(filePath);
         }
         break;
       default:
@@ -80,33 +81,72 @@ export class AddPatternComponent implements OnInit {
         break;
     }
     this.cdr.detectChanges();
-    //console.log("new file",  this.files, this.pattern);
+  }
+
+  openFilePicker(input: HTMLInputElement): void {
+    input.click();
+  }
+
+  onFileSelect(event: Event, type: string): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    this.addFiles(input.files, type);
+    input.value = '';
+  }
+
+  onFileDrop(event: DragEvent, type: string): void {
+    event.preventDefault();
+    const files = event.dataTransfer!.files;
+    if (!files || files.length === 0) return;
+    this.addFiles(files, type);
   }
 
   allowDrop(event: DragEvent): void {
     event.preventDefault();
   }
 
-  deleteItem(list: number , item: string) {
-    switch(list) {
-      case 0 :
-        var index = this.pattern.photos.indexOf(item);
-        if ( index != -1 ) this.pattern.photos.splice(index,1);
-        break;
-      case 1 :
-        var index = this.pattern.techDrawings.indexOf(item);
-        if ( index != -1 ) this.pattern.techDrawings.splice(index,1);
-        break;
-      case 2 :
-        var index = this.pattern.files.indexOf(item);
-        if ( index != -1 ) this.pattern.files.splice(index,1);
-        break;
-      default :
-        break;
+  private getTargetList(list: number): string[] | undefined {
+    switch (list) {
+      case 0:
+        return this.pattern.photos;
+      case 1:
+        return this.pattern.techDrawings;
+      case 2:
+        return this.pattern.files;
+      default:
+        return undefined;
     }
   }
 
+  onReorderDrop(event: CdkDragDrop<string[]>, list: number): void {
+    const targetList = this.getTargetList(list);
+    if (!targetList) return;
+    moveItemInArray(targetList, event.previousIndex, event.currentIndex);
+  }
+
+  removeItem(list: number, index: number): void {
+    this.getTargetList(list)?.splice(index, 1);
+  }
+
+  addResourceRow(type: 'fabric' | 'materials'): void {
+    const nextItem: Material = { type: '', requirement: '' };
+    if (type === 'fabric') {
+      this.pattern.fabric.push(nextItem);
+      return;
+    }
+    this.pattern.materials.push(nextItem);
+  }
+
+  removeResourceRow(type: 'fabric' | 'materials', index: number): void {
+    if (type === 'fabric') {
+      this.pattern.fabric.splice(index, 1);
+      return;
+    }
+    this.pattern.materials.splice(index, 1);
+  }
+
   submitForm(): void {
+    this.onDifficultyChange();
     // Validate form data
     if (!this.pattern.name || this.pattern.files.length === 0 || !this.data.checkPatternNameValidity(this.pattern.name)) {
       console.error('Pattern name and files are required.');

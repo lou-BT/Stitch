@@ -1,56 +1,159 @@
-<!-- carousel -->
-<div>
-    <mdb-carousel [controls]="true" [indicators]="true" >
-        @for (photo of pattern?.photos; track photo) {
-          <mdb-carousel-item>
-            <img
-                style="height: 400px; object-fit: contain;"
-                [src]="photo"
-                class="d-block w-100"
-                alt="..."
-            />
-          </mdb-carousel-item>
-        }
-        @for (photo of pattern?.techDrawings; track photo) {
-            <mdb-carousel-item>
-                <img
-                style="height: 400px; object-fit: contain;"
-                [src]="photo"
-                class="d-block w-100"
-                alt="..."
-                />
-            </mdb-carousel-item>
-        }
+@if (pattern == null) {
+  <p style="padding: var(--space-5);">Loading...</p>
+} @else {
+  <!-- carousel -->
+  <div style="border-radius: var(--inner-card-radius) 0px 0px 0px; overflow: hidden;">
+    <mdb-carousel [controls]="true" [indicators]="true">
+      @for (photo of pattern.photos; track photo) {
+        <mdb-carousel-item>
+          <img
+            style="height: 400px; object-fit: contain;"
+            [src]="photo"
+            class="d-block w-100"
+            alt="{{pattern.name}} photo"
+          />
+        </mdb-carousel-item>
+      }
+      @for (drawing of pattern.techDrawings; track drawing) {
+        <mdb-carousel-item>
+          <img
+            style="height: 400px; object-fit: contain;"
+            [src]="drawing"
+            class="d-block w-100"
+            alt="{{pattern.name}} technical drawing"
+          />
+        </mdb-carousel-item>
+      }
+    </mdb-carousel>
+  </div>
+  <!-- end of carousel -->
 
-      </mdb-carousel>
-</div>
-<!-- end of carousel -->
-
-<!-- pattern content -->
-<div style="padding: 20px;">
-    <h5 style="color: grey; margin-bottom: -3px;margin-top: 5px;">{{pattern?.category}}</h5>
-    <div class="pattern-header d-flex flex-row">
-        <h3>{{pattern?.name}}</h3>
+  <!-- pattern content -->
+  <div style="padding: var(--space-5);">
+    <h5 class="text-grey" style="margin-bottom: -3px; margin-top: var(--space-1);">{{pattern.category}}</h5>
+    <div class="pattern-header d-flex justify-content-between align-items-center">
+      <div class="d-flex flex-row align-items-center gap-1">
+        <h3 style="margin-right: var(--space-1);">{{pattern.name}}</h3> 
+        @for (n of [1, 2, 3, 4, 5]; track n) {
+            <i class="bi bi-star-fill" style="margin-bottom: var(--space-1);" [class.grey-color]="pattern.difficulty < n"></i>
+        }
+      </div>
+      <div class="d-flex flex-row gap-2">
+        <button type="button" class="icon-button" (click)="scrollToComments()" title="Go to comments">
+          <i class="bi bi-chat-dots-fill"></i>
+        </button>
+        <span class="meta-badge" [class.badge-positive]="pattern.used" [class.badge-neutral]="!pattern.used">
+          <i class="bi bi-scissors" style="margin-right: var(--space-1);"></i>
+          {{pattern.used ? 'Tested' : 'Not tested yet'}}
+        </span>
+      </div>
+    </div>
+    <div class="grey-box pattern-meta-card" style="margin-left: var(--space-4);">
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="label-upper">Brand</span>
+          <span class="meta-value">{{pattern.brand || 'Not specified'}} @if(!pattern.free){<i class="bi bi-coin" style="color: var(--gold)"></i>}</span>  
+        </div>
+        <div class="meta-item">
+          <span class="label-upper">Fabrics</span>
+          <span class="meta-value">
+            @if (pattern.fabric.length) {
+              @for (fabric of pattern.fabric; track $index; let i = $index) {
+                <span>{{fabric.type}} ({{fabric.requirement}}){{i < pattern.fabric.length - 1 ? ', ' : ''}}</span>
+              }
+            } @else {
+              Not specified
+            }
+          </span>
+        </div>
+        <div class="meta-item meta-item-wide">
+          <span class="label-upper">Materials</span>
+          <span class="meta-value">
+            @if (pattern.materials.length) {
+              @for (material of pattern.materials; track $index; let i = $index) {
+                <span>{{material.type}} ({{material.requirement}}){{i < pattern.materials.length - 1 ? ', ' : ''}}</span>
+              }
+            } @else {
+              Not specified
+            }
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex flex-row">
+      <p style="margin-left: var(--space-4);">{{pattern.description}}</p>
     </div>
 
     <!-- files -->
-    <div class="container-fluid" style="margin-top: 20px;">
-        <div class="row justify-content-center">
-            <div class="col-8">
-                <h5 style="margin-left: 15px;">Files</h5>
-                @for (file of pattern?.files; track file) {
-                    <div class="file-block d-flex flex-row align-items-center justify-content-between">
-                        <div class="d-flex flex-row">
-                            <fa-icon [icon]='fileIcon' style="margin-right: 12px;"></fa-icon>
-                            {{file.split("\\").pop()}}
-                        </div>
+    <div class="container-fluid" style="margin-top: var(--space-5);">
+      <div class="row justify-content-center">
+        <div class="col-8">
+          <h5 style="margin-left: var(--space-4);">Files</h5>
+          @for (file of pattern.files; track file) {
+            <div class="black-box d-flex flex-row align-items-center justify-content-between">
+              <div class="d-flex flex-row align-items-center file-info">
+                <fa-icon [icon]="fileIcon" style="margin-right: var(--space-3);"></fa-icon>
+                <span class="file-name">{{file.split("\\").pop()}}</span>
+              </div>
 
-                        <button class="justify-self-end button"
-                                (click)="data.openFile(file)">open</button>
-                    </div>
-                }
+              <button class="justify-self-end primary-button" (click)="data.openFile(file)">open</button>
             </div>
+          }
         </div>
+      </div>
     </div>
 
-</div> 
+    <!-- comments -->
+    <div class="container-fluid" style="margin-top: var(--space-5);" id="comments-section">
+      <div class="row justify-content-center">
+        <div class="col-8">
+          <h5 style="margin-left: var(--space-4);">Comments</h5>
+
+          <div class="grey-box comment-form">
+            <textarea
+              class="form-control"
+              name="newComment"
+              rows="3"
+              placeholder="Add a comment"
+              [(ngModel)]="newCommentText"
+            ></textarea>
+            <div class="comment-form-actions">
+              <button type="button" class="primary-button" (click)="addComment()">Add comment</button>
+            </div>
+          </div>
+
+          @if (!pattern.comments.length) {
+            <p class="text-grey empty-comments">No comments yet.</p>
+          }
+
+          @for (comment of pattern.comments; track comment.id) {
+            <div class="black-box">
+              <div class="text-grey comment-meta d-flex justify-content-between align-items-center">
+                <span>{{comment.date | date:'medium'}}</span>
+              </div>
+
+              @if (editingCommentId === comment.id) {
+                <textarea
+                  class="form-control"
+                  [name]="'editComment' + comment.id"
+                  rows="3"
+                  [(ngModel)]="editingCommentText"
+                ></textarea>
+                <div class="comment-actions">
+                  <button type="button" class="primary-button" (click)="saveComment(comment.id)">Save</button>
+                  <button type="button" class="secondary-button" (click)="cancelEditComment()">Cancel</button>
+                </div>
+              } @else {
+                <p class="comment-text">{{comment.text}}</p>
+                <div class="comment-actions">
+                  <button type="button" class="primary-button" (click)="startEditComment(comment.id, comment.text)">Edit</button>
+                  <button type="button" class="subtle-warning-button" (click)="deleteComment(comment.id)">Delete</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

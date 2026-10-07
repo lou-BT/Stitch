@@ -1,50 +1,104 @@
-const {app, BrowserWindow, ipcMain, ipcRenderer} = require('electron');
-const url = require("url");
+require('dotenv').config();
+const { app, BrowserWindow, ipcMain, shell, ipcRenderer } = require('electron');
+const url = require('url');
+const path = require('path');
+const fs = require('fs');
+const settings = require('electron-settings');
 
-const patternFolderPath = 'C:/Users/louca/Documents/PatternFolder';
-const path = require("path");
-const fs = require("fs");
-const { shell } = require("electron");
+// Import database functions
+const db = require('./database/database.js');
 
+const patternFolderPath = process.env.PATTERN_FOLDER_PATH || 'C:/Users/louca/Documents/PatternFolder';
 
-/*
-const sqlite3 = require('sqlite3');
+// Enable hot reload in development
+const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 
-// Open SQLite database
-const DB_FILE_PATH = './data/database.db';
-const db = new sqlite3.Database(DB_FILE_PATH);
+if (isDev) {
+  require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
+    hardResetMethod: 'exit'
+  });
+}
 
-// // Create a table
-db.serialize(() => {
-  db.run('DROP TABLE patterns');
-  db.run('CREATE TABLE IF NOT EXISTS patterns (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255) NOT NULL, files TEXT[] NOT NULL)');
-});
-
-*/
 
 let mainWindow;
 
+function createPatternFolder(folderPath) {
+  //check if folder exists, if not create folder
+  if(!fs.existsSync(folderPath)) {
+    console.log("creating folder");
+    fs.mkdirSync(folderPath);
+    //and create index file
+    fs.writeFileSync(path.join(folderPath,'patternIndex.json'), JSON.stringify([]));
+  }
+}
+
+async function loadConfig() {
+  //check if predefined config exist
+  const configPath = path.join(__dirname, 'config.json');
+  if(fs.existsSync(configPath)) {
+    //if yes, load config
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    await settings.set('settings', config);
+    //and check if folder exists
+
+  } else {
+    //if not, check if file exists at default path
+    const folderPath = path.join(app.getPath('documents'),'PatternFolder');
+    //if it doesn't exists, create it with the JSON index
+    createPatternFolder(folderPath);
+    //and add default path to config
+    await settings.set('settings', {
+      'patternFolderPath': folderPath
+    })
+  }
+}
+
+async function updateConfig(config) {
+  //check if config file already exists
+  const configPath = path.join(__dirname, 'config.json');
+  if(fs.existsSync(configPath)) {
+    //if yes, update it
+    fs.writeFileSync(configPath, JSON.stringify(config));
+  } else {
+    //if not, create it
+    fs.writeFileSync(configPath, JSON.stringify(config));
+  }
+
+}
+
 function createWindow () {
+  // loadConfig();
+
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      webSecurity: false, // Allow loading local resources
+      allowRunningInsecureContent: true,
       preload: path.join(__dirname, 'preload.js')
     }
   })
 
-  mainWindow.loadURL(
-    url.format({
-      pathname: path.join(__dirname, `/dist/browser/index.html`),
-      protocol: "file:",
-      slashes: true
-    })
-  );
+  // Load from dev server in development, built files in production
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:4200');
+  } else {
+    mainWindow.loadURL(
+      url.format({
+        pathname: path.join(__dirname, `/dist/browser/index.html`),
+        protocol: "file:",
+        slashes: true
+      })
+    );
+  }
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // Open the DevTools in development
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
 
   mainWindow.on('closed', function () {
     mainWindow = null
@@ -63,14 +117,62 @@ app.on('activate', function () {
   if (mainWindow === null) createWindow()
 })
 
+
+
 ipcMain.handle('patterns:getAll', (event) => {
-  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
-  if(fs.existsSync(patternIndexPath)) {
-    const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-    return JSON.parse(patternsJSON);
+  try {
+    return db.getAllPatterns();
+  } catch (error) {
+    console.error('Error getting patterns:', error);
+    return [];
   }
-  else return [];
 })
+
+
+
+ipcMain.handle('patterns:getDetails', (event, patternId) => {
+  try {
+    return db.getPatternDetails(patternId); 
+  } catch (error) {
+    console.error('Error getting pattern details:', error);
+    return null;
+  }
+})
+
+ipcMain.handle('comments:add', (event, patternId, text) => {
+  try {
+    const trimmed = (text ?? '').trim();
+    if (!trimmed) return db.getPatternDetails(patternId);
+    db.addComment(patternId, trimmed);
+    return db.getPatternDetails(patternId);
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('comments:edit', (event, patternId, commentId, text) => {
+  try {
+    const trimmed = (text ?? '').trim();
+    if (!trimmed) return db.getPatternDetails(patternId);
+    db.editComment(commentId, trimmed);
+    return db.getPatternDetails(patternId);
+  } catch (error) {
+    console.error('Error editing comment:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('comments:delete', (event, patternId, commentId) => {
+  try {
+    db.deleteComment(commentId);
+    return db.getPatternDetails(patternId);
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    return null;
+  }
+});
+
 
 ipcMain.on('patterns:addNew', (event, pattern) => {
 
@@ -111,38 +213,42 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
     techDrawings.push(destPath);
   });
 
-  //update JSON index
-  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
+  //update database
   const newPattern = {
     name: pattern.name,
+    brand: pattern.brand ?? null,
+    difficulty: pattern.difficulty,
+    free: pattern.free ?? true,
+    used: pattern.used ?? false,
+    fabric: pattern.fabric ?? [],
+    materials: pattern.materials ?? [],
     category: pattern.category,
+    description: pattern.description,
     files: files,
     photos: photos,
-    techDrawings: techDrawings
+    techDrawings: techDrawings,
+    comments: []
   }
 
-  if(fs.existsSync(patternIndexPath)) {
-        const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-        var patterns = JSON.parse(patternsJSON);
-        patterns.push(newPattern);
-
-        fs.writeFileSync(patternIndexPath, JSON.stringify(patterns));
-        event.sender.send('patterns:update', patterns);
-  }
-
-  else {
+  try {
+    db.addPattern(newPattern);
+    const patterns = db.getAllPatterns();
+    event.sender.send('patterns:update', patterns);
+  } catch (error) {
+    console.error('Error adding pattern to database:', error);
     event.sender.send('patterns:addNew:response', []);
   }
-
-  //database operations
-  //db.run('INSERT INTO patterns (name, files) VALUES (?, ?)', [pattern.name, pattern])
 })
+
+
 
 ipcMain.on('patterns:openFile', (event, file) => {
   shell.openPath(file).then( res => {
     if(res != "") shell.showItemInFolder(file);
   })
 })
+
+
 
 ipcMain.on('patterns:delete', (event, pattern) => {
   //delete folder
@@ -157,31 +263,48 @@ ipcMain.on('patterns:delete', (event, pattern) => {
     });   
   }
 
-  //get old list
-  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
-  if(fs.existsSync(patternIndexPath)) {
-    const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-    var patterns = JSON.parse(patternsJSON);
-    
-    //delete pattern from list
-    patterns = patterns.filter(obj => obj.name !== pattern.name);
-    try {
-      fs.writeFileSync(patternIndexPath, JSON.stringify(patterns, null, 2));
-    } catch (err) {
-      console.error('Error writing JSON file:', err);
-    }
+  //delete from database
+  try {
+    db.deletePattern(pattern.id);
+    const patterns = db.getAllPatterns();
     event.sender.send('patterns:update', patterns);
-  }
-
-  else {
+  } catch (error) {
+    console.error('Error deleting pattern from database:', error);
     event.sender.send('patterns:delete:response', []);
   }
 })
 
-ipcMain.on('patterns:edit', (event, newPattern, patternEdit) => {
+
+
+ipcMain.handle('patterns:edit', (event, newPattern, patternEdit) => {
   console.log('edit is called')
   var pattern = newPattern;
   const folderPath = path.join(patternFolderPath, newPattern.name);
+
+  function copyAndReplacePaths(targetList, sourcePaths, destinationBuilder) {
+    const replacements = new Map();
+
+    sourcePaths.forEach(sourcePath => {
+      const fileName = path.basename(sourcePath);
+      const destinationPath = destinationBuilder(fileName);
+
+      fs.copyFileSync(sourcePath, destinationPath);
+
+      if (!replacements.has(sourcePath)) {
+        replacements.set(sourcePath, []);
+      }
+      replacements.get(sourcePath).push(destinationPath);
+    });
+
+    return (targetList || []).map(existingPath => {
+      const replacementQueue = replacements.get(existingPath);
+      if (replacementQueue && replacementQueue.length > 0) {
+        return replacementQueue.shift();
+      }
+      return existingPath;
+    });
+  }
+
   //delete files
   for( let i = 0; i < patternEdit.delPhotos.length; i++) {
     console.log('photo', patternEdit.delPhotos[i])
@@ -216,41 +339,33 @@ ipcMain.on('patterns:edit', (event, newPattern, patternEdit) => {
   }
   
   //add files
-  patternEdit.newFiles.forEach(filePath => {
-    const fileName = path.basename(filePath);
-    const destPath = path.join(folderPath, fileName);
-    
-    fs.copyFileSync(filePath, destPath);
-    pattern.files.push(destPath);
-  })
+  pattern.files = copyAndReplacePaths(
+    pattern.files,
+    patternEdit.newFiles,
+    fileName => path.join(folderPath, fileName)
+  );
+
   //and add pictures
-  patternEdit.newPhotos.forEach(filePath => {
-    const fileName = path.basename(filePath);
-    const destPath = path.join(folderPath, "pictures", fileName);
+  pattern.photos = copyAndReplacePaths(
+    pattern.photos,
+    patternEdit.newPhotos,
+    fileName => path.join(folderPath, "pictures", fileName)
+  );
 
-    fs.copyFileSync(filePath, destPath);
-    pattern.photos.push(destPath);
-  })
-  patternEdit.newTechDrawings.forEach(filePath => {
-    const fileName = path.basename(filePath);
-    const destPath = path.join(folderPath, "pictures", fileName);
+  pattern.techDrawings = copyAndReplacePaths(
+    pattern.techDrawings,
+    patternEdit.newTechDrawings,
+    fileName => path.join(folderPath, "pictures", fileName)
+  );
 
-    fs.copyFileSync(filePath, destPath);
-    pattern.techDrawings.push(destPath);
-  })
-
-  //update json
-  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
-  if(fs.existsSync(patternIndexPath)) {
-    const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-    var patterns = JSON.parse(patternsJSON);
-    const index = patterns.findIndex((item) => item.name == pattern.name);
-    //console.log("index", index, patterns[index])
-    patterns.splice(index, 1, pattern);
-    fs.writeFileSync(patternIndexPath, JSON.stringify(patterns));
+  //update database
+  try {
+    // Update the pattern in database with the edits
+    db.updatePattern(pattern.id, pattern);
+    const patterns = db.getAllPatterns();
     event.sender.send('patterns:update', patterns);
+  } catch (error) {
+    console.error('Error updating pattern in database:', error);
   }
-
-  
 
 })

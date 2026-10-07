@@ -23,13 +23,17 @@ export class PatternsComponent implements OnInit, AfterViewInit{
   @ViewChild('addPatternModal') addPatternModal!: ElementRef;
   @ViewChild('patternEditModal') patternEditModal!: ElementRef;
 
+  @ViewChild(PatternDetailsComponent) patternDetails?: PatternDetailsComponent;
+
   private modalInstance: any;
+  private isSwitchingModal = false;
 
   patternList : any[] = [];
-  selectedPattern: Pattern | null = null;
+  selectedPatternId?: number;
 
   categories = Categories;
   selectedCategory: string = 'all';
+  previewSource: 'photo' | 'techDrawing' = 'photo';
 
   plusIcon = iconsSolid.faPlus;
 
@@ -39,15 +43,21 @@ export class PatternsComponent implements OnInit, AfterViewInit{
 
   ngOnInit(): void {
     this.data.patternList$.subscribe((data:any[]) => {
+      console.log('Received pattern list update:', data);
       this.patternList = data;
+    
     })
   }
 
   ngAfterViewInit() {
-    // this.patternModal.nativeElement.addEventListener('hidden.bs.modal', () => {
-    //   console.log('setting to null');
-    //   this.selectedPattern = null;
-    // })
+    const resetSelectedPatternIfNotSwitching = () => {
+      if (!this.isSwitchingModal) {
+        this.selectedPatternId = undefined;
+      }
+    };
+
+    this.patternModal.nativeElement.addEventListener('hidden.bs.modal', resetSelectedPatternIfNotSwitching);
+    this.patternEditModal.nativeElement.addEventListener('hidden.bs.modal', resetSelectedPatternIfNotSwitching);
   }
  
   setCategory(category: string) {
@@ -63,11 +73,33 @@ export class PatternsComponent implements OnInit, AfterViewInit{
     return pattern.category as unknown as string === this.selectedCategory;
   }
 
-  openModal( modalName: string, pattern? : any ) {
-    this.modalInstance.hide();
+  togglePreviewSource() {
+    this.previewSource = this.previewSource === 'photo' ? 'techDrawing' : 'photo';
+  }
 
-    if( pattern ) 
-      this.selectedPattern = pattern;
+  getPreviewImage(pattern: Pattern): string {
+    const preferredImages = this.previewSource === 'photo' ? pattern.photos : pattern.techDrawings;
+    const fallbackImages = this.previewSource === 'photo' ? pattern.techDrawings : pattern.photos;
+    return preferredImages?.[0] || fallbackImages?.[0] || '';
+  }
+
+  private showModal(modalElement: HTMLElement) {
+    document.body.appendChild(modalElement);
+    this.modalInstance = new bootstrap.Modal(modalElement);
+    this.modalInstance.show();
+  }
+
+  onPatternSaved() {
+    this.patternDetails?.reload();
+    this.openModal('pattern');
+  }
+
+  openModal(modalName: string, pattern?: Pattern | number) {
+    if (typeof pattern === 'number') {
+      this.selectedPatternId = pattern;
+    } else if (pattern?.id) {
+      this.selectedPatternId = pattern.id;
+    }
     
     var modalElement : any = null;
     switch( modalName ) {
@@ -83,19 +115,32 @@ export class PatternsComponent implements OnInit, AfterViewInit{
       default:
         break;
     }
-    document.body.appendChild(modalElement);
-    this.modalInstance = new bootstrap.Modal(modalElement);
-    this.modalInstance.show();
+
+    if (!modalElement) return;
+
+    const currentModalElement = this.modalInstance?._element as HTMLElement | undefined;
+    const isSwitchingModals = !!currentModalElement && currentModalElement !== modalElement;
+
+    if (isSwitchingModals && currentModalElement.classList.contains('show')) {
+      this.isSwitchingModal = true;
+      currentModalElement.addEventListener('hidden.bs.modal', () => {
+        this.showModal(modalElement);
+        this.isSwitchingModal = false;
+      }, { once: true });
+      this.modalInstance.hide();
+      return;
+    }
+
+    this.showModal(modalElement);
   }
 
   async closeModal() {
     this.modalInstance.hide();
-    setTimeout(() => {this.selectedPattern = null}, 10);
     //this.selectedPattern = null;
   }
 
   openPatternModal(pattern: any) {
-    this.selectedPattern = pattern;
+    this.selectedPatternId = pattern.id;
     const modalElement = this.patternModal.nativeElement;
     document.body.appendChild(modalElement); // Move modal to body
     this.modalInstance = new bootstrap.Modal(modalElement);
@@ -108,12 +153,6 @@ export class PatternsComponent implements OnInit, AfterViewInit{
     this.modalInstance = new bootstrap.Modal(modalElement);
     this.modalInstance.show();
   }
-
-  // openPatternEditModal() {
-  //   this.modalInstance.hide();
-  //   const modalEleme
-
-  // }
 
 }
 

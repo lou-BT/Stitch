@@ -1,60 +1,85 @@
 <div style="height: 100%; display:flex; flex-direction: column;">
-  <h1 class="title">Patterns</h1>
+  <div class="header-section">
+    <h1 class="title">Patterns</h1>
+    <div class="d-flex justify-content-between">
+      <p class="text-grey subtitle-text">Explore and manage your pattern collection</p>
+      <div class="form-check form-switch">
+        <label class="form-check-label" for="techDrawingSwitch">Tech drawing</label>
+        <input
+          id="techDrawingSwitch"
+          type="checkbox"
+          class="form-check-input"
+          [checked]="previewSource === 'techDrawing'"
+          (change)="togglePreviewSource()"
+          aria-label="Use tech drawing for pattern cards"
+        />
+      </div>
+    </div>
+    
+  </div>
 
   <!-- search section -->
-  <div class="d-flex flex-row" style="padding-bottom: 20px;">
-      <div class="category-item" (click)="setCategory('all')">
-          <a>all</a>
+
+
+  <div class="category-section">
+      <div [ngClass]="{'category-item': selectedCategory !== 'all', 'selected-category-item': selectedCategory === 'all'}" 
+           (click)="setCategory('all')">
+          <span>All Patterns</span>
       </div>
-      @for (category of categories; track category) {
-        <div>
-            <div [ngClass]="{'category-item': selectedCategory !== category, 'selected-category-item': selectedCategory === category}"
-                  (click)="setCategory(category)">
-                <a>{{category}}</a>
-            </div>
-        </div>
-      }
+      <div class="category-items-container" style="gap: var(--space-2);">
+        @for (category of categories; track category) {
+          <div [ngClass]="{'category-item': selectedCategory !== category, 'selected-category-item': selectedCategory === category}"
+                (click)="setCategory(category)">
+              <span>{{category}}</span>
+          </div>
+        }
+      </div>
   </div>
   <!-- end of search section -->
 
-  <!-- pattern list -->
+  <!-- pattern list --> 
   <div id="pattern-page-content" style="flex-grow: 1; overflow-y: auto;">
       <div class="container-fluid">
-          <div class="row gy-4" id="patterns-list">
+          <div class="row gy-2 gx-2" id="patterns-list">
             @for (pattern of patternList.filter(filterCategory); track pattern) {
-              <div class="col-4">
+              <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
                   <!-- individual pattern block -->
-                  <div class="pattern-block d-flex flex-column" (click)="openPatternModal(pattern)">
+                  <div class="pattern-block" (click)="openPatternModal(pattern)">
                       <div class="image-container">
-                          <img [src]="pattern.photos[0]" alt="Logo">
+                          <img [src]="getPreviewImage(pattern)" alt="{{pattern.name}}" [style.filter]="previewSource === 'techDrawing' ? 'grayscale(1)' : 'saturate(0.9) contrast(1.03) brightness(0.98)'" [style.object-fit]="previewSource === 'techDrawing' ? 'contain' : 'cover'" [style.object-position]="previewSource === 'techDrawing' ? 'center' : 'top'">
+                          <div class="pattern-overlay">
+                            <span class="overlay-text">View Details</span>
+                          </div>
                       </div>
-                      <span class="subtitle" style="margin-left: 10px; margin-bottom: -5px;">{{pattern.category}}</span>
-                      <span style="margin-left: 10px;">{{pattern.name}}</span>
+                      <div class="pattern-info">
+                        <span class="label-upper">{{pattern.category}}</span>
+                        <span class="pattern-name">{{pattern.name}}</span>
+                      </div>
                   </div>
                   <!-- end of individual pattern block -->
               </div>
-            }
+            } 
           </div>
       </div>
   </div>
   <!-- end of pattern list -->
 
-  <button class="plus-button" (click)="openNewPatternModal()">
-    <fa-icon [icon]='plusIcon' size="xl" ></fa-icon>
+  <button class="plus-button" (click)="openNewPatternModal()" title="Add New Pattern">
+    <fa-icon [icon]='plusIcon' size="xl"></fa-icon>
   </button>
     
   <!-- single pattern modal -->
   <div class="modal fade" id="patternModal" tabindex="-1" aria-labelledby="pattern Modal" aria-hidden="true" #patternModal>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="width: 80%; max-width: 800px;">
-      <div class="modal-content" style="border-radius: 10px;">
-        @if (selectedPattern) {
-          <div class="modal-body" style="padding:3px; border-radius: 8px;">
-            <app-pattern-details [pattern]="selectedPattern" (editEvent)="openModal('edit')"></app-pattern-details>
+      <div class="modal-content" style="border-radius: var(--inner-card-radius);">
+        @if (selectedPatternId) {
+          <div class="modal-body" style="padding-top:var(--space-1); padding-left:var(--space-1); padding-right:0px; padding-bottom:var(--space-1); border-radius: var(--inner-inner-radius);">
+            <app-pattern-details [patternId]="selectedPatternId" (editEvent)="openModal('edit')"></app-pattern-details>
           </div>
         }
         <div class="modal-footer">
-          <button type="button" class="secondary-button" (click)="openModal('edit', selectedPattern)">edit</button>
-          <button type="button" class="button" (click)="closeModal()">close</button>
+          <button type="button" class="primary-button" (click)="openModal('edit')">edit</button>
+          <button type="button" class="secondary-button" (click)="closeModal()">close</button>
         </div>
       </div>
     </div>
@@ -63,8 +88,8 @@
   <!-- add pattern modal -->
   <div class="modal fade" id="addPatternModal" tabindex="-1" aria-labelledby="add pattern Modal" aria-hidden="true" #addPatternModal>
     <div class="modal-dialog modal-dialog-centered " style="width: 80%; max-width: 800px;">
-      <div class="modal-content" style="border-radius: 10px;">
-        <div class="modal-body" style="padding:3px; border-radius: 8px;">
+      <div class="modal-content" style="border-radius: var(--inner-card-radius);">
+        <div class="modal-body" style="padding:3px; border-radius: var(--inner-inner-radius);">
           <app-add-pattern (closeModalEvent)="closeModal()"></app-add-pattern>
         </div>
       </div>
@@ -74,10 +99,10 @@
   <!-- edit pattern modal -->
   <div class="modal fade" id="patternEditModal" tabindex="-1" aria-labelledby="pattern edit Modal" aria-hidden="true" #patternEditModal>
     <div class="modal-dialog modal-dialog-centered " style="width: 80%; max-width: 800px;">
-      <div class="modal-content" style="border-radius: 10px;">
-        @if (selectedPattern) {
-          <div class="modal-body" style="padding:3px; border-radius: 8px;">
-            <app-pattern-edit [oldPattern]="selectedPattern"></app-pattern-edit>
+      <div class="modal-content" style="border-radius: var(--inner-card-radius);">
+        @if (selectedPatternId) {
+          <div class="modal-body" style="padding:3px; border-radius: var(--inner-inner-radius);">
+            <app-pattern-edit [oldPatternId]="selectedPatternId" (savedEvent)="onPatternSaved()"></app-pattern-edit>
           </div>
         }
       </div>

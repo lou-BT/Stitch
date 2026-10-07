@@ -40,3 +40,13 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Database files
+*.db
+*.db-journal
+*.db.backup
+patternIndex.json.backup

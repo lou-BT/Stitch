@@ -52,6 +52,17 @@ db.exec(`
     file_path TEXT NOT NULL,
     FOREIGN KEY (pattern_id) REFERENCES patterns(id) ON DELETE CASCADE
   );
+  CREATE TABLE IF NOT EXISTS shared_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_path TEXT NOT NULL UNIQUE
+  );
+  CREATE TABLE IF NOT EXISTS pattern_shared_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pattern_id INTEGER NOT NULL,
+    shared_file_id INTEGER NOT NULL,
+    FOREIGN KEY (pattern_id) REFERENCES patterns(id) ON DELETE CASCADE,
+    FOREIGN KEY (shared_file_id) REFERENCES shared_files(id) ON DELETE CASCADE
+  );
   CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     pattern_id INTEGER NOT NULL,
@@ -112,7 +123,8 @@ const statements = {
   getPhotos: db.prepare('SELECT file_path FROM photos WHERE pattern_id = ?'),
   getTechDrawings: db.prepare('SELECT file_path FROM tech_drawings WHERE pattern_id = ?'),
   getFiles: db.prepare('SELECT file_path FROM files WHERE pattern_id = ?'),
-  getComments: db.prepare('SELECT id, text, date FROM comments WHERE pattern_id = ? ORDER BY date DESC')
+  getComments: db.prepare('SELECT id, text, date FROM comments WHERE pattern_id = ? ORDER BY date DESC'),
+  getSharedFiles: db.prepare('SELECT shared_files.id, shared_files.file_path FROM shared_files JOIN pattern_shared_files ON pattern_shared_files.shared_file_id = shared_files.id WHERE pattern_shared_files.pattern_id = ?')
 };
 
 // Helper function to get all patterns
@@ -143,6 +155,8 @@ function getPatternDetails(id) {
   pattern.photos = statements.getPhotos.all(pattern.id).map(row => row.file_path);
   pattern.techDrawings = statements.getTechDrawings.all(pattern.id).map(row => row.file_path);
   pattern.files = statements.getFiles.all(pattern.id).map(row => row.file_path);
+  pattern.sharedFiles = statements.getSharedFiles.all(pattern.id).map(row => ({ id: row.id, filePath: row.file_path }));
+  
   hydratePatternFields(pattern);
   pattern.comments = statements.getComments.all(pattern.id).map(row => ({ 
     id: row.id,
@@ -187,6 +201,18 @@ function addPattern(pattern) {
     const insertFile = db.prepare('INSERT INTO files (pattern_id, file_path) VALUES (?, ?)');
     pattern.files.forEach(file => insertFile.run(id, file));
 
+    // add new shared files than add them to the pattern_shared_files table
+    const insertNewSharedFile = db.prepare('INSERT INTO shared_files (file_path) VALUES (?)');
+    const insertPatternSharedFile = db.prepare('INSERT INTO pattern_shared_files (pattern_id, shared_file_id) VALUES (?, ?)');
+    pattern.newSharedFiles.forEach(file => {
+      const result = insertNewSharedFile.run(file);
+      const sharedFileId = result.lastInsertRowid;
+      insertPatternSharedFile.run(id, sharedFileId);
+    });
+    // add existing shared files to the pattern_shared_files table
+    const insertOldSharedFiles = db.prepare('INSERT INTO pattern_shared_files (pattern_id, shared_file_id) VALUES (?, ?)');
+    (pattern.sharedFiles ?? []).forEach(file => insertOldSharedFiles.run(id, file.id));
+    
     return id;
   });
   
@@ -259,10 +285,17 @@ function deletePattern(patternId) {
   del.run(patternId);
 }
 
+// Helper to get every shared file
+function getAllSharedFiles() {
+  return db.prepare('SELECT id, file_path FROM shared_files ORDER BY file_path ASC').all()
+    .map(row => ({ id: row.id, filePath: row.file_path }));
+}
+
 module.exports = {
   db,
   getPatternDetails,
   getAllPatterns,
+  getAllSharedFiles,
   addPattern,
   updatePattern,
   addComment,

@@ -29,6 +29,7 @@ try {
         console.log(`  Photos: ${details.photos?.length || 0}`);
         console.log(`  Tech Drawings: ${details.techDrawings?.length || 0}`);
         console.log(`  Files: ${details.files?.length || 0}`);
+        
         console.log(`  Comments: ${details.comments?.length || 0}`);
       }
       console.log('');

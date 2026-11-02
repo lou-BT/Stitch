@@ -173,12 +173,22 @@ ipcMain.handle('comments:delete', (event, patternId, commentId) => {
   }
 });
 
+ipcMain.handle('sharedFiles:getAll', (event) => {
+  try {
+    return db.getAllSharedFiles();
+  } catch (error) {
+    console.error('Error getting shared files:', error);
+    return [];
+  }
+});
+
 
 ipcMain.on('patterns:addNew', (event, pattern) => {
 
   var photos = [];
   var techDrawings = [];
   var files = [];
+  var newSharedFiles = [];
 
   const newFolderPath = path.join(patternFolderPath, pattern.name);
   // Create folder
@@ -213,6 +223,21 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
     techDrawings.push(destPath);
   });
 
+  // Copy new shared files in the folder "shared"
+  pattern.newSharedFiles.forEach(filePath => {
+    const fileName = path.basename(filePath);
+    const destPath = path.join(patternFolderPath, "shared", fileName);
+    // Create the "shared" folder if it doesn't exist
+    if (!fs.existsSync(path.join(patternFolderPath, "shared"))) {
+      fs.mkdirSync(path.join(patternFolderPath, "shared"));
+    }
+
+    fs.copyFileSync(filePath, destPath);
+    newSharedFiles.push(destPath);
+  });
+
+  
+
   //update database
   const newPattern = {
     name: pattern.name,
@@ -227,6 +252,8 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
     files: files,
     photos: photos,
     techDrawings: techDrawings,
+    newSharedFiles: newSharedFiles,
+    sharedFiles: pattern.sharedFiles ?? [],
     comments: []
   }
 

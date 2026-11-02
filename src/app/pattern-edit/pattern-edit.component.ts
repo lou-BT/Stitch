@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
-import { Material, Pattern, PatternEdit } from '../classes';
+import { Material, Pattern, PatternEdit, NewPattern, createPatternEdit } from '../classes';
 import { DataService } from '../services/data.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -18,7 +18,7 @@ export class PatternEditComponent implements OnInit, OnChanges{
   @Output() savedEvent = new EventEmitter<void>();
 
   oldPattern?: Pattern;
-  newPattern? : Pattern;
+  newPattern? : NewPattern;
   patternEdit?: PatternEdit;
 
   fileIcon = icons.faFile;
@@ -38,10 +38,10 @@ console.log("constructor", this.oldPatternId);
     if (this.oldPatternId) {
       this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
         this.oldPattern = details;
-        this.newPattern = this.oldPattern as Pattern;
+        this.newPattern = this.oldPattern as NewPattern;
         this.newPattern.fabric = this.newPattern.fabric ?? [];
         this.newPattern.materials = this.newPattern.materials ?? [];
-        this.patternEdit = new PatternEdit(this.newPattern);
+        this.patternEdit = createPatternEdit();
       });
     }
   }
@@ -51,10 +51,10 @@ console.log("constructor", this.oldPatternId);
       if (this.oldPatternId) {
         this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
           this.oldPattern = details;
-          this.newPattern = this.oldPattern as Pattern;
+          this.newPattern = this.oldPattern as NewPattern;
           this.newPattern.fabric = this.newPattern.fabric ?? [];
           this.newPattern.materials = this.newPattern.materials ?? [];
-          this.patternEdit = new PatternEdit(this.newPattern);
+          this.patternEdit = createPatternEdit();
         });
       }
     }

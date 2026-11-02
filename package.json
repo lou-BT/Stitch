@@ -38,6 +38,7 @@
     "electron-reload": "^2.0.0-alpha.1",
     "electron-settings": "^4.0.4",
     "electron-store": "^11.0.0",
+    "graphifyy": "^0.10.0",
     "jquery": "^3.7.1",
     "jquery-ui": "^1.13.2",
     "material-design-icons-iconfont": "^6.7.0",

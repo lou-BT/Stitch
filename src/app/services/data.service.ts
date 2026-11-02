@@ -1,5 +1,5 @@
 import { Injectable, OnInit } from '@angular/core';
-import { Category, Pattern, NewPattern, PatternEdit } from '../classes';
+import { Category, Pattern, NewPattern, PatternEdit, SharedFile } from '../classes';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
@@ -51,7 +51,7 @@ export class DataService {
     return !this._patternList.value.find((pattern => pattern.name === patternName)) && !invalidChars.test(patternName);
   }
 
-  addPattern( pattern: Pattern ) {
+  addPattern( pattern: NewPattern ) {
     window.ipcRenderer.send('patterns:addNew', pattern);
   }
 
@@ -67,6 +67,8 @@ export class DataService {
     await window.ipcRenderer.invoke('patterns:edit', newPattern, patternEdit);
   }
 
+  //////////////////////////////////////////////////////////////////////////////////////////
+  // COMMENTS
   async addComment(patternId: number, text: string): Promise<Pattern | null> {
     try {
       return await window.ipcRenderer.invoke('comments:add', patternId, text) as Pattern | null;
@@ -93,4 +95,18 @@ export class DataService {
       return null;
     }
   }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+  // SHARED FILES
+  async getAllSharedFiles(): Promise<SharedFile[]> {
+    try {
+      const sharedFiles = await window.ipcRenderer.invoke('sharedFiles:getAll') as SharedFile[];
+      return sharedFiles;
+    } catch (error) {
+      console.error('Error getting all shared files:', error);
+      return [];
+    }
+  }
+
+  
 }

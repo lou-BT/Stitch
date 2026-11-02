@@ -311,6 +311,10 @@ body {
     resize: none;
 }
 
+.preserve-whitespace {
+    white-space: pre-wrap;
+}
+
 // RANGE CHECK
 
 .difficulty-radios {

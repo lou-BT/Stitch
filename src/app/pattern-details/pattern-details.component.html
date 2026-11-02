@@ -50,38 +50,46 @@
     </div>
     <div class="grey-box pattern-meta-card" style="margin-left: var(--space-4);">
       <div class="meta-grid">
-        <div class="meta-item">
-          <span class="label-upper">Brand</span>
-          <span class="meta-value">{{pattern.brand || 'Not specified'}} @if(!pattern.free){<i class="bi bi-coin" style="color: var(--gold)"></i>}</span>  
+        <div class="meta-column">
+          <div class="meta-item">
+            <span class="label-upper">Brand</span>
+            <span class="meta-value">{{pattern.brand || 'Not specified'}} @if(!pattern.free){<i class="bi bi-coin" style="color: var(--gold)"></i>}</span>  
+          </div>
+          <div class="meta-item">
+            <span class="label-upper">Materials</span>
+            <span class="meta-value">
+              @if (pattern.materials.length) {
+                @for (material of pattern.materials; track $index; let i = $index) {
+                  <span>{{material.type}} ({{material.requirement}}){{i < pattern.materials.length - 1 ? ', ' : ''}}</span>
+                }
+              } @else {
+                Not specified
+              }
+            </span>
+          </div>
         </div>
-        <div class="meta-item">
-          <span class="label-upper">Fabrics</span>
-          <span class="meta-value">
+        <div class="meta-column">
+          <div class="meta-item">
+            <span class="label-upper">Fabrics</span>
             @if (pattern.fabric.length) {
-              @for (fabric of pattern.fabric; track $index; let i = $index) {
-                <span>{{fabric.type}} ({{fabric.requirement}}){{i < pattern.fabric.length - 1 ? ', ' : ''}}</span>
-              }
+              <ul class="meta-list meta-value">
+                @for (fabric of pattern.fabric; track $index) {
+                  <li>{{fabric.type}} ({{fabric.requirement}})</li>
+                }
+              </ul>
             } @else {
-              Not specified
+              <span class="meta-value">Not specified</span>
             }
-          </span>
-        </div>
-        <div class="meta-item meta-item-wide">
-          <span class="label-upper">Materials</span>
-          <span class="meta-value">
-            @if (pattern.materials.length) {
-              @for (material of pattern.materials; track $index; let i = $index) {
-                <span>{{material.type}} ({{material.requirement}}){{i < pattern.materials.length - 1 ? ', ' : ''}}</span>
-              }
-            } @else {
-              Not specified
-            }
-          </span>
+          </div>
         </div>
       </div>
     </div>
     <div class="d-flex flex-row">
-      <p style="margin-left: var(--space-4);">{{pattern.description}}</p>
+      <p class="preserve-whitespace" 
+      style="margin-left: var(--space-4); 
+             margin: 1em; 
+             text-align: justify;
+             hyphens: auto;">{{pattern.description}}</p>
     </div>
 
     <!-- files -->
@@ -97,6 +105,16 @@
               </div>
 
               <button class="justify-self-end primary-button" (click)="data.openFile(file)">open</button>
+            </div>
+          }
+          @for (file of pattern.sharedFiles; track $index; let i = $index) {
+            <div class="black-box d-flex flex-row align-items-center justify-content-between">
+              <div class="d-flex flex-row align-items-center file-info">
+                <fa-icon [icon]="fileIcon" style="margin-right: var(--space-3);"></fa-icon>
+                <span class="file-name">{{file.filePath.split("\\").pop()}}</span>
+              </div>
+
+              <button class="justify-self-end primary-button" (click)="data.openFile(file.filePath)">open</button>
             </div>
           }
         </div>

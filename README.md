@@ -1,66 +1,96 @@
-# stitch
+# Stitch
 
-stitch is a desktop app to store and visualize sewing patterns. 
-Eventually, a fabric stash inventory section will be added.
-It's a work in progress.
+Stitch is a Windows desktop app for organizing a personal collection of sewing patterns. It keeps pattern details, reference images, and pattern files together in a local library that can be filtered by category.
 
-The project is built with Angular and Electron.
+Built with Angular, Electron, and SQLite.
 
-## Installation
+## Features
 
-1. Clone the repository:
+- Add, view, edit, and delete sewing patterns.
+- Organize patterns by category and filter the list by category.
+- Browse pattern cards using either photos or technical drawings.
+- Store details for each pattern, including its brand, difficulty, whether it is free or paid, and a description.
+- Keep a list of required fabrics and materials for each pattern.
+- Add, edit, and delete comments on a pattern to keep personal notes.
+- Copy pattern documents and images into a centralized local library folder, organized into a folder for each pattern.
+- Store the pattern collection in a local SQLite database.
+
+## Screenshots
+
+### Pattern library
+
+![Stitch pattern library](screens/stitchMain.PNG)
+
+### Pattern details
+
+![Pattern details](screens/stitchPatternDetails.PNG)
+
+### Add a pattern
+
+![Add a pattern](screens/stitchNewPattern.PNG)
+
+### Filter by category
+
+![Category filter](screens/stitchCategoryFilter.PNG)
+
+More screenshots are available in the [`screens`](screens) folder.
+
+## Requirements
+
+- Windows
+- Node.js and npm
+- Git
+
+## Getting started
+
+1. Clone the repository and enter the project directory:
+
    ```bash
    git clone https://gitlab.com/lou.bt5/stitch.git
-   ```
-2. Navigate to the project directory:
-   ```bash
    cd stitch
    ```
-3. Install the dependencies:
+
+2. Install the dependencies:
+
    ```bash
    npm install
    ```
-4. Set the link to the folder that will contain the patterns in main.js (l.4)
-   ```bash
-   const patternFolderPath = 'full path here';
+
+3. Create the folder where Stitch should keep its library. Then create a `.env` file in the project root and set `PATTERN_FOLDER_PATH` to that folder's absolute path. For example:
+
+   ```dotenv
+   PATTERN_FOLDER_PATH=C:/Users/YourName/Documents/StitchPatterns
    ```
 
-5. To start the application, run:
-   ```bash
-   npm run electron
-   ```
+   The folder must already exist and be writable. `.env` is ignored by Git, so your local path will not be committed.
 
-6. To start the application in dev mode, run:
+4. Start Stitch in development mode:
+
    ```bash
    npm run electron:dev
    ```
 
-## Visuals
+To build the Angular app and launch the Electron app, run:
 
-![Project Screenshot](https://gitlab.com/lou.bt5/stitch/-/blob/main/screens/stitchMain.PNG)
-(more photos in the 'screens' folder)
+```bash
+npm run electron
+```
 
+## Development commands
 
-## Usage
-
-Adding patterns: 
-- set name and category before adding pictures, technical drawings (flats, size chart...) and the pattern files (pattern & instructions)
-- clicking on 'add pattern' will create a folder in the main pattern folder, move (copy for now) the selected files to that folder and update the pattern index (stored in a JSON file)
-- the name choice is restricted for safety reasons
-
-Patterns display
-- displays a list of patterns in cards (first picture, name & category)
-- clicking on a pattern/card will open a modal with more details: all pictures, the name, the category, buttons to open each pattern file, a button to delete the pattern and a button to edit the pattern
-
-Pattern edit
-- each pattern can be edited: add/remove pictures and files or change the category
+| Command | Description |
+| --- | --- |
+| `npm run start` | Serve the Angular app in a browser for development. |
+| `npm run build` | Build the Angular app. |
+| `npm test` | Run the Angular unit tests. |
+| `npm run db:migrate` | Run database migrations. |
 
 ## Roadmap
 
-- settings page: set the path to the pattern folder here would make things easier
-- replace JSON index with simple DB
-- add fabric inventory
-- add more details for each pattern (size range, fabric requirements, pattern already tested: yes/no, personal comments...)
+- Complete the Settings and Fabrics pages.
+- Add a simple favorites feature.
+- Support exporting and importing pattern collections to share them with other Stitch users.
+- Add an inventory of fabrics available at home.
 
 ## License
 

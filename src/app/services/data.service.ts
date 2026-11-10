@@ -1,5 +1,5 @@
 import { Injectable, OnInit } from '@angular/core';
-import { Category, Pattern, NewPattern, PatternEdit, SharedFile } from '../classes';
+import { Category, Pattern, NewPattern, SharedFile } from '../classes';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
@@ -63,8 +63,8 @@ export class DataService {
     window.ipcRenderer.send('patterns:delete', pattern);
   }
 
-  async editPattern( newPattern: Pattern, patternEdit: PatternEdit): Promise<void> {
-    await window.ipcRenderer.invoke('patterns:edit', newPattern, patternEdit);
+  async editPattern( oldPattern: Pattern, newPattern: NewPattern): Promise<void> {
+    await window.ipcRenderer.invoke('patterns:edit', oldPattern, newPattern);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////

@@ -221,10 +221,12 @@ function addPattern(pattern) {
 
 // Helper function to update an existing pattern
 function updatePattern(id, pattern) {
+  // pattern of type NewPattern
   const transaction = db.transaction(() => {
     const update = db.prepare(
       'UPDATE patterns SET name = ?, brand = ?, difficulty = ?, free = ?, used = ?, category = ?, description = ? WHERE id = ?'
     );
+
     update.run(
       pattern.name,
       normalizeBrand(pattern.brand),
@@ -241,7 +243,8 @@ function updatePattern(id, pattern) {
     db.prepare('DELETE FROM photos WHERE pattern_id = ?').run(id);
     db.prepare('DELETE FROM tech_drawings WHERE pattern_id = ?').run(id);
     db.prepare('DELETE FROM files WHERE pattern_id = ?').run(id);
-
+    db.prepare('DELETE FROM pattern_shared_files WHERE pattern_id = ?').run(id);
+    
     const insertFabric = db.prepare('INSERT INTO fabrics (pattern_id, type, requirement) VALUES (?, ?, ?)');
     normalizeResourceItems(pattern.fabric).forEach(item => insertFabric.run(id, item.type, item.requirement));
 
@@ -256,6 +259,18 @@ function updatePattern(id, pattern) {
 
     const insertFile = db.prepare('INSERT INTO files (pattern_id, file_path) VALUES (?, ?)');
     (pattern.files ?? []).forEach(file => insertFile.run(id, file));
+
+    // Insert shared files and new shared files
+    const insertSharedFile = db.prepare('INSERT INTO pattern_shared_files (pattern_id, shared_file_id) VALUES (?, ?)');
+    (pattern.sharedFiles ?? []).forEach(file => insertSharedFile.run(id, file.id));
+
+    const insertNewSharedFile = db.prepare('INSERT INTO shared_files (file_path) VALUES (?)');
+    (pattern.newSharedFiles ?? []).forEach(file => {
+      // insert new shared file into shared_files table
+      const {lastInsertRowid} = insertNewSharedFile.run(file);
+      // Insert the new shared file into the pattern_shared_files table (linking it to the current pattern)
+      insertSharedFile.run(id, lastInsertRowid);
+    });
   });
 
   return transaction();

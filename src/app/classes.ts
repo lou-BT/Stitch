@@ -19,14 +19,7 @@ export interface Pattern extends PatternPartial {
     comments: Comment[];
 }
 
-export interface NewPattern extends PatternPartial {
-    description?: string;
-    fabric: Fabric[];
-    materials: Material[];
-    files: string[];
-    comments: Comment[];
-    
-    sharedFiles: SharedFile[];
+export interface NewPattern extends Pattern {
     newSharedFiles: string[];
 }
 
@@ -54,32 +47,6 @@ export function createPattern(overrides: Partial<NewPattern> = {}): NewPattern {
 
 // usage
 //const p = createPattern({ name: "Summer dress", difficulty: 3 });
-
-export interface PatternEdit {
-    delPhotos: string[];
-    delTechDrawings: string[];
-    delFiles: string[];
-    newPhotos: string[];
-    newTechDrawings: string[];
-    newFiles: string[];
-    newSharedFiles: string[];
-}
-
-export function createPatternEdit(overrides: Partial<PatternEdit> = {}): PatternEdit {
-    return {
-        delPhotos: [],
-        delTechDrawings: [],
-        delFiles: [],
-        newPhotos: [],
-        newTechDrawings: [],
-        newFiles: [],
-        newSharedFiles: [],
-        ...overrides,
-    };
-}
-
-
-
 
 
 

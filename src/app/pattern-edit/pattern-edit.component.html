@@ -199,6 +199,58 @@
                 (drop)="onFileDrop($event, 2)" (dragover)="allowDrop($event)" (click)="openFilePicker(filesInput)">
             <fa-icon [icon]='plusIcon'  style="color:var(--medium-grey)"></fa-icon>
           </div>
+
+          <!-- SHARED FILES -->
+          <div class="d-flex align-items-center justify-content-between" style="margin-top: var(--space-5);">
+            <label class="form-label mb-0">Shared instruction files</label>
+            <span class="text-muted small">{{ (newPattern?.sharedFiles?.length || 0) + (newPattern?.newSharedFiles?.length || 0) }} selected</span>
+          </div>
+
+          <input type="text"
+                class="inputField form-control mt-2 mb-2"
+                name="sharedFilesFilter"
+                [(ngModel)]="sharedFilesFilter"
+                placeholder="Search files...">
+
+          <div class="list-group shared-files-list">
+            <!-- new files (not saved yet) -->
+            @for (path of filteredNewSharedFiles; track path) {
+              <label class="list-group-item d-flex align-items-center gap-2" style="cursor: pointer;">
+                <input type="checkbox"
+                      class="form-check-input mt-0"
+                      checked
+                      (change)="removeNewSharedFile(path)">
+                <span class="text-truncate">{{ extractFileName(path) }}</span>
+                <span class="badge text-bg-secondary ms-auto">new</span>
+              </label>
+            }
+
+            <!-- existing files (already in the db) -->
+            @for (file of filteredAvailableSharedFiles; track file.id) {
+              <label class="list-group-item d-flex align-items-center gap-2" style="cursor: pointer;">
+                <input type="checkbox"
+                      class="form-check-input mt-0"
+                      [checked]="isSharedFileSelected(file)"
+                      (change)="toggleSharedFile(file, $any($event.target).checked)">
+                <span class="text-truncate">{{ extractFileName(file.filePath) }}</span>
+              </label>
+            }
+
+            @if (!filteredNewSharedFiles.length && !filteredAvailableSharedFiles.length) {
+              <div class="list-group-item text-muted">
+                {{ sharedFilesFilter ? 'No file matches your search.' : 'No shared files available yet.' }}
+              </div>
+            }
+          </div>
+
+          <!-- Add new shared file(s) -->
+          <input #sharedFilesInput type="file" hidden multiple (change)="onFileSelect($event, 3)">
+          <div class="grey-box new-item-block d-flex align-items-center justify-content-center mt-2"
+              (drop)="onFileDrop($event, 3)"
+              (dragover)="allowDrop($event)"
+              (click)="openFilePicker(sharedFilesInput)">
+            <fa-icon [icon]="plusIcon" style="color: var(--medium-grey)"></fa-icon>
+          </div>
         </div>
 
     </div>

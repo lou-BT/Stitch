@@ -303,8 +303,12 @@ ipcMain.on('patterns:delete', (event, pattern) => {
 
 
 
-ipcMain.handle('patterns:edit', (event, newPattern, patternEdit) => {
+ipcMain.handle('patterns:edit', (event, oldPattern, newPattern) => {
+  // old pattern of type Pattern
+  // new pattern of type NewPattern (extra field for new shared files)
+
   console.log('edit is called')
+
   var pattern = newPattern;
   const folderPath = path.join(patternFolderPath, newPattern.name);
 
@@ -332,11 +336,17 @@ ipcMain.handle('patterns:edit', (event, newPattern, patternEdit) => {
     });
   }
 
-  //delete files
-  for( let i = 0; i < patternEdit.delPhotos.length; i++) {
-    console.log('photo', patternEdit.delPhotos[i])
-    if(fs.existsSync(patternEdit.delPhotos[i])) 
-      fs.unlinkSync(patternEdit.delPhotos[i], { recursive: true, force: true }, (err) => {
+  // PHOTOS
+  // photos to be removed (present in oldPattern but not in newPattern)
+  const delPhotos = oldPattern.photos.filter(photo => !newPattern.photos.includes(photo));
+  // photos to be added (present in newPattern but not in oldPattern)
+  const addPhotos = newPattern.photos.filter(photo => !oldPattern.photos.includes(photo));
+
+  // delete photos
+  for( let i = 0; i < delPhotos.length; i++) {
+    console.log('photo', delPhotos[i])
+    if(fs.existsSync(delPhotos[i])) 
+      fs.unlinkSync(delPhotos[i], { recursive: true, force: true }, (err) => {
         if (err) {
           console.error('Error while deleting the folder:', err);
         } else {
@@ -344,46 +354,85 @@ ipcMain.handle('patterns:edit', (event, newPattern, patternEdit) => {
         }
       })
   }
-  for( let i=0; i < patternEdit.delTechDrawings.length; i++) {
-    if(fs.existsSync(patternEdit.delTechDrawings[i])) 
-      fs.unlinkSync(patternEdit.delTechDrawings[i], { recursive: true, force: true }, (err) => {
-      if (err) {
-        console.error('Error while deleting the folder:', err);
-      } else {
-        console.log('Folder and its contents deleted successfully');
-      }
-    })
-  }
-  for( let i=0; i < patternEdit.delFiles.length; i++) {
-    if(fs.existsSync(patternEdit.delFiles[i])) 
-      fs.unlinkSync(patternEdit.delFiles[i], { recursive: true, force: true }, (err) => {
-      if (err) {
-        console.error('Error while deleting the folder:', err);
-      } else {
-        console.log('Folder and its contents deleted successfully');
-      }
-    })
-  }
+
+  // add photos
+    pattern.photos = copyAndReplacePaths(
+    pattern.photos,
+    addPhotos,
+    fileName => path.join(folderPath, "pictures", fileName)
+  );
   
-  //add files
+  // TECH DRAWINGS
+  // tech drawings to be removed (present in oldPattern but not in newPattern)
+  const delTechDrawings = oldPattern.techDrawings.filter(td => !newPattern.techDrawings.includes(td));
+  // tech drawings to be added (present in newPattern but not in oldPattern)
+  const addTechDrawings = newPattern.techDrawings.filter(td => !oldPattern.techDrawings.includes(td));
+
+  // delete tech drawings
+  for( let i=0; i < delTechDrawings.length; i++) {
+    if(fs.existsSync(delTechDrawings[i])) 
+      fs.unlinkSync(delTechDrawings[i], { recursive: true, force: true }, (err) => {
+      if (err) {
+        console.error('Error while deleting the folder:', err);
+      } else {
+        console.log('Folder and its contents deleted successfully');
+      }
+    })
+  }
+
+  // add tech drawings
+  pattern.techDrawings = copyAndReplacePaths(
+    pattern.techDrawings,
+    addTechDrawings,
+    fileName => path.join(folderPath, "techDrawings", fileName)
+  );
+
+  // FILES
+  // files to be removed (present in oldPattern but not in newPattern)
+  const delFiles = oldPattern.files.filter(f => !newPattern.files.includes(f));
+  // files to be added (present in newPattern but not in oldPattern)
+  const addFiles = newPattern.files.filter(f => !oldPattern.files.includes(f));
+
+  // delete files
+  for( let i=0; i < delFiles.length; i++) {
+    if(fs.existsSync(delFiles[i])) 
+      fs.unlinkSync(delFiles[i], { recursive: true, force: true }, (err) => {
+      if (err) {
+        console.error('Error while deleting the folder:', err);
+      } else {
+        console.log('Folder and its contents deleted successfully');
+      }
+    })
+  }
+
+  // add files
   pattern.files = copyAndReplacePaths(
     pattern.files,
-    patternEdit.newFiles,
+    addFiles,
     fileName => path.join(folderPath, fileName)
   );
 
-  //and add pictures
-  pattern.photos = copyAndReplacePaths(
-    pattern.photos,
-    patternEdit.newPhotos,
-    fileName => path.join(folderPath, "pictures", fileName)
+  // SHARED FILES
+
+  // shared files to be removed (present in oldPattern but not in newPattern)
+  // const delSharedFiles = oldPattern.sharedFiles.filter(sf => !newPattern.sharedFiles.includes(sf));
+  // const addSharedFiles = newPattern.sharedFiles.filter(sf => !oldPattern.sharedFiles.includes(sf)); 
+  // => no need to handle old shared files, they are already in the right folder, only db references need to be updated
+  
+  // shared files to be added (new shared files field in newPattern type)
+  const addSharedFiles = newPattern.newSharedFiles;
+
+  // delete shared files
+  // = > no files to delete for shared files only db references need to be updated
+
+  //and add shared files
+  pattern.newSharedFiles = copyAndReplacePaths(
+    pattern.newSharedFiles,
+    addSharedFiles,
+    fileName => path.join(patternFolderPath, "shared", fileName)
   );
 
-  pattern.techDrawings = copyAndReplacePaths(
-    pattern.techDrawings,
-    patternEdit.newTechDrawings,
-    fileName => path.join(folderPath, "pictures", fileName)
-  );
+
 
   //update database
   try {

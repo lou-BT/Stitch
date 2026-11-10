@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
-import { Material, Pattern, PatternEdit, NewPattern, createPatternEdit } from '../classes';
+import { Material, Pattern, NewPattern, SharedFile } from '../classes';
 import { DataService } from '../services/data.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -18,15 +18,16 @@ export class PatternEditComponent implements OnInit, OnChanges{
   @Output() savedEvent = new EventEmitter<void>();
 
   oldPattern?: Pattern;
-  newPattern? : NewPattern;
-  patternEdit?: PatternEdit;
+  newPattern?: NewPattern;
+  availableSharedFiles: SharedFile[] = [];
+  sharedFilesFilter = '';
 
   fileIcon = icons.faFile;
   plusIcon = solidIcons.faPlus;
   dragHandleIcon = solidIcons.faGripVertical;
 
   constructor(private data: DataService, private cdr: ChangeDetectorRef) {
-console.log("constructor", this.oldPatternId);
+    console.log("constructor", this.oldPatternId);
   }
 
   onDifficultyChange() {
@@ -35,13 +36,15 @@ console.log("constructor", this.oldPatternId);
   }
 
   ngOnInit() {
+    this.data.getAllSharedFiles().then(files => {
+      this.availableSharedFiles = files;
+      this.cdr.detectChanges();
+    });
     if (this.oldPatternId) {
       this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
         this.oldPattern = details;
         this.newPattern = this.oldPattern as NewPattern;
-        this.newPattern.fabric = this.newPattern.fabric ?? [];
-        this.newPattern.materials = this.newPattern.materials ?? [];
-        this.patternEdit = createPatternEdit();
+        this.newPattern.newSharedFiles = this.newPattern.newSharedFiles ?? [];
       });
     }
   }
@@ -52,12 +55,15 @@ console.log("constructor", this.oldPatternId);
         this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
           this.oldPattern = details;
           this.newPattern = this.oldPattern as NewPattern;
-          this.newPattern.fabric = this.newPattern.fabric ?? [];
-          this.newPattern.materials = this.newPattern.materials ?? [];
-          this.patternEdit = createPatternEdit();
+          this.newPattern.newSharedFiles = this.newPattern.newSharedFiles ?? [];
         });
       }
     }
+  }
+
+  extractFileName(filePath: string): string {
+    const pathParts = filePath.split(/[\\/]/);
+    return pathParts[pathParts.length - 1] || '';
   }
 
   addResourceRow(type: 'fabric' | 'materials'): void {
@@ -81,10 +87,10 @@ console.log("constructor", this.oldPatternId);
 
   async submitForm() {
     this.onDifficultyChange();
-    if( this.newPattern && this.patternEdit) {
+    if( this.oldPattern && this.newPattern ) {
       this.newPattern.free = !!this.newPattern.free;
       this.newPattern.used = !!this.newPattern.used;
-      await this.data.editPattern(this.newPattern, this.patternEdit);
+      await this.data.editPattern(this.oldPattern, this.newPattern);
       this.savedEvent.emit();
     }
   }
@@ -110,63 +116,40 @@ console.log("constructor", this.oldPatternId);
   }
 
   removeItem(item: number, index: number) {
-    if( !this.newPattern || !this.patternEdit) return;
+    if( !this.newPattern ) return;
     const targetList = this.getTargetList(item);
     if (!targetList || index < 0 || index >= targetList.length) return;
 
-    const removedPath = targetList[index];
-
-    switch(item) {
-      case 0:
-        if (this.removeFromNewList(this.patternEdit.newPhotos, removedPath)) break;
-        this.patternEdit.delPhotos.push(removedPath);
-        break;
-      case 1:
-        if (this.removeFromNewList(this.patternEdit.newTechDrawings, removedPath)) break;
-        this.patternEdit.delTechDrawings.push(removedPath);
-        break;
-      case 2:
-        if (this.removeFromNewList(this.patternEdit.newFiles, removedPath)) break;
-        this.patternEdit.delFiles.push(removedPath);
-        break;
-      default:
-        break;
-    }
-
     targetList.splice(index, 1);
-  }
-
-  private removeFromNewList(list: string[], removedPath: string): boolean {
-    const newIndex = list.indexOf(removedPath);
-    if (newIndex === -1) return false;
-    list.splice(newIndex, 1);
-    return true;
   }
 
   onFileDrop(event: DragEvent, item: number): void {
     event.preventDefault();
     const files = event.dataTransfer!.files;
-    if( !this.patternEdit || !this.newPattern) return;
+    if( !this.newPattern) return;
     switch (item) {
       case 0 :
         for(let i=0; i<files.length; i++) {
           const filePath = window.getFilePath(files[i]);
           this.newPattern.photos.push(filePath);
-          this.patternEdit.newPhotos.push(filePath);
         }
         break;
       case 1 :
         for(let i=0; i<files.length; i++) {
           const filePath = window.getFilePath(files[i]);
           this.newPattern.techDrawings.push(filePath);
-          this.patternEdit.newTechDrawings.push(filePath);
         }
         break;
       case 2 :
         for(let i=0; i<files.length; i++) {
           const filePath = window.getFilePath(files[i]);
           this.newPattern.files.push(filePath);
-          this.patternEdit.newFiles.push(filePath);
+        }
+        break;
+      case 3 :
+        for(let i=0; i<files.length; i++) {
+          const filePath = window.getFilePath(files[i]);
+          this.newPattern.newSharedFiles.push(filePath);
         }
         break;
       default:
@@ -187,27 +170,30 @@ console.log("constructor", this.oldPatternId);
 
   onFileSelect(event: Event, item: number): void {
     const files = (event.target as HTMLInputElement).files;
-    if (!files || !this.patternEdit || !this.newPattern) return;
+    if (!files || !this.newPattern) return;
     switch (item) {
       case 0:
         for (let i = 0; i < files.length; i++) {
           const filePath = window.getFilePath(files[i]);
           this.newPattern.photos.push(filePath);
-          this.patternEdit.newPhotos.push(filePath);
         }
         break;
       case 1:
         for (let i = 0; i < files.length; i++) {
           const filePath = window.getFilePath(files[i]);
           this.newPattern.techDrawings.push(filePath);
-          this.patternEdit.newTechDrawings.push(filePath);
         }
         break;
       case 2:
         for (let i = 0; i < files.length; i++) {
           const filePath = window.getFilePath(files[i]);
           this.newPattern.files.push(filePath);
-          this.patternEdit.newFiles.push(filePath);
+        }
+        break;
+      case 3:
+        for (let i = 0; i < files.length; i++) {
+          const filePath = window.getFilePath(files[i]);
+          this.newPattern.newSharedFiles.push(filePath);
         }
         break;
       default:
@@ -216,6 +202,39 @@ console.log("constructor", this.oldPatternId);
     }
     (event.target as HTMLInputElement).value = '';
     this.cdr.detectChanges();
+  }
+
+  // SHARED FILES
+  // available files + any newly added ones, filtered by the search text
+  private matchesFilter(path: string): boolean {
+    const q = this.sharedFilesFilter.trim().toLowerCase();
+    return !q || this.extractFileName(path).toLowerCase().includes(q);
+  }
+
+  get filteredAvailableSharedFiles(): SharedFile[] {
+    return this.availableSharedFiles.filter(f => this.matchesFilter(f.filePath));
+  }
+
+  get filteredNewSharedFiles(): string[] {
+    return (this.newPattern?.newSharedFiles ?? []).filter(p => this.matchesFilter(p));
+  }
+
+  isSharedFileSelected(file: SharedFile): boolean {
+    return !!this.newPattern?.sharedFiles.some(f => f.id === file.id);
+  }
+
+  toggleSharedFile(file: SharedFile, checked: boolean): void {
+    if (!this.newPattern) return;
+    if (checked) {
+      if (!this.isSharedFileSelected(file)) this.newPattern.sharedFiles.push(file);
+    } else {
+      this.newPattern.sharedFiles = this.newPattern.sharedFiles.filter(f => f.id !== file.id);
+    }
+  }
+
+  removeNewSharedFile(path: string): void {
+    if (!this.newPattern) return;
+    this.newPattern.newSharedFiles = this.newPattern.newSharedFiles.filter(p => p !== path);
   }
 
   testFunction() {

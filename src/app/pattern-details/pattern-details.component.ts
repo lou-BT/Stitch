@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
 import { DataService } from '../services/data.service';
-import { Pattern } from '../classes';
+import { Category, Pattern } from '../classes';
 
 @Component({
     selector: 'app-pattern-details',
@@ -16,6 +16,7 @@ import { Pattern } from '../classes';
 export class PatternDetailsComponent implements OnInit, OnChanges {
   @Input() patternId?: number;
   pattern?: Pattern;
+  category: Category | undefined;
 
   fileIcon = icons.faFile;
 
@@ -29,6 +30,19 @@ export class PatternDetailsComponent implements OnInit, OnChanges {
 
   public data = inject(DataService);
 
+  ngOnInit() {
+    this.loadPatternDetails();
+
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['patternId']) {
+      this.cancelEditComment();
+      this.newCommentText = '';
+      this.loadPatternDetails();
+    }
+  }
+
   reload() {
     this.loadPatternDetails();
   }
@@ -37,6 +51,9 @@ export class PatternDetailsComponent implements OnInit, OnChanges {
     if (!this.patternId) return;
     this.data.getPatternDetails(this.patternId.toString()).then((details: Pattern | null) => {
       this.pattern = details ?? undefined;
+    });
+    this.data.getCategoryById(this.pattern?.categoryId ?? 0).then((category: Category | null) => {
+      this.category = category ?? undefined;
     });
   }
 
@@ -85,15 +102,5 @@ export class PatternDetailsComponent implements OnInit, OnChanges {
     }
   }
 
-  ngOnInit() {
-    this.loadPatternDetails();
-  }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['patternId']) {
-      this.cancelEditComment();
-      this.newCommentText = '';
-      this.loadPatternDetails();
-    }
-  }
 }

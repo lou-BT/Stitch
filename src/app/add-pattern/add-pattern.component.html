@@ -30,14 +30,11 @@
             <label class="form-label">Category</label><br>
             <select name="category" 
                     class="form-select inputField form-control"  
-                    [(ngModel)]="pattern.category">
+                    [(ngModel)]="pattern.categoryId">
               <!-- <option *ngFor="let key of categoryKeys" [value]="key">{{key}}</option> -->
-              <option value="top">top</option>
-              <option value="bottom">bottom</option>
-              <option value="dress">dress</option>
-              <option value="one piece">one piece</option>
-              <option value="accessory">accessory</option>
-              <option value="else">else</option>
+              @for (category of categories; track category.id) {
+                <option [ngValue]="category.id">{{category.name}}</option>
+              }
             </select>
           </div>
         </div>
@@ -295,7 +292,9 @@
       <!-- <button class="btn btn-outline-dark align-self-end justify-self-center" type="submit" [disabled]="patternForm.invalid">Submit</button> -->
   </div>
   <div class="modal-footer">
-    <button type="button" class="primary-button"  type="submit" [disabled]="patternForm.invalid">add pattern</button>
+    <button type="button" class="primary-button"  type="submit" [disabled]="patternForm.invalid">
+      <fa-icon [icon]="plusIcon"></fa-icon>
+      add pattern</button>
     <button type="button" class="secondary-button" (click)="closeModal()">cancel</button>
   </div>
 </form>

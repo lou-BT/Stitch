@@ -20,6 +20,39 @@ export class DataService {
     })
    }
 
+  async getCategories(): Promise<Category[]> {
+    try {
+      const categories = await window.ipcRenderer.invoke('patterns:getCategories') as Category[];
+      return categories;
+    } catch (error) {
+      console.error('Error getting categories:', error);
+      return [];
+    }
+  }
+
+  async getCategoryById(id: number): Promise<Category | null> {
+    try {
+      const category = await window.ipcRenderer.invoke('patterns:getCategoryById', id) as Category | null;
+      return category;
+    } catch (error) {
+      console.error('Error getting category by id:', error);
+      return null;
+    }
+  }
+
+  // Note: unlike the getters above, these intentionally let errors (e.g. duplicate
+  // or protected "Else" category) propagate so callers can show the message to the user.
+  async addCategory(name: string): Promise<Category> {
+    return await window.ipcRenderer.invoke('patterns:addCategory', name) as Category;
+  }
+
+  async updateCategory(id: number, name: string): Promise<Category> {
+    return await window.ipcRenderer.invoke('patterns:updateCategory', id, name) as Category;
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    await window.ipcRenderer.invoke('patterns:deleteCategory', id);
+  }
 
   async loadPatterns(): Promise<Pattern[]> {
     try {

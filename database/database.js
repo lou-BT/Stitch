@@ -6,6 +6,8 @@ const patternFolderPath = process.env.PATTERN_FOLDER_PATH || 'C:/Users/louca/Doc
 const dbPath = path.join(patternFolderPath, 'patterns.db');
 const db = new Database(dbPath);
 
+const { defaultCategories } = require('../default-categories');
+
 db.pragma('foreign_keys = ON');
 
 // Create the tables if they don't exist
@@ -17,7 +19,7 @@ db.exec(`
     difficulty INTEGER NOT NULL DEFAULT 1 CHECK(difficulty BETWEEN 1 AND 5),
     free INTEGER NOT NULL DEFAULT 1 CHECK(free IN (0, 1)),
     used INTEGER NOT NULL DEFAULT 0 CHECK(used IN (0, 1)),
-    category TEXT NOT NULL,
+    category_id INTEGER REFERENCES categories(id),
     description TEXT
   );
   CREATE TABLE IF NOT EXISTS fabrics (
@@ -62,6 +64,7 @@ db.exec(`
     shared_file_id INTEGER NOT NULL,
     FOREIGN KEY (pattern_id) REFERENCES patterns(id) ON DELETE CASCADE,
     FOREIGN KEY (shared_file_id) REFERENCES shared_files(id) ON DELETE CASCADE
+    UNIQUE (pattern_id, shared_file_id)
   );
   CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,8 +72,20 @@ db.exec(`
     date DATE NOT NULL,
     text TEXT NOT NULL,
     FOREIGN KEY (pattern_id) REFERENCES patterns(id) ON DELETE CASCADE
-  )
+  );
+  CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE COLLATE NOCASE
+  );
 `);
+
+// Insert default categories if they don't exist
+const insertCategoryStmt = db.prepare('INSERT OR IGNORE INTO categories (name) VALUES (?)');
+for (const category of defaultCategories) {
+  insertCategoryStmt.run(category);
+}
+
+
 
 function normalizeBrand(brand) {
   if (typeof brand !== 'string') return null;
@@ -116,29 +131,108 @@ function hydratePatternFields(pattern) {
 
 // Prepared statements
 const statements = {
-  getPatternByName: db.prepare('SELECT * FROM patterns WHERE name = ?'),
-  getPatternById: db.prepare('SELECT * FROM patterns WHERE id = ?'),
+  getPatternByName: db.prepare('SELECT id, name, brand, difficulty, free, used, category_id AS categoryId, description FROM patterns WHERE name = ?'),
+  getPatternById: db.prepare('SELECT id, name, brand, difficulty, free, used, category_id AS categoryId, description FROM patterns WHERE id = ?'),
+  getPattern: db.prepare('SELECT id, name, brand, difficulty, free, used, category_id AS categoryId, description FROM patterns'),
   getFabrics: db.prepare('SELECT type, requirement FROM fabrics WHERE pattern_id = ? ORDER BY id ASC'),
   getMaterials: db.prepare('SELECT type, requirement FROM materials WHERE pattern_id = ? ORDER BY id ASC'),
   getPhotos: db.prepare('SELECT file_path FROM photos WHERE pattern_id = ?'),
   getTechDrawings: db.prepare('SELECT file_path FROM tech_drawings WHERE pattern_id = ?'),
   getFiles: db.prepare('SELECT file_path FROM files WHERE pattern_id = ?'),
   getComments: db.prepare('SELECT id, text, date FROM comments WHERE pattern_id = ? ORDER BY date DESC'),
-  getSharedFiles: db.prepare('SELECT shared_files.id, shared_files.file_path FROM shared_files JOIN pattern_shared_files ON pattern_shared_files.shared_file_id = shared_files.id WHERE pattern_shared_files.pattern_id = ?')
+  getSharedFiles: db.prepare('SELECT shared_files.id, shared_files.file_path FROM shared_files JOIN pattern_shared_files ON pattern_shared_files.shared_file_id = shared_files.id WHERE pattern_shared_files.pattern_id = ?'),
+  getCategoryById: db.prepare('SELECT * FROM categories WHERE id = ?')
 };
 
 // Helper function to get all patterns
 function getAllPatterns() {
-  const patterns = db.prepare('SELECT id, name, brand, difficulty, free, used, category, description FROM patterns').all();
+  const patterns = statements.getPattern.all();
     if (patterns.length === 0) return [];
     patterns.forEach(pattern => {
         pattern.fabric = statements.getFabrics.all(pattern.id);
         pattern.materials = statements.getMaterials.all(pattern.id);
         pattern.photos = statements.getPhotos.all(pattern.id).map(row => row.file_path);
         pattern.techDrawings = statements.getTechDrawings.all(pattern.id).map(row => row.file_path);
-    hydratePatternFields(pattern);
+        hydratePatternFields(pattern);
     });
     return patterns;
+}
+
+// Helper function to get all categories
+function getCategories() {
+  return db.prepare('SELECT * FROM categories').all();
+}
+
+function getCategoryById(id) {
+  return statements.getCategoryById.get(id);
+}
+
+// Helper function to add a new category
+function addCategory(name) {
+  const trimmedName = normalizeOptionalText(name);
+  if (!trimmedName) {
+    throw new Error('Category name cannot be empty');
+  }
+
+  try {
+    const insert = db.prepare('INSERT INTO categories (name) VALUES (?)');
+    const result = insert.run(trimmedName);
+    return { id: result.lastInsertRowid, name: trimmedName };
+  } catch (error) {
+    if (/UNIQUE constraint failed/i.test(error.message)) {
+      throw new Error(`A category named "${trimmedName}" already exists`);
+    }
+    throw error;
+  }
+}
+
+// Helper function to rename an existing category, keeping its id
+function updateCategory(id, name) {
+  const trimmedName = normalizeOptionalText(name);
+  if (!trimmedName) {
+    throw new Error('Category name cannot be empty');
+  }
+
+  const category = statements.getCategoryById.get(id);
+  if (!category) {
+    throw new Error('Category not found');
+  }
+  if (category.name === 'Else') {
+    throw new Error('The "Else" category cannot be renamed');
+  }
+
+  try {
+    db.prepare('UPDATE categories SET name = ? WHERE id = ?').run(trimmedName, id);
+  } catch (error) {
+    if (/UNIQUE constraint failed/i.test(error.message)) {
+      throw new Error(`A category named "${trimmedName}" already exists`);
+    }
+    throw error;
+  }
+
+  return { id, name: trimmedName };
+}
+
+// Helper function to delete a category, reassigning its patterns to "Else"
+function deleteCategory(id) {
+  const category = statements.getCategoryById.get(id);
+  if (!category) {
+    throw new Error('Category not found');
+  }
+  if (category.name === 'Else') {
+    throw new Error('The "Else" category cannot be deleted');
+  }
+
+  const elseCategory = db.prepare("SELECT id FROM categories WHERE name = 'Else'").get();
+  if (!elseCategory) {
+    throw new Error('The "Else" fallback category is missing; cannot delete this category');
+  }
+
+  const transaction = db.transaction(() => {
+    db.prepare('UPDATE patterns SET category_id = ? WHERE category_id = ?').run(elseCategory.id, id);
+    db.prepare('DELETE FROM categories WHERE id = ?').run(id);
+  });
+  transaction();
 }
 
 // Helper function to get pattern with all details
@@ -156,7 +250,6 @@ function getPatternDetails(id) {
   pattern.techDrawings = statements.getTechDrawings.all(pattern.id).map(row => row.file_path);
   pattern.files = statements.getFiles.all(pattern.id).map(row => row.file_path);
   pattern.sharedFiles = statements.getSharedFiles.all(pattern.id).map(row => ({ id: row.id, filePath: row.file_path }));
-  
   hydratePatternFields(pattern);
   pattern.comments = statements.getComments.all(pattern.id).map(row => ({ 
     id: row.id,
@@ -171,16 +264,18 @@ function getPatternDetails(id) {
 // Helper function to add a new pattern
 function addPattern(pattern) {
   const transaction = db.transaction(() => {
-    const insert = db.prepare('INSERT INTO patterns (name, brand, difficulty, free, used, category, description) VALUES (?, ?, ?, ?, ?, ?, ?)');
+
+    const insert = db.prepare('INSERT INTO patterns (name, brand, difficulty, free, used, category_id, description) VALUES (?, ?, ?, ?, ?, ?, ?)');
     const result = insert.run(
       pattern.name,
       normalizeBrand(pattern.brand),
       normalizeDifficulty(pattern.difficulty),
       normalizeBoolean(pattern.free, true),
       normalizeBoolean(pattern.used, false),
-      pattern.category,
+      pattern.categoryId,
       pattern.description ?? null
     );
+
     const id = result.lastInsertRowid;
 
     const insertFabric = db.prepare('INSERT INTO fabrics (pattern_id, type, requirement) VALUES (?, ?, ?)');
@@ -224,7 +319,7 @@ function updatePattern(id, pattern) {
   // pattern of type NewPattern
   const transaction = db.transaction(() => {
     const update = db.prepare(
-      'UPDATE patterns SET name = ?, brand = ?, difficulty = ?, free = ?, used = ?, category = ?, description = ? WHERE id = ?'
+      'UPDATE patterns SET name = ?, brand = ?, difficulty = ?, free = ?, used = ?, category_id = ?, description = ? WHERE id = ?'
     );
 
     update.run(
@@ -233,7 +328,7 @@ function updatePattern(id, pattern) {
       normalizeDifficulty(pattern.difficulty),
       normalizeBoolean(pattern.free, true),
       normalizeBoolean(pattern.used, false),
-      pattern.category,
+      pattern.categoryId,
       pattern.description ?? null,
       id
     );
@@ -316,5 +411,10 @@ module.exports = {
   addComment,
   editComment,
   deleteComment,
-  deletePattern
+  deletePattern,
+  getCategories,
+  getCategoryById,
+  addCategory,
+  updateCategory,
+  deleteCategory,
 };

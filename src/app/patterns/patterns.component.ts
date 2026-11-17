@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild} from '@angular/core';
 import { DataService } from '../services/data.service';
 import { NgClass } from '@angular/common';
-import { Categories, Pattern } from '../classes';
+import { Category, Pattern } from '../classes';
 import * as bootstrap from 'bootstrap';
 import { Subscription } from 'rxjs';
 
@@ -31,22 +31,23 @@ export class PatternsComponent implements OnInit, AfterViewInit{
   patternList : any[] = [];
   selectedPatternId?: number;
 
-  categories = Categories;
-  selectedCategory: string = 'all';
+  categories: Category[] = [];
+  selectedCategory: Category | null = null;
   previewSource: 'photo' | 'techDrawing' = 'photo';
 
   plusIcon = iconsSolid.faPlus;
 
-  constructor(private data: DataService) {
-    //this.selectedCategory = "all";
-  }
+  constructor(private data: DataService) {}
 
   ngOnInit(): void {
     this.data.patternList$.subscribe((data:any[]) => {
       console.log('Received pattern list update:', data);
       this.patternList = data;
     
-    })
+    });
+    this.data.getCategories().then((categories: Category[]) => {
+      this.categories = categories;
+    });
   }
 
   ngAfterViewInit() {
@@ -60,17 +61,13 @@ export class PatternsComponent implements OnInit, AfterViewInit{
     this.patternEditModal.nativeElement.addEventListener('hidden.bs.modal', resetSelectedPatternIfNotSwitching);
   }
  
-  setCategory(category: string) {
-    if( category !== this.selectedCategory) {
-      this.selectedCategory = category; 
-    } else {
-      this.selectedCategory = "all"; 
-    } 
+  setCategory(category: Category | null) {
+    this.selectedCategory = category?.id == this.selectedCategory?.id ? null : category;
   }
 
   filterCategory = (pattern: Pattern): boolean => {
-    if (!this.selectedCategory || this.selectedCategory === 'all') return true;
-    return pattern.category as unknown as string === this.selectedCategory;
+    if (!this.selectedCategory) return true;
+    return pattern.categoryId === this.selectedCategory.id;
   }
 
   togglePreviewSource() {

@@ -22,15 +22,15 @@
 
 
   <div class="category-section">
-      <div [ngClass]="{'category-item': selectedCategory !== 'all', 'selected-category-item': selectedCategory === 'all'}" 
-           (click)="setCategory('all')">
+      <div [ngClass]="{'category-item': selectedCategory !== null, 'selected-category-item': selectedCategory === null}" 
+           (click)="setCategory(null)">
           <span>All Patterns</span>
       </div>
       <div class="category-items-container" style="gap: var(--space-2);">
-        @for (category of categories; track category) {
-          <div [ngClass]="{'category-item': selectedCategory !== category, 'selected-category-item': selectedCategory === category}"
+        @for (category of categories; track category.id) {
+          <div [ngClass]="{'category-item': selectedCategory?.id !== category.id, 'selected-category-item': selectedCategory?.id === category.id}"
                 (click)="setCategory(category)">
-              <span>{{category}}</span>
+              <span>{{category.name}}</span>
           </div>
         }
       </div>
@@ -38,10 +38,10 @@
   <!-- end of search section -->
 
   <!-- pattern list --> 
-  <div id="pattern-page-content" style="flex-grow: 1; overflow-y: auto;">
+  <div id="pattern-page-content" class="pattern-section">
       <div class="container-fluid">
           <div class="row gy-2 gx-2" id="patterns-list">
-            @for (pattern of patternList.filter(filterCategory); track pattern) {
+            @for (pattern of patternList.filter(filterCategory); track pattern.id) {
               <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
                   <!-- individual pattern block -->
                   <div class="pattern-block" (click)="openPatternModal(pattern)">
@@ -52,7 +52,7 @@
                           </div>
                       </div>
                       <div class="pattern-info">
-                        <span class="label-upper">{{pattern.category}}</span>
+                        <!-- <span class="label-upper">{{pattern.category}}</span> -->
                         <span class="pattern-name">{{pattern.name}}</span>
                       </div>
                   </div>

@@ -13,14 +13,10 @@
           <div class="row" style="margin-top: var(--space-5);">
             <div class="col">
               <label class="form-label">Category</label><br>
-              <select name="category" class="form-select inputField form-control"  [(ngModel)]="newPattern!.category">
-                <!-- <option *ngFor="let key of categoryKeys" [value]="key">{{key}}</option> -->
-                <option value="top">top</option>
-                <option value="bottom">bottom</option>
-                <option value="dress">dress</option>
-                <option value="one piece">one piece</option>
-                <option value="accessory">accessory</option>
-                <option value="else">else</option>
+              <select name="category" class="form-select inputField form-control"  [(ngModel)]="newPattern!.categoryId">
+                @for (category of categories; track category.id) {
+                  <option [ngValue]="category.id">{{category.name}}</option>
+                }
               </select>
             </div>
             <div class="col">

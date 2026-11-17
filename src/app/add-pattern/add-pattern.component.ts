@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Material, NewPattern, SharedFile, createPattern } from '../classes';
+import { Material, NewPattern, SharedFile, createPattern, Category } from '../classes';
 import { NgClass} from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
@@ -28,14 +28,32 @@ export class AddPatternComponent implements OnInit {
   plusIcon = solidIcons.faPlus;
   dragHandleIcon = solidIcons.faGripVertical;
 
+  categories: Category[] = [];
+
   private cdr = inject(ChangeDetectorRef);
   private data = inject(DataService);
-  
-  ngOnInit(): void {
+
+  private loadSharedFiles(): void {
     this.data.getAllSharedFiles().then(files  => {
       this.availableSharedFiles = files;
       this.cdr.detectChanges();
     });
+  }
+
+  private loadCategories(): void {
+    this.data.getCategories().then((categories: Category[]) => {
+      this.categories = categories;
+      if (this.pattern.categoryId === null) {
+        this.pattern.categoryId = (this.categories.find(category => category.name === 'Else') ?? this.categories[0]).id;
+      }
+      this.cdr.detectChanges();
+    });
+  }
+  
+  ngOnInit(): void {
+    this.loadSharedFiles();
+    this.loadCategories();
+    console.log(this.categories);
   }
 
   extractFileName(filePath: string): string {
@@ -201,6 +219,8 @@ export class AddPatternComponent implements OnInit {
     else {
       console.log(this.pattern);
       this.data.addPattern(this.pattern);
+      this.loadSharedFiles();
+      this.loadCategories();
       this.closeModal();
     }
   }
@@ -209,6 +229,7 @@ export class AddPatternComponent implements OnInit {
     console.log('close modale 1');
     this.closeModalEvent.emit(true);
     this.pattern = createPattern();
+    this.pattern.categoryId = (this.categories.find(category => category.name === 'Else') ?? this.categories[0]).id;
   }
 
 }

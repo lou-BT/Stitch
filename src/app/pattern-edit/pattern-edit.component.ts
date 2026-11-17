@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
-import { Material, Pattern, NewPattern, SharedFile } from '../classes';
+import { Material, Pattern, NewPattern, SharedFile, Category } from '../classes';
 import { DataService } from '../services/data.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -26,6 +26,8 @@ export class PatternEditComponent implements OnInit, OnChanges{
   plusIcon = solidIcons.faPlus;
   dragHandleIcon = solidIcons.faGripVertical;
 
+  categories: Category[] = [];
+
   constructor(private data: DataService, private cdr: ChangeDetectorRef) {
     console.log("constructor", this.oldPatternId);
   }
@@ -35,30 +37,31 @@ export class PatternEditComponent implements OnInit, OnChanges{
     this.newPattern.difficulty = Math.min(5, Math.max(1, Number(this.newPattern.difficulty) || 1));
   }
 
+  private loadPattern(): void {
+    if (!this.oldPatternId) return;
+    this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
+      this.oldPattern = details;
+      this.newPattern = details as NewPattern;
+      this.newPattern.newSharedFiles = this.newPattern.newSharedFiles ?? [];
+      console.log("category id", this.newPattern.categoryId, this.oldPattern, this.newPattern);
+      this.cdr.detectChanges();
+    });
+  }
+
   ngOnInit() {
     this.data.getAllSharedFiles().then(files => {
       this.availableSharedFiles = files;
       this.cdr.detectChanges();
     });
-    if (this.oldPatternId) {
-      this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
-        this.oldPattern = details;
-        this.newPattern = this.oldPattern as NewPattern;
-        this.newPattern.newSharedFiles = this.newPattern.newSharedFiles ?? [];
-      });
-    }
+    this.data.getCategories().then((categories: Category[]) => {
+      this.categories = categories;
+      this.cdr.detectChanges();
+    });
+    this.loadPattern();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if( changes['oldPatternId']) {
-      if (this.oldPatternId) {
-        this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
-          this.oldPattern = details;
-          this.newPattern = this.oldPattern as NewPattern;
-          this.newPattern.newSharedFiles = this.newPattern.newSharedFiles ?? [];
-        });
-      }
-    }
+    if (changes['oldPatternId']) this.loadPattern();
   }
 
   extractFileName(filePath: string): string {

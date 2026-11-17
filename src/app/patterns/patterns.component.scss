@@ -28,6 +28,13 @@
     }
 }
 
+// Patterns section
+.pattern-section {
+    padding-top: var(--space-3);
+    flex-grow: 1; 
+    overflow-y: auto;
+}
+
 
 
 // Category Section
@@ -36,7 +43,7 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: var(--space-2);
-    padding-bottom: var(--space-5);
+    padding-bottom: var(--space-3);
     align-items: center;
 }
 
@@ -98,7 +105,7 @@
     flex-direction: column;
     
     &:hover {
-        transform: translateY(-8px);
+        transform: translateY(-4px);
         box-shadow: 0 12px 24px var(--black-shadow-hover);
         
         .image-container img {

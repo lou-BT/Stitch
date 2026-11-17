@@ -20,7 +20,7 @@ try {
       console.log(`  Name: ${pattern.name || '(empty)'}`);
       console.log(`  Brand: ${pattern.brand || '(empty)'}`);
       console.log(`  Difficulty: ${pattern.difficulty || 1}`);
-      console.log(`  Category: ${pattern.category || '(empty)'}`);
+      console.log(`  Category: ${pattern.categoryId || '(empty)'}`);
       console.log(`  Description: ${pattern.description || '(empty)'}`);
       
       // Get details for this pattern

@@ -5,7 +5,7 @@ export interface PatternPartial {
     difficulty: number;
     free: boolean;
     used: boolean;
-    category: Category;
+    categoryId: number | null;
     photos: string[];
     techDrawings: string[];
 }
@@ -34,7 +34,7 @@ export function createPattern(overrides: Partial<NewPattern> = {}): NewPattern {
         description: "",
         fabric: [],
         materials: [],
-        category: Category.else,
+        categoryId: null,
         photos: [],
         techDrawings: [],
         files: [],
@@ -48,23 +48,26 @@ export function createPattern(overrides: Partial<NewPattern> = {}): NewPattern {
 // usage
 //const p = createPattern({ name: "Summer dress", difficulty: 3 });
 
-
-
-export enum Category {
-    "top",
-    "bottom",
-    "dress",
-    "one piece",
-    "accessory",
-    "else"
+export interface Category {
+    id: number;
+    name: string;
 }
 
-export const Categories = ["top",
-    "bottom",
-    "dress",
-    "one piece",
-    "accessory",
-    "else"]
+// export enum Category {
+//     "top",
+//     "bottom",
+//     "dress",
+//     "one piece",
+//     "accessory",
+//     "else"
+// }
+
+// export const Categories = ["top",
+//     "bottom",
+//     "dress",
+//     "one piece",
+//     "accessory",
+//     "else"]
 
 export interface Comment {
     id: number;

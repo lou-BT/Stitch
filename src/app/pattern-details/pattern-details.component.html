@@ -30,7 +30,7 @@
 
   <!-- pattern content -->
   <div style="padding: var(--space-5);">
-    <h5 class="text-grey" style="margin-bottom: -3px; margin-top: var(--space-1);">{{pattern.category}}</h5>
+    <h5 class="text-grey" style="margin-bottom: -3px; margin-top: var(--space-1);">{{category?.name}}</h5>
     <div class="pattern-header d-flex justify-content-between align-items-center">
       <div class="d-flex flex-row align-items-center gap-1">
         <h3 style="margin-right: var(--space-1);">{{pattern.name}}</h3> 
@@ -164,7 +164,11 @@
               } @else {
                 <p class="comment-text">{{comment.text}}</p>
                 <div class="comment-actions">
-                  <button type="button" class="primary-button" (click)="startEditComment(comment.id, comment.text)">Edit</button>
+                  <button type="button" class="primary-button" (click)="startEditComment(comment.id, comment.text)">
+                    <!-- <fa-icon [icon]="editIcon" style="margin-right: var(--space-2);"></fa-icon> -->
+                    <!-- <i class="fa-solid fa-pencil"></i>
+                    <i class="bi bi-pencil"></i> -->
+                    edit</button>
                   <button type="button" class="subtle-warning-button" (click)="deleteComment(comment.id)">Delete</button>
                 </div>
               }

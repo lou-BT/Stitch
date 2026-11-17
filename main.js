@@ -118,6 +118,54 @@ app.on('activate', function () {
 })
 
 
+ipcMain.handle('patterns:getCategories', (event) => {
+  try {
+    return db.getCategories();
+  } catch (error) {
+    console.error('Error getting categories:', error);
+    return [];
+  }
+});
+
+ipcMain.handle('patterns:getCategoryById', (event, id) => {
+  try {
+    return db.getCategoryById(id);
+  } catch (error) {
+    console.error('Error getting category by id:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('patterns:addCategory', (event, name) => {
+  try {
+    return db.addCategory(name);
+  } catch (error) {
+    console.error('Error adding category:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('patterns:updateCategory', (event, id, name) => {
+  try {
+    return db.updateCategory(id, name);
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('patterns:deleteCategory', (event, id) => {
+  try {
+    db.deleteCategory(id);
+    // deleting a category reassigns its patterns to "Else", so refresh the pattern list too
+    const patterns = db.getAllPatterns();
+    event.sender.send('patterns:update', patterns);
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    throw error;
+  }
+});
+
 
 ipcMain.handle('patterns:getAll', (event) => {
   try {
@@ -247,7 +295,7 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
     used: pattern.used ?? false,
     fabric: pattern.fabric ?? [],
     materials: pattern.materials ?? [],
-    category: pattern.category,
+    categoryId: pattern.categoryId,
     description: pattern.description,
     files: files,
     photos: photos,

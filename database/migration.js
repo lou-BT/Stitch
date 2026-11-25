@@ -7,6 +7,14 @@ const patternFolderPath = process.env.PATTERN_FOLDER_PATH || 'C:/Users/louca/Doc
 const dbPath = path.join(patternFolderPath, 'patterns.db');
 const db = new Database(dbPath);
 
+// Foreign keys must be disabled for the whole migration run (and before any transaction
+// is opened, since SQLite ignores changes to this pragma inside a transaction). Some
+// migrations rebuild tables (copy -> drop -> rename) to work around SQLite's limited
+// ALTER TABLE support; with foreign_keys = ON, dropping a parent table cascades
+// ON DELETE CASCADE into every child table (photos, tech_drawings, files, etc.),
+// wiping their rows even though the parent's data is only being recreated, not deleted.
+db.pragma('foreign_keys = OFF');
+
 const migrationsDir = path.join(__dirname, 'migrations');
 
 function ensureMigrationsTable() {
@@ -75,11 +83,21 @@ function runMigrations() {
   console.log('Migrations completed.');
 }
 
+function checkForeignKeyViolations() {
+  const violations = db.prepare('PRAGMA foreign_key_check').all();
+  if (violations.length > 0) {
+    console.warn(`⚠ Found ${violations.length} foreign key violation(s) after migrating:`);
+    console.warn(violations);
+  }
+}
+
 try {
   runMigrations();
+  checkForeignKeyViolations();
 } catch (error) {
   console.error('Migration failed:', error.message);
   process.exitCode = 1;
 } finally {
+  db.pragma('foreign_keys = ON');
   db.close();
 }

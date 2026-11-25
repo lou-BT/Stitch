@@ -1,6 +1,7 @@
 import { Injectable, OnInit } from '@angular/core';
 import { Category, Pattern, NewPattern, SharedFile } from '../classes';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { ipcMain } from 'electron'; // keep this line for Electron IPC communication
 
 @Injectable({
   providedIn: 'root'
@@ -14,15 +15,14 @@ export class DataService {
     this.loadPatterns().then((data: Pattern[]) => {
       this._patternList.next(data)
     })    
-
-    window.ipcRenderer.on('patterns:update', (event: any, data: Pattern[]) => {
+    window.electronAPI.onPatternsUpdate((event: any, data: Pattern[]) => {
       this._patternList.next(data);
     })
    }
 
   async getCategories(): Promise<Category[]> {
     try {
-      const categories = await window.ipcRenderer.invoke('patterns:getCategories') as Category[];
+      const categories = await window.electronAPI.getCategories() as Category[];
       return categories;
     } catch (error) {
       console.error('Error getting categories:', error);
@@ -32,7 +32,7 @@ export class DataService {
 
   async getCategoryById(id: number): Promise<Category | null> {
     try {
-      const category = await window.ipcRenderer.invoke('patterns:getCategoryById', id) as Category | null;
+      const category = await window.electronAPI.getCategoryById(id) as Category | null;
       return category;
     } catch (error) {
       console.error('Error getting category by id:', error);
@@ -43,20 +43,21 @@ export class DataService {
   // Note: unlike the getters above, these intentionally let errors (e.g. duplicate
   // or protected "Else" category) propagate so callers can show the message to the user.
   async addCategory(name: string): Promise<Category> {
-    return await window.ipcRenderer.invoke('patterns:addCategory', name) as Category;
+    return await window.electronAPI.addCategory(name) as Category;
   }
 
   async updateCategory(id: number, name: string): Promise<Category> {
-    return await window.ipcRenderer.invoke('patterns:updateCategory', id, name) as Category;
+    return await window.electronAPI.updateCategory(id, name) as Category;
   }
 
   async deleteCategory(id: number): Promise<void> {
-    await window.ipcRenderer.invoke('patterns:deleteCategory', id);
+    await window.electronAPI.deleteCategory(id);
   }
 
   async loadPatterns(): Promise<Pattern[]> {
     try {
-      const patterns = await window.ipcRenderer.invoke('patterns:getAll') as Pattern[];
+      const patterns = await window.electronAPI.loadPatterns() as Pattern[];
+      console.log('Loaded patterns:', patterns);
       return patterns;
     } catch (error) {
       console.error('Error loading file:', error);
@@ -66,7 +67,7 @@ export class DataService {
 
   async getPatternDetails(patternId: string): Promise<Pattern | null> {
     try {
-      const patternDetails = await window.ipcRenderer.invoke('patterns:getDetails', patternId) as Pattern | null;
+      const patternDetails = await window.electronAPI.getPatternDetails(patternId) as Pattern | null;
       console.log('Received pattern details:', patternDetails);
       return patternDetails;
     } catch (error) {
@@ -85,26 +86,26 @@ export class DataService {
   }
 
   addPattern( pattern: NewPattern ) {
-    window.ipcRenderer.send('patterns:addNew', pattern);
+    window.electronAPI.addPattern(pattern);
   }
 
   openFile( file: string ) {
-    window.ipcRenderer.send('patterns:openFile', file);
+    window.electronAPI.openFile(file);
   }
 
   deletePattern( pattern: Pattern ) {
-    window.ipcRenderer.send('patterns:delete', pattern);
+    window.electronAPI.deletePattern(pattern);
   }
 
   async editPattern( oldPattern: Pattern, newPattern: NewPattern): Promise<void> {
-    await window.ipcRenderer.invoke('patterns:edit', oldPattern, newPattern);
+    await window.electronAPI.editPattern(oldPattern, newPattern);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////
   // COMMENTS
   async addComment(patternId: number, text: string): Promise<Pattern | null> {
     try {
-      return await window.ipcRenderer.invoke('comments:add', patternId, text) as Pattern | null;
+      return await window.electronAPI.addComment(patternId, text) as Pattern | null;
     } catch (error) {
       console.error('Error adding comment:', error);
       return null;
@@ -113,7 +114,7 @@ export class DataService {
 
   async editComment(patternId: number, commentId: number, text: string): Promise<Pattern | null> {
     try {
-      return await window.ipcRenderer.invoke('comments:edit', patternId, commentId, text) as Pattern | null;
+      return await window.electronAPI.editComment(patternId, commentId, text) as Pattern | null;
     } catch (error) {
       console.error('Error editing comment:', error);
       return null;
@@ -122,7 +123,7 @@ export class DataService {
 
   async deleteComment(patternId: number, commentId: number): Promise<Pattern | null> {
     try {
-      return await window.ipcRenderer.invoke('comments:delete', patternId, commentId) as Pattern | null;
+      return await window.electronAPI.deleteComment(patternId, commentId) as Pattern | null;
     } catch (error) {
       console.error('Error deleting comment:', error);
       return null;
@@ -133,7 +134,8 @@ export class DataService {
   // SHARED FILES
   async getAllSharedFiles(): Promise<SharedFile[]> {
     try {
-      const sharedFiles = await window.ipcRenderer.invoke('sharedFiles:getAll') as SharedFile[];
+      const sharedFiles = await window.electronAPI.getSharedFiles() as SharedFile[];
+      console.log('Retrieved shared files:', sharedFiles);
       return sharedFiles;
     } catch (error) {
       console.error('Error getting all shared files:', error);

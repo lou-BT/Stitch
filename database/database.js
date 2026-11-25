@@ -19,8 +19,14 @@ db.exec(`
     difficulty INTEGER NOT NULL DEFAULT 1 CHECK(difficulty BETWEEN 1 AND 5),
     free INTEGER NOT NULL DEFAULT 1 CHECK(free IN (0, 1)),
     used INTEGER NOT NULL DEFAULT 0 CHECK(used IN (0, 1)),
-    category_id INTEGER REFERENCES categories(id),
     description TEXT
+  );
+  CREATE TABLE IF NOT EXISTS pattern_categories (
+    pattern_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    PRIMARY KEY (pattern_id, category_id),
+    FOREIGN KEY (pattern_id) REFERENCES patterns(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
   );
   CREATE TABLE IF NOT EXISTS fabrics (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -129,11 +135,34 @@ function hydratePatternFields(pattern) {
   pattern.used = normalizeBoolean(pattern.used, false) === 1;
 }
 
+// Helper function to get category IDs for a pattern
+function getPatternCategoryIds(patternId) {
+  const rows = statements.getPatternCategoryIds.all(patternId);
+  return rows.map(row => row.category_id);
+}
+
+// Helper function to hydrate pattern with categories
+function hydratePatternWithCategories(pattern) {
+  pattern.categoryIds = getPatternCategoryIds(pattern.id);
+  return pattern;
+}
+
 // Prepared statements
 const statements = {
-  getPatternByName: db.prepare('SELECT id, name, brand, difficulty, free, used, category_id AS categoryId, description FROM patterns WHERE name = ?'),
-  getPatternById: db.prepare('SELECT id, name, brand, difficulty, free, used, category_id AS categoryId, description FROM patterns WHERE id = ?'),
-  getPattern: db.prepare('SELECT id, name, brand, difficulty, free, used, category_id AS categoryId, description FROM patterns'),
+  getPatternByName: db.prepare('SELECT id, name, brand, difficulty, free, used, description FROM patterns WHERE name = ?'),
+  getPatternById: db.prepare('SELECT id, name, brand, difficulty, free, used, description FROM patterns WHERE id = ?'),
+  getPattern: db.prepare('SELECT id, name, brand, difficulty, free, used, description FROM patterns'),
+  getPatternCategories: db.prepare(`
+    SELECT c.id, c.name FROM categories c
+    JOIN pattern_categories pc ON pc.category_id = c.id
+    WHERE pc.pattern_id = ?
+    ORDER BY c.name
+  `),
+  getPatternCategoryIds: db.prepare(`
+    SELECT category_id FROM pattern_categories WHERE pattern_id = ? ORDER BY category_id
+  `),
+  deletePatternCategories: db.prepare('DELETE FROM pattern_categories WHERE pattern_id = ?'),
+  insertPatternCategory: db.prepare('INSERT INTO pattern_categories (pattern_id, category_id) VALUES (?, ?)'),
   getFabrics: db.prepare('SELECT type, requirement FROM fabrics WHERE pattern_id = ? ORDER BY id ASC'),
   getMaterials: db.prepare('SELECT type, requirement FROM materials WHERE pattern_id = ? ORDER BY id ASC'),
   getPhotos: db.prepare('SELECT file_path FROM photos WHERE pattern_id = ?'),
@@ -154,6 +183,7 @@ function getAllPatterns() {
         pattern.photos = statements.getPhotos.all(pattern.id).map(row => row.file_path);
         pattern.techDrawings = statements.getTechDrawings.all(pattern.id).map(row => row.file_path);
         hydratePatternFields(pattern);
+        hydratePatternWithCategories(pattern);
     });
     return patterns;
 }
@@ -229,7 +259,14 @@ function deleteCategory(id) {
   }
 
   const transaction = db.transaction(() => {
-    db.prepare('UPDATE patterns SET category_id = ? WHERE category_id = ?').run(elseCategory.id, id);
+    // Replace all instances of the deleted category with "Else" in pattern_categories
+    db.prepare(`
+      UPDATE pattern_categories 
+      SET category_id = ? 
+      WHERE category_id = ?
+    `).run(elseCategory.id, id);
+    
+    // Delete the category
     db.prepare('DELETE FROM categories WHERE id = ?').run(id);
   });
   transaction();
@@ -251,6 +288,7 @@ function getPatternDetails(id) {
   pattern.files = statements.getFiles.all(pattern.id).map(row => row.file_path);
   pattern.sharedFiles = statements.getSharedFiles.all(pattern.id).map(row => ({ id: row.id, filePath: row.file_path }));
   hydratePatternFields(pattern);
+  hydratePatternWithCategories(pattern);
   pattern.comments = statements.getComments.all(pattern.id).map(row => ({ 
     id: row.id,
     text: row.text,
@@ -265,18 +303,41 @@ function getPatternDetails(id) {
 function addPattern(pattern) {
   const transaction = db.transaction(() => {
 
-    const insert = db.prepare('INSERT INTO patterns (name, brand, difficulty, free, used, category_id, description) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const insert = db.prepare('INSERT INTO patterns (name, brand, difficulty, free, used, description) VALUES (?, ?, ?, ?, ?, ?)');
     const result = insert.run(
       pattern.name,
       normalizeBrand(pattern.brand),
       normalizeDifficulty(pattern.difficulty),
       normalizeBoolean(pattern.free, true),
       normalizeBoolean(pattern.used, false),
-      pattern.categoryId,
       pattern.description ?? null
     );
 
     const id = result.lastInsertRowid;
+
+    // Handle categories - at least one is required, default to "Else" if none provided
+    let categoryIds = pattern.categoryIds || [];
+    if (!Array.isArray(categoryIds)) {
+      categoryIds = [];
+    }
+    
+    // Enforce max 5 categories
+    if (categoryIds.length > 5) {
+      throw new Error('A pattern cannot have more than 5 categories');
+    }
+
+    // If no categories provided, default to "Else"
+    if (categoryIds.length === 0) {
+      const elseCategory = db.prepare("SELECT id FROM categories WHERE name = 'Else'").get();
+      if (elseCategory) {
+        categoryIds = [elseCategory.id];
+      }
+    }
+
+    // Insert pattern categories
+    categoryIds.forEach(categoryId => {
+      statements.insertPatternCategory.run(id, categoryId);
+    });
 
     const insertFabric = db.prepare('INSERT INTO fabrics (pattern_id, type, requirement) VALUES (?, ?, ?)');
     normalizeResourceItems(pattern.fabric).forEach(item => insertFabric.run(id, item.type, item.requirement));
@@ -319,7 +380,7 @@ function updatePattern(id, pattern) {
   // pattern of type NewPattern
   const transaction = db.transaction(() => {
     const update = db.prepare(
-      'UPDATE patterns SET name = ?, brand = ?, difficulty = ?, free = ?, used = ?, category_id = ?, description = ? WHERE id = ?'
+      'UPDATE patterns SET name = ?, brand = ?, difficulty = ?, free = ?, used = ?, description = ? WHERE id = ?'
     );
 
     update.run(
@@ -328,10 +389,34 @@ function updatePattern(id, pattern) {
       normalizeDifficulty(pattern.difficulty),
       normalizeBoolean(pattern.free, true),
       normalizeBoolean(pattern.used, false),
-      pattern.categoryId,
       pattern.description ?? null,
       id
     );
+
+    // Handle categories
+    let categoryIds = pattern.categoryIds || [];
+    if (!Array.isArray(categoryIds)) {
+      categoryIds = [];
+    }
+
+    // Enforce max 5 categories
+    if (categoryIds.length > 5) {
+      throw new Error('A pattern cannot have more than 5 categories');
+    }
+
+    // If no categories provided, default to "Else"
+    if (categoryIds.length === 0) {
+      const elseCategory = db.prepare("SELECT id FROM categories WHERE name = 'Else'").get();
+      if (elseCategory) {
+        categoryIds = [elseCategory.id];
+      }
+    }
+
+    // Delete existing categories and insert new ones
+    statements.deletePatternCategories.run(id);
+    categoryIds.forEach(categoryId => {
+      statements.insertPatternCategory.run(id, categoryId);
+    });
 
     db.prepare('DELETE FROM fabrics WHERE pattern_id = ?').run(id);
     db.prepare('DELETE FROM materials WHERE pattern_id = ?').run(id);

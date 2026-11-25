@@ -74,8 +74,8 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
       webSecurity: false, // Allow loading local resources
       allowRunningInsecureContent: true,
       preload: path.join(__dirname, 'preload.js')
@@ -253,6 +253,7 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
 
   // Create sub folder
   fs.mkdirSync(path.join(newFolderPath, "pictures"));
+  fs.mkdirSync(path.join(newFolderPath, "techDrawings"));
 
   //copy pictures in folder
   pattern.photos.forEach(filePath => {
@@ -265,7 +266,7 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
 
   pattern.techDrawings.forEach(filePath => {
     const fileName = path.basename(filePath);
-    const destPath = path.join(newFolderPath, "pictures", fileName);
+    const destPath = path.join(newFolderPath, "techDrawings", fileName);
 
     fs.copyFileSync(filePath, destPath);
     techDrawings.push(destPath);
@@ -295,7 +296,7 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
     used: pattern.used ?? false,
     fabric: pattern.fabric ?? [],
     materials: pattern.materials ?? [],
-    categoryId: pattern.categoryId,
+    categoryIds: pattern.categoryIds ?? [],
     description: pattern.description,
     files: files,
     photos: photos,
@@ -359,6 +360,14 @@ ipcMain.handle('patterns:edit', (event, oldPattern, newPattern) => {
 
   var pattern = newPattern;
   const folderPath = path.join(patternFolderPath, newPattern.name);
+
+  // make sure the pictures and techDrawings subfolders exist before copying files into them
+  ['pictures', 'techDrawings'].forEach(subFolder => {
+    const subFolderPath = path.join(folderPath, subFolder);
+    if (!fs.existsSync(subFolderPath)) {
+      fs.mkdirSync(subFolderPath, { recursive: true });
+    }
+  });
 
   function copyAndReplacePaths(targetList, sourcePaths, destinationBuilder) {
     const replacements = new Map();

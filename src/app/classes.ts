@@ -5,7 +5,8 @@ export interface PatternPartial {
     difficulty: number;
     free: boolean;
     used: boolean;
-    categoryId: number | null;
+    categoryIds: number[];
+    categories?: Category[];
     photos: string[];
     techDrawings: string[];
 }
@@ -34,7 +35,8 @@ export function createPattern(overrides: Partial<NewPattern> = {}): NewPattern {
         description: "",
         fabric: [],
         materials: [],
-        categoryId: null,
+        categoryIds: [],
+        categories: [],
         photos: [],
         techDrawings: [],
         files: [],

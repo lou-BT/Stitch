@@ -1,0 +1,16 @@
+{
+  "9": "package.json",
+  "15": "app.config.ts",
+  "16": "migration.js",
+  "17": "_tmp_recover_runner.js",
+  "21": "recover-missing-pattern-files.js",
+  "22": "20261117_006_add_multi_category_support.js",
+  "25": "bootstrap",
+  "26": "bootswatch@^5.3.2",
+  "27": "jquery@^3.7.1",
+  "37": "jquery-ui@^1.13.2",
+  "38": "mdb-angular-ui-kit",
+  "39": "ngx-electron@^2.2.0",
+  "40": "tslib@^2.3.0",
+  "41": "karma-chrome-launcher@~3.2.0"
+}

@@ -41,9 +41,13 @@ export class PatternEditComponent implements OnInit, OnChanges{
     if (!this.oldPatternId) return;
     this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
       this.oldPattern = details;
-      this.newPattern = details as NewPattern;
+      this.newPattern = structuredClone(details) as NewPattern;
       this.newPattern.newSharedFiles = this.newPattern.newSharedFiles ?? [];
-      console.log("category id", this.newPattern.categoryId, this.oldPattern, this.newPattern);
+      // Ensure categoryIds is an array
+      if (!this.newPattern.categoryIds || !Array.isArray(this.newPattern.categoryIds)) {
+        this.newPattern.categoryIds = [];
+      }
+      console.log("category ids", this.newPattern.categoryIds, this.oldPattern, this.newPattern);
       this.cdr.detectChanges();
     });
   }
@@ -133,25 +137,25 @@ export class PatternEditComponent implements OnInit, OnChanges{
     switch (item) {
       case 0 :
         for(let i=0; i<files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.newPattern.photos.push(filePath);
         }
         break;
       case 1 :
         for(let i=0; i<files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.newPattern.techDrawings.push(filePath);
         }
         break;
       case 2 :
         for(let i=0; i<files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.newPattern.files.push(filePath);
         }
         break;
       case 3 :
         for(let i=0; i<files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.newPattern.newSharedFiles.push(filePath);
         }
         break;
@@ -177,25 +181,25 @@ export class PatternEditComponent implements OnInit, OnChanges{
     switch (item) {
       case 0:
         for (let i = 0; i < files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.newPattern.photos.push(filePath);
         }
         break;
       case 1:
         for (let i = 0; i < files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.newPattern.techDrawings.push(filePath);
         }
         break;
       case 2:
         for (let i = 0; i < files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.newPattern.files.push(filePath);
         }
         break;
       case 3:
         for (let i = 0; i < files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.newPattern.newSharedFiles.push(filePath);
         }
         break;
@@ -238,6 +242,31 @@ export class PatternEditComponent implements OnInit, OnChanges{
   removeNewSharedFile(path: string): void {
     if (!this.newPattern) return;
     this.newPattern.newSharedFiles = this.newPattern.newSharedFiles.filter(p => p !== path);
+  }
+
+  // CATEGORY HANDLING
+  isCategorySelected(categoryId: number): boolean {
+    return this.newPattern?.categoryIds.includes(categoryId) ?? false;
+  }
+
+  toggleCategory(categoryId: number, checked: boolean): void {
+    if (!this.newPattern) return;
+    if (checked) {
+      // Add category if not already selected and under max 5
+      if (!this.newPattern.categoryIds.includes(categoryId) && this.newPattern.categoryIds.length < 5) {
+        this.newPattern.categoryIds.push(categoryId);
+      }
+    } else {
+      // Remove category, but ensure at least one remains
+      const newCategoryIds = this.newPattern.categoryIds.filter(id => id !== categoryId);
+      if (newCategoryIds.length > 0) {
+        this.newPattern.categoryIds = newCategoryIds;
+      }
+    }
+  }
+
+  canAddMoreCategories(): boolean {
+    return (this.newPattern?.categoryIds.length ?? 0) < 5;
   }
 
   testFunction() {

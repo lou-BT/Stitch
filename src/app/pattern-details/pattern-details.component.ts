@@ -16,7 +16,7 @@ import { Category, Pattern } from '../classes';
 export class PatternDetailsComponent implements OnInit, OnChanges {
   @Input() patternId?: number;
   pattern?: Pattern;
-  category: Category | undefined;
+  categories: Category[] = [];
 
   fileIcon = icons.faFile;
 
@@ -32,7 +32,6 @@ export class PatternDetailsComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.loadPatternDetails();
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -52,9 +51,17 @@ export class PatternDetailsComponent implements OnInit, OnChanges {
     this.data.getPatternDetails(this.patternId.toString()).then((details: Pattern | null) => {
       this.pattern = details ?? undefined;
     });
-    this.data.getCategoryById(this.pattern?.categoryId ?? 0).then((category: Category | null) => {
-      this.category = category ?? undefined;
+    // Load all categories for display
+    this.data.getCategories().then((categories: Category[]) => {
+      this.categories = categories;
     });
+  }
+
+  getCategoryNames(): string {
+    if (!this.pattern?.categoryIds) return '';
+    return this.pattern.categoryIds
+      .map(id => this.categories.find(c => c.id === id)?.name || 'Unknown')
+      .join(', ');
   }
 
   async addComment(): Promise<void> {

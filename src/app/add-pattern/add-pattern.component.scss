@@ -11,3 +11,9 @@
   max-height: 220px;
   overflow-y: auto;
 }
+
+.category-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

@@ -37,62 +37,27 @@
 
 
 
-// Category Section
-.category-section {
+// Search Section: search bar on the left, category dropdown on the right
+.search-section {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding-bottom: var(--space-3);
+}
+
+// Category Section: selected category chips, under the search section
+.category-section {
+    display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
     padding-bottom: var(--space-3);
     align-items: center;
 }
 
-.category-items-container {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-}
-.category-item,
-.selected-category-item {
-    padding: var(--space-2) var(--space-4);
-    text-align: center;
-    border-radius: var(--pill-radius);
-    border: none;
-    cursor: pointer;
-    font-weight: var(--font-weight-medium);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    user-select: none;
-    white-space: nowrap;
-    
-    span {
-        text-transform: capitalize;
-    }
-}
-
-.category-item {
-    color:var(--light-black);
-    background-color: var(--white);
-    
-    &:hover {
-        background-color: var(--primary-color);
-        color: var(--white);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px var(--blue-shadow);
-    }
-    
-    &:active {
-        transform: translateY(0);
-    }
-}
-
-.selected-category-item {
-    color: var(--white);
-    background-color: var(--primary-color);
-    box-shadow: 0 4px 12px var(--blue-shadow);
-}
-
 // Pattern Card
 .pattern-block {
+    position: relative; // the stretched-link of the name button covers this whole card
     width: 100%;
     aspect-ratio: 1/1.3;
     border-radius: var(--large-card-radius);
@@ -115,6 +80,12 @@
         .pattern-overlay {
             opacity: 1;
         }
+    }
+
+    // keyboard focus on the name button: outline the whole card
+    &:has(.stretched-link:focus-visible) {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
     }
 }
 
@@ -171,23 +142,34 @@
     flex-grow: 1;
     
     .pattern-name {
+        // reset the default button look so it reads as plain text
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: none;
+        background: none;
+        text-align: left;
+        font-family: inherit;
+
         font-size: var(--font-size-body);
         font-weight: var(--font-weight-semibold);
         color: var(--light-black);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        // the focus outline is drawn on the whole card instead (see .pattern-block)
+        &:focus-visible {
+            outline: none;
+        }
     }
 }
 
-// Modals
-.modal-dialog {
-    max-width: 800px;
-}
+// Modals (shared modal styles are in styles.scss: app-modal-dialog, app-modal-content, app-modal-body)
 
-.modal-content {
-    border: none;
-    box-shadow: 0 20px 60px var(--darker-black-shadow);
+// the details modal body uses its own padding (no right padding)
+.pattern-details-body {
+    padding: var(--space-1) 0 var(--space-1) var(--space-1);
 }
 
 .modal-footer {

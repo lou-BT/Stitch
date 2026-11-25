@@ -1,32 +1,33 @@
 <div class="container-fluid" style="height: 100vh;" id="page">
   <div class="row" style="height: 100%;">
     <div class="col-3 col-xl-2" id="nav-column">
-      <div class="d-flex flex-column" id="nav">
+      <nav class="d-flex flex-column" id="nav" aria-label="Main navigation">
         <div class="p-2" id="nav-topper">
             <img src="assets/illustrations/logoStitchLarge.png" alt="Logo" id="logo">
             <h2 style="font-weight: var(--font-weight-bold);">stitch</h2>
         </div>
         <div class="p-2" id="nav-links" role="group">
-            <div class="nav-item" [routerLink]="['/patterns']" routerLinkActive="nav-item-active">
+            <a class="nav-item" routerLink="/patterns" routerLinkActive="nav-item-active">
                 <fa-icon [icon]='patternsIcon' class="nav-icon"></fa-icon>
-                <h5 class="item-name">Patterns</h5>
-            </div>
+                <span class="item-name">Patterns</span>
+            </a>
+            <!-- no route yet: stays a div until the fabrics page exists -->
             <div class="nav-item">
                 <fa-icon [icon]='fabricsIcon' class="nav-icon"></fa-icon>
-                <h5 class="item-name">Fabrics</h5>
+                <span class="item-name">Fabrics</span>
             </div>
         </div>
         <div class="mt-auto p-2" id="nav-bottom-container">
-          <div class="nav-item nav-settings" [routerLink]="['/settings']" routerLinkActive="nav-item-active">
+          <a class="nav-item nav-settings" routerLink="/settings" routerLinkActive="nav-item-active">
             <fa-icon [icon]='settingsIcon' class="settings-icon"></fa-icon>
-            <h5 class="item-name">Settings</h5>
-          </div>
+            <span class="item-name">Settings</span>
+          </a>
         </div>
-      </div>
+      </nav>
     </div>
-    <div class="col-9 col-xl-10" id="main-div">
-      <router-outlet></router-outlet >
-    </div>
+    <main class="col-9 col-xl-10" id="main-div">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 </div>
 

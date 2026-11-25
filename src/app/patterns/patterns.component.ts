@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild} from '@angular/core';
 import { DataService } from '../services/data.service';
-import { NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Category, Pattern } from '../classes';
 import * as bootstrap from 'bootstrap';
 import { Subscription } from 'rxjs';
@@ -14,7 +14,7 @@ import { PatternEditComponent } from '../pattern-edit/pattern-edit.component';
 
 @Component({
     selector: 'app-patterns',
-    imports: [PatternDetailsComponent, FontAwesomeModule, AddPatternComponent, PatternEditComponent, NgClass],
+    imports: [PatternDetailsComponent, FontAwesomeModule, AddPatternComponent, PatternEditComponent, FormsModule],
     templateUrl: './patterns.component.html',
     styleUrl: './patterns.component.scss'
 })
@@ -32,10 +32,13 @@ export class PatternsComponent implements OnInit, AfterViewInit{
   selectedPatternId?: number;
 
   categories: Category[] = [];
-  selectedCategory: Category | null = null;
+  selectedCategoryIds: number[] = [];
+  categorySearch = '';
+  patternSearch = '';
   previewSource: 'photo' | 'techDrawing' = 'photo';
 
   plusIcon = iconsSolid.faPlus;
+  removeIcon = iconsSolid.faXmark;
 
   constructor(private data: DataService) {}
 
@@ -61,13 +64,59 @@ export class PatternsComponent implements OnInit, AfterViewInit{
     this.patternEditModal.nativeElement.addEventListener('hidden.bs.modal', resetSelectedPatternIfNotSwitching);
   }
  
-  setCategory(category: Category | null) {
-    this.selectedCategory = category?.id == this.selectedCategory?.id ? null : category;
+  // categories shown in the dropdown, narrowed by the text typed in its search input
+  get filteredCategories(): Category[] {
+    const search = this.categorySearch.trim().toLowerCase();
+    if (!search) return this.categories;
+    return this.categories.filter(category => category.name.toLowerCase().includes(search));
+  }
+
+  // selected categories, displayed as removable chips next to the dropdown
+  get selectedCategories(): Category[] {
+    return this.categories.filter(category => this.selectedCategoryIds.includes(category.id));
+  }
+
+  isCategorySelected(categoryId: number): boolean {
+    return this.selectedCategoryIds.includes(categoryId);
+  }
+
+  toggleCategory(categoryId: number) {
+    this.selectedCategoryIds = this.isCategorySelected(categoryId)
+      ? this.selectedCategoryIds.filter(id => id !== categoryId)
+      : [...this.selectedCategoryIds, categoryId];
+  }
+
+  clearCategories() {
+    this.selectedCategoryIds = [];
   }
 
   filterCategory = (pattern: Pattern): boolean => {
-    if (!this.selectedCategory) return true;
-    return pattern.categoryId === this.selectedCategory.id;
+    if (this.selectedCategoryIds.length === 0) return true;
+    // OR logic: show pattern if it contains at least one of the selected categories
+    return pattern.categoryIds.some(id => this.selectedCategoryIds.includes(id));
+  }
+
+  // case-insensitive match on the pattern name or brand (brand is optional)
+  matchesSearch = (pattern: Pattern): boolean => {
+    const search = this.patternSearch.trim().toLowerCase();
+    if (!search) return true;
+    return pattern.name.toLowerCase().includes(search)
+      || (pattern.brand ?? '').toLowerCase().includes(search);
+  }
+
+  // patterns displayed in the list: must match the search AND the category selection
+  get filteredPatterns(): Pattern[] {
+    return this.patternList.filter(pattern => this.matchesSearch(pattern) && this.filterCategory(pattern));
+  }
+
+  clearSearch() {
+    this.patternSearch = '';
+  }
+
+  getCategoryNames(categoryIds: number[]): string {
+    return categoryIds
+      .map(id => this.categories.find(c => c.id === id)?.name || 'Unknown')
+      .join(', ');
   }
 
   togglePreviewSource() {

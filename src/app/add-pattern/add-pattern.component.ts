@@ -43,8 +43,12 @@ export class AddPatternComponent implements OnInit {
   private loadCategories(): void {
     this.data.getCategories().then((categories: Category[]) => {
       this.categories = categories;
-      if (this.pattern.categoryId === null) {
-        this.pattern.categoryId = (this.categories.find(category => category.name === 'Else') ?? this.categories[0]).id;
+      // Initialize with "Else" category if none provided
+      if (!this.pattern.categoryIds || this.pattern.categoryIds.length === 0) {
+        const elseCategory = this.categories.find(category => category.name === 'Else') ?? this.categories[0];
+        if (elseCategory) {
+          this.pattern.categoryIds = [elseCategory.id];
+        }
       }
       this.cdr.detectChanges();
     });
@@ -84,25 +88,25 @@ export class AddPatternComponent implements OnInit {
     switch (type) {
       case "photos":
         for (let i = 0; i < files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.pattern.photos.push(filePath);
         }
         break;
       case "techDrawings":
         for (let i = 0; i < files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.pattern.techDrawings.push(filePath);
         }
         break;
       case "files":
         for (let i = 0; i < files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.pattern.files.push(filePath);
         }
         break;
       case "newSharedFiles":
         for (let i = 0; i < files.length; i++) {
-          const filePath = window.getFilePath(files[i]);
+          const filePath = window.electronAPI.getFilePath(files[i]);
           this.pattern.newSharedFiles.push(filePath);
         }
         break;
@@ -189,8 +193,29 @@ export class AddPatternComponent implements OnInit {
     this.pattern.newSharedFiles = this.pattern.newSharedFiles.filter(p => p !== path);
   }
 
+  // CATEGORY HANDLING
+  isCategorySelected(categoryId: number): boolean {
+    return this.pattern.categoryIds.includes(categoryId);
+  }
 
-  // RESSOURCES
+  toggleCategory(categoryId: number, checked: boolean): void {
+    if (checked) {
+      // Add category if not already selected and under max 5
+      if (!this.pattern.categoryIds.includes(categoryId) && this.pattern.categoryIds.length < 5) {
+        this.pattern.categoryIds.push(categoryId);
+      }
+    } else {
+      // Remove category, but ensure at least one remains
+      const newCategoryIds = this.pattern.categoryIds.filter(id => id !== categoryId);
+      if (newCategoryIds.length > 0) {
+        this.pattern.categoryIds = newCategoryIds;
+      }
+    }
+  }
+
+  canAddMoreCategories(): boolean {
+    return this.pattern.categoryIds.length < 5;
+  }
   addResourceRow(type: 'fabric' | 'materials'): void {
     const nextItem: Material = { type: '', requirement: '' };
     if (type === 'fabric') {
@@ -229,7 +254,11 @@ export class AddPatternComponent implements OnInit {
     console.log('close modale 1');
     this.closeModalEvent.emit(true);
     this.pattern = createPattern();
-    this.pattern.categoryId = (this.categories.find(category => category.name === 'Else') ?? this.categories[0]).id;
+    // Initialize with "Else" category
+    const elseCategory = this.categories.find(category => category.name === 'Else') ?? this.categories[0];
+    if (elseCategory) {
+      this.pattern.categoryIds = [elseCategory.id];
+    }
   }
 
 }

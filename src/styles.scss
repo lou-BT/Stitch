@@ -1,167 +1,645 @@
 /* You can add global styles to this file, and also import other style files */
-//@import "../node_modules/bootswatch/dist/sketchy/variables";
 @import "../node_modules/bootstrap/scss/bootstrap";
+@import "../node_modules/bootstrap-icons/font/bootstrap-icons.css";
 @import "../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css";
-// @import "../node_modules/bootstrap-icons/"
 @import "../node_modules/material-design-icons-iconfont/dist/material-design-icons.css";
 
 @font-face {
     font-family: 'Signika';
     src:  url('./assets/Signika-VariableFont_GRAD,wght.ttf') format('truetype');
-    /* Add additional font properties if needed */
 }
 
 body {
-    font-family: 'Signika', sans-serif; /* Use the custom font */
-    
+    font-family: 'Signika', sans-serif;
 }
 
 :root {
+    //// FONT SIZES
+    --font-size-tag: 0.65rem;
+    --font-size-label: 0.80rem;
+    --font-size-body: 0.95rem;
+    --font-size-icon: 1.2rem;
+    --font-size-heading: 1.75rem;
+
+    //// FONT WEIGHTS
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    //// LETTER SPACING
+    --letter-spacing-label: 0.05em;
+    --letter-spacing-wide: 0.5px;
+
+    //// COLORS
+    //base
+    --black: #000000;
+    --white: #ffffff;
+    --off-white: #f8f9fa;
+    --gold: #daa520;
+    //blues
+    --dark-primary-color: #474eff;
     --primary-color: #6066FF;
     --secondary-color: #999CFF;
     --tertiary-color: #D6D8FF;
+    //greys
     --background-color-grey: #F4F5F6;
-    --light-black: #1F1F1F;
-    --warning-pink: #A1025C;
-}
+    --lighter-grey: #e0e0e0;
+    --light-grey: #c4c4c4;
+    --grey: #8e8e96;
+    --medium-grey: #575760;
+    //blacks
+    --light-black: #1f1f1f;
+    --lighter-black: #2c2c2c;
+    // warning/pink colors
+    --dark-warning-pink: #A1025C;
+    --warning-pink: #c30771;
+    --lighter-pink: #ffd6ec;
+    // badge colors
+    --green: #1e5f3a;
+    --light-green: #d6f0df;
+    //shadows
+    --black-shadow: rgba(0, 0, 0, 0.08);
+    --black-shadow-hover: rgba(0, 0, 0, 0.15);
+    --darker-black-shadow: rgba(0, 0, 0, 0.3);
+    --blue-shadow: rgba(96, 102, 255, 0.3);
+    --blue-shadow-soft: rgba(96, 102, 255, 0.25);
+    --blue-shadow-hover: rgba(96, 102, 255, 0.5);
+    --black-overlay: rgba(0, 0, 0, 0.7);
+    // navigation active state
+    --nav-active-from: rgba(44, 62, 80, 0.1);
+    --nav-active-to: rgba(52, 73, 94, 0.15);
+    --nav-active-shadow: rgba(44, 62, 80, 0.15);
+    --nav-active-hover-from: rgba(44, 62, 80, 0.15);
+    --nav-active-hover-to: rgba(52, 73, 94, 0.2);
 
-mat-tab-group.invisible-tabs  {
-    mat-tab-header {
-        display: none!important;
-    }
-    padding: 25px;
-    padding-right: 0px;
-    padding-bottom: 15px;
-    background-color: white;
-    color: black;
-    // border-radius: 20px;
-    height: 100%;
-    width: 100%;
+    //// MEASURES
+    //radius
+    --button-radius: 10px;
+    --large-card-radius: 16px;
+    --card-radius: 12px;
+    --inner-card-radius: 10px;
+    --inner-inner-radius: 8px;
+    --icon-radius: 6px;
+    --pill-radius: 999px;
+    //spacing
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
 }
 
 .title {
-    font-weight: bold;
+    font-weight: var(--font-weight-bold);
 }
 
 .form-control {
-    padding-left: .75rem;
-    padding-right: .75rem;
-    padding-top: .6rem;
-    padding-bottom: .6rem;
+    padding: .6rem var(--space-3) .6rem var(--space-3);
     background-color: var(--background-color-grey);
-    border-radius: 10px;
-    // border: 1.5px solid black;
+    border-radius: var(--inner-card-radius);
     border: 0px;
-    // box-shadow: 0 0 0 0px var(--tertiary-color);
-    // transition: box-shadow 0.3 ease;
     width: 100%;
+
+    &:focus {
+      border: 1.5px solid var(--secondary-color);
+      box-shadow: 0 0 0 0.25rem var(--blue-shadow-soft);
+    }
+    
+    &::placeholder {
+      color: var(--light-grey);
+    }
 }
 
-.form-control:focus {
-    border-width: 1.5px;
-    border-style: solid;
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 0.25rem rgba(96, 102, 255, 0.25);
-} 
-
-.form-control::placeholder {
-    color: lightgray;
+.text-grey {
+    color: var(--medium-grey);
 }
 
-.inputLabel {
-    font-size: small;
-    color: gray;
+.form-label {
+    @extend .text-grey;
+    font-size: var(--font-size-label);
     margin-bottom: 2px;
+    margin-right: var(--space-1);
 }
 
-.subtitle {
-    font-size: small;
-    color: grey;
+// space before a section of a form (section title, section header row...)
+.form-section {
+    margin-top: var(--space-5);
 }
+
+// section title of a form (<h2>), styled like a .form-label instead of a big heading
+.form-section-title {
+    @extend .form-label;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+// ============================================================
+// Bootstrap overrides
+// ============================================================
+
+// MODALS (added on top of Bootstrap's modal-content, used for confirmations)
+
+.app-modal-content {
+    border: none;
+    border-radius: var(--inner-card-radius);
+    box-shadow: 0 20px 60px var(--darker-black-shadow);
+}
+
+// BLOCKS
+
+.black-box {
+    border: 1.5px solid var(--black);
+    border-radius: var(--inner-card-radius);
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+// light outlined row (files, comments, categories...) on a white card
+.light-box {
+    border: 1px solid var(--lighter-grey);
+    border-radius: var(--inner-card-radius);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-3);
+}
+
+.grey-box {
+    background-color: var(--background-color-grey);
+    border-radius: var(--inner-card-radius);
+    padding: var(--space-3);
+}
+
+.label-upper {
+    @extend .text-grey;
+    font-size: var(--font-size-label);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-label);
+    font-weight: var(--font-weight-semibold);
+}
+
+// BUTTONS
 
 .button {
-    padding-left: .85rem;
-    padding-right: .85rem;
-    padding-top: .6rem;
-    padding-bottom: .6rem;
-    border-radius: 10px;
-    color: white;
-    background-color: black;
-    border-style: hidden;
+    display: inline-block;   // so links (<a>) styled as buttons size like buttons
+    padding: .6rem .85rem .6rem .85rem;
+    border-radius: var(--button-radius);
+    text-decoration: none;   // no underline on links styled as buttons
+
+    // disabled buttons (:disabled) and links (.disabled): faded, no hover/pressed effect
+    // (the variants below only apply hover/pressed styles when not disabled)
+    &:disabled,
+    &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+// PAGES (details, edit, add: routed pages inside the main area)
+
+// the main area has a fixed height, so each page scrolls itself
+.page {
+    // position: relative keeps absolutely positioned content (e.g. Bootstrap's .visually-hidden texts)
+    // inside this scroll container; without it they are placed relative to the window and make the
+    // whole window scrollable, with empty space under the side nav
+    position: relative;
+    height: 100%;
+    overflow-y: auto;
+    // thin scrollbar blending with the page background
+    scrollbar-width: thin;
+    scrollbar-color: var(--grey) var(--background-color-grey); // thumb and track colors
+
+    &::-webkit-scrollbar-track {
+        background: var(--background-color-grey);
+    }
+}
+
+// content centered with a readable width
+.page-content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding-bottom: var(--space-6);
+}
+
+// bar at the top of a page: back link on the left, actions on the right
+.page-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+// white card holding a page's content (same look as the pattern cards on the grey background)
+.page-card {
+    background-color: var(--white);
+    border-radius: var(--large-card-radius);
+    box-shadow: 0 2px 8px var(--black-shadow);
+    padding: var(--space-5);
+    margin-bottom: var(--space-4);
+}
+
+// body of a form page (add / edit)
+.page-form-body {
+    padding: var(--space-5);
+}
+
+// error message above a form's buttons (e.g. "The pattern couldn't be added")
+.form-error {
+    margin: 0 var(--space-5) var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--inner-card-radius);
+    background-color: var(--lighter-pink);
+    color: var(--dark-warning-pink);
+}
+
+// buttons at the bottom of a form, aligned right
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5);
+    border-top: 1px solid var(--lighter-grey);
+}
+
+// "← Previous page" link at the top of a page
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--icon-radius);
+    color: var(--medium-grey);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+
+    &:hover {
+        color: var(--light-black);
+        background-color: var(--lighter-grey);
+    }
+}
+
+.primary-button {
+    @extend .button;
+    // soft tint at rest, deepening to blue on hover and dark blue when pressed
+    color: var(--dark-primary-color);
+    background-color: var(--tertiary-color);
+    border: solid 1.5px var(--tertiary-color); // same color as the background, keeps the button size unchanged
+
+    &:not(:disabled):not(.disabled):hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: var(--white);
+    }
+
+    &:not(:disabled):not(.disabled):active {
+      background-color: var(--dark-primary-color);
+      border-color: var(--dark-primary-color);
+      box-shadow: 0 0 0 .25rem var(--tertiary-color);
+    }
 }
 
 .secondary-button {
-    padding-left: 12.1px;
-    padding-right: 12.1px;
-    padding-top: 8.1px;
-    padding-bottom: 8.1px;
-    border-radius: 10px;
-    color: black;
-    background-color: white;
+    @extend .button;
+    // quieter than .primary-button: white with a light grey border
+    color: var(--light-black);
+    background-color: var(--white);
+    border: solid 1.5px var(--lighter-grey);
 
-    border-style: solid;
-    border-width: 1.5px;
-    border-color: black;
+    &:not(:disabled):not(.disabled):hover {
+        background-color: var(--background-color-grey);
+        border-color: var(--light-grey);
+        color: var(--black);
+    }
+
+    &:not(:disabled):not(.disabled):active {
+        background-color: var(--lighter-grey);
+        border-color: var(--light-grey);
+        box-shadow: 0 0 0 .25rem var(--lighter-grey);
+    }
 }
 
-.button:hover {
-    background-color: var(--light-black);
-}
 
 .subtle-warning-button {
-    padding-left: 12.1px;
-    padding-right: 12.1px;
-    padding-top: 8.1px;
-    padding-bottom: 8.1px;
-    border-radius: 10px;
-    color: black;
-    background-color: white;
+    @extend .button;
+    // same idea as .primary-button, in pink
+    color: var(--warning-pink);
+    background-color: var(--lighter-pink);
+    border: solid 1.5px var(--lighter-pink); // same color as the background, keeps the button size unchanged
 
-    border-style: solid;
-    border-width: 1.5px;
-    border-color: black;
+    &:not(:disabled):not(.disabled):hover {
+        color: var(--white);
+        background-color: var(--warning-pink);
+        border-color: var(--warning-pink);
+    }
+
+    &:not(:disabled):not(.disabled):active {
+        background-color: var(--dark-warning-pink);
+        border-color: var(--dark-warning-pink);
+        box-shadow: 0 0 0 .25rem var(--lighter-pink);
+    }
 }
 
-.subtle-warning-button:hover {
-    color: white;
-    background-color: var(--warning-pink);
-    border-color: var(--warning-pink);
+// FILE LISTS (photos, technical drawings and files in the add and edit forms)
+
+// shared instruction files: scrolls once there are many files
+.shared-files-list {
+    max-height: 220px;
+    overflow-y: auto;
+
+    .list-group-item {
+        cursor: pointer; // each row is a <label> around its checkbox
+    }
 }
 
-.button:disabled {
-    background-color: var(--light-black);
+// inside a photo / drawing / file row: icon, name (and cover badge), buttons
+.file-row-icon {
+    margin-right: var(--space-3);
 }
 
-.action-button {
-    padding-left: 12.1px;
-    padding-right: 12.1px;
-    padding-top: 8.1px;
-    padding-bottom: 8.1px;
-    border-radius: 10px;
-    color: black;
-    background-color: white;
-
-    border-style: solid;
-    border-width: 1.5px;
-    border-color: black;
+.file-row-text {
+    margin-left: var(--space-3);
 }
 
-.action-button:hover {
-    color: white;
-    background-color: var(--primary-color);
+.file-row-actions {
+    margin-right: var(--space-3);
+}
+
+.image-block {
+    padding: 2px;
+    margin-bottom: var(--space-4);
+}
+
+.cover-item {
     border-color: var(--primary-color);
+    border-width: 2px;
 }
 
-::ng-deep .modal-backdrop {
-    z-index: 1040 !important;
-  }
-  
-  ::ng-deep .modal {
-    z-index: 1050 !important;
-  }
+.cover-badge {
+    font-size: var(--font-size-tag);
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: 2px;
+}
 
+.reorder-list {
+    min-height: 10px;
+}
 
+.drag-handle {
+    min-width: 42px;
+    padding: var(--space-2) var(--space-3);
+    cursor: grab;
+}
 
-  
+.cdk-drag-preview {
+    box-shadow: 0 8px 24px var(--darker-black-shadow);
+    border-radius: var(--inner-card-radius);
+}
 
+.cdk-drag-placeholder {
+    opacity: 0.25;
+}
 
+// "+" zone of the add/edit forms: a button (click or keyboard to pick files, or drop files on it)
+.new-item-block {
+    height: 76px;
+    width: 100%;
+    margin-bottom: var(--space-4);
+    border: none;
+    color: var(--medium-grey); // color of the "+" icon
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+}
+
+.item-thumbnail {
+    border-bottom-left-radius: var(--inner-inner-radius);
+    border-top-left-radius: var(--inner-inner-radius);
+    aspect-ratio: 1/1;
+    height: 72px;
+
+    img {
+        border-bottom-left-radius: var(--inner-inner-radius);
+        border-top-left-radius: var(--inner-inner-radius);
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        margin-right: var(--space-3);
+    }
+}
+
+// CHECKBOXES
+
+.form-check-input {
+    background-color: var(--white);
+    border: var(--bs-border-width) solid var(--lighter-grey);
+}
+
+.form-check-input:focus {
+    border: 1.5px solid var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 .25rem var(--tertiary-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border: var(--bs-border-width) solid var(--primary-color);
+}
+
+// SEARCH BAR (text input with a search icon on the left and a clear button on the right)
+
+.search-bar {
+    position: relative;
+    flex: 1 1 auto;
+    max-width: 420px;
+
+    .form-control {
+        // leave room for the icon and the clear button
+        padding-left: 2.4rem;
+        padding-right: 2.4rem;
+        background-color: var(--white);
+    }
+}
+
+.search-bar-icon {
+    position: absolute;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--grey);
+    pointer-events: none; // clicks go through to the input
+}
+
+.search-bar-clear {
+    position: absolute;
+    right: var(--space-2);
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--grey);
+    font-size: var(--font-size-label);
+
+    &:hover {
+        background-color: var(--lighter-grey);
+        color: var(--light-black);
+    }
+}
+
+// message shown when a filtered list has no result
+.empty-list-message {
+    padding: var(--space-6) 0;
+}
+
+// FILTER DROPDOWN (dropdown with a search input and a scrollable list of checkboxes)
+
+.filter-dropdown-menu {
+    width: 260px;
+    padding: var(--space-2);
+    border: none;
+    border-radius: var(--inner-card-radius);
+    box-shadow: 0 8px 24px var(--black-shadow-hover);
+
+    .form-control {
+        margin-bottom: var(--space-2);
+    }
+}
+
+.filter-dropdown-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    border-radius: var(--icon-radius);
+    cursor: pointer;
+    text-transform: capitalize;
+
+    .form-check-input {
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: var(--tertiary-color);
+    }
+
+    &:active {
+        color: inherit;
+        background-color: var(--tertiary-color);
+    }
+
+    // option that can't be ticked/unticked (e.g. maximum reached in the category picker)
+    &:has(.form-check-input:disabled) {
+        opacity: 0.5;
+        cursor: not-allowed;
+
+        &:hover,
+        &:active {
+            background-color: transparent;
+        }
+    }
+}
+
+.filter-empty {
+    padding: var(--space-2);
+    margin: 0;
+    font-size: var(--font-size-label);
+}
+
+// number of active filters, shown inside the dropdown button
+.filter-count {
+    display: inline-block;
+    min-width: 1.4em;
+    margin-left: var(--space-1);
+    padding: 0 var(--space-1);
+    border-radius: var(--pill-radius);
+    background-color: var(--primary-color);
+    color: var(--white);
+    font-size: var(--font-size-label);
+    text-align: center;
+}
+
+// active filter, removable with its x button
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+    border-radius: var(--pill-radius);
+    background-color: var(--primary-color);
+    color: var(--white);
+    font-weight: var(--font-weight-medium);
+    text-transform: capitalize;
+    white-space: nowrap;
+
+    button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--white);
+
+        &:not(:disabled):hover {
+            background-color: var(--dark-primary-color);
+        }
+
+        // chip that can't be removed (e.g. the last category of a pattern)
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    }
+}
+
+// Textarea that grows with its content, then scrolls vertically
+.auto-grow-textarea {
+    field-sizing: content;
+    max-height: 10rem;
+    overflow-y: auto;
+    resize: none;
+}
+
+.preserve-whitespace {
+    white-space: pre-wrap;
+}
+
+// RANGE CHECK
+
+.difficulty-radios {
+    display: flex;
+    flex-direction: row;
+    margin-top: var(--space-1);
+    margin-bottom: var(--space-5);
+}
+
+.difficulty-radio {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+
+    .form-check-input:checked,
+    .form-check-input.filled {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      background-image: none !important;
+    }
+}

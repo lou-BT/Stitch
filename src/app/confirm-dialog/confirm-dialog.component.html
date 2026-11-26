@@ -1,0 +1,16 @@
+<div class="modal fade" tabindex="-1" aria-labelledby="confirmDialogTitle" aria-hidden="true" #modal>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content app-modal-content">
+      <div class="modal-body confirm-dialog-body">
+        <h2 class="h5" id="confirmDialogTitle">{{dialog.title}}</h2>
+        <p class="text-grey mb-0">{{dialog.message}}</p>
+      </div>
+      <footer class="form-actions">
+        <button type="button" class="secondary-button" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" [class]="dialog.danger ? 'subtle-warning-button' : 'primary-button'" (click)="confirm()">
+          {{dialog.confirmLabel}}
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>

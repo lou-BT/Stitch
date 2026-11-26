@@ -1,50 +1,104 @@
-const {app, BrowserWindow, ipcMain, ipcRenderer} = require('electron');
-const url = require("url");
+require('dotenv').config();
+const { app, BrowserWindow, ipcMain, shell, ipcRenderer } = require('electron');
+const url = require('url');
+const path = require('path');
+const fs = require('fs');
+const settings = require('electron-settings');
 
-const patternFolderPath = 'C:/Users/louca/Documents/PatternFolder';
-const path = require("path");
-const fs = require("fs");
-const { shell } = require("electron");
+// Import database functions
+const db = require('./database/database.js');
 
+const patternFolderPath = process.env.PATTERN_FOLDER_PATH || 'C:/Users/louca/Documents/PatternFolder';
 
-/*
-const sqlite3 = require('sqlite3');
+// Enable hot reload in development
+const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 
-// Open SQLite database
-const DB_FILE_PATH = './data/database.db';
-const db = new sqlite3.Database(DB_FILE_PATH);
+if (isDev) {
+  require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
+    hardResetMethod: 'exit'
+  });
+}
 
-// // Create a table
-db.serialize(() => {
-  db.run('DROP TABLE patterns');
-  db.run('CREATE TABLE IF NOT EXISTS patterns (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255) NOT NULL, files TEXT[] NOT NULL)');
-});
-
-*/
 
 let mainWindow;
 
+function createPatternFolder(folderPath) {
+  //check if folder exists, if not create folder
+  if(!fs.existsSync(folderPath)) {
+    console.log("creating folder");
+    fs.mkdirSync(folderPath);
+    //and create index file
+    fs.writeFileSync(path.join(folderPath,'patternIndex.json'), JSON.stringify([]));
+  }
+}
+
+async function loadConfig() {
+  //check if predefined config exist
+  const configPath = path.join(__dirname, 'config.json');
+  if(fs.existsSync(configPath)) {
+    //if yes, load config
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    await settings.set('settings', config);
+    //and check if folder exists
+
+  } else {
+    //if not, check if file exists at default path
+    const folderPath = path.join(app.getPath('documents'),'PatternFolder');
+    //if it doesn't exists, create it with the JSON index
+    createPatternFolder(folderPath);
+    //and add default path to config
+    await settings.set('settings', {
+      'patternFolderPath': folderPath
+    })
+  }
+}
+
+async function updateConfig(config) {
+  //check if config file already exists
+  const configPath = path.join(__dirname, 'config.json');
+  if(fs.existsSync(configPath)) {
+    //if yes, update it
+    fs.writeFileSync(configPath, JSON.stringify(config));
+  } else {
+    //if not, create it
+    fs.writeFileSync(configPath, JSON.stringify(config));
+  }
+
+}
+
 function createWindow () {
+  // loadConfig();
+
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: false, // Allow loading local resources
+      allowRunningInsecureContent: true,
       preload: path.join(__dirname, 'preload.js')
     }
   })
 
-  mainWindow.loadURL(
-    url.format({
-      pathname: path.join(__dirname, `/dist/browser/index.html`),
-      protocol: "file:",
-      slashes: true
-    })
-  );
+  // Load from dev server in development, built files in production
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:4200');
+  } else {
+    mainWindow.loadURL(
+      url.format({
+        pathname: path.join(__dirname, `/dist/browser/index.html`),
+        protocol: "file:",
+        slashes: true
+      })
+    );
+  }
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // Open the DevTools in development
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
 
   mainWindow.on('closed', function () {
     mainWindow = null
@@ -63,20 +117,127 @@ app.on('activate', function () {
   if (mainWindow === null) createWindow()
 })
 
-ipcMain.handle('patterns:getAll', (event) => {
-  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
-  if(fs.existsSync(patternIndexPath)) {
-    const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-    return JSON.parse(patternsJSON);
+
+ipcMain.handle('patterns:getCategories', (event) => {
+  try {
+    return db.getCategories();
+  } catch (error) {
+    console.error('Error getting categories:', error);
+    return [];
   }
-  else return [];
+});
+
+ipcMain.handle('patterns:getCategoryById', (event, id) => {
+  try {
+    return db.getCategoryById(id);
+  } catch (error) {
+    console.error('Error getting category by id:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('patterns:addCategory', (event, name) => {
+  try {
+    return db.addCategory(name);
+  } catch (error) {
+    console.error('Error adding category:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('patterns:updateCategory', (event, id, name) => {
+  try {
+    return db.updateCategory(id, name);
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('patterns:deleteCategory', (event, id) => {
+  try {
+    db.deleteCategory(id);
+    // deleting a category reassigns its patterns to "Else", so refresh the pattern list too
+    const patterns = db.getAllPatterns();
+    event.sender.send('patterns:update', patterns);
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    throw error;
+  }
+});
+
+
+ipcMain.handle('patterns:getAll', (event) => {
+  try {
+    return db.getAllPatterns();
+  } catch (error) {
+    console.error('Error getting patterns:', error);
+    return [];
+  }
 })
 
-ipcMain.on('patterns:addNew', (event, pattern) => {
+
+
+ipcMain.handle('patterns:getDetails', (event, patternId) => {
+  try {
+    return db.getPatternDetails(patternId); 
+  } catch (error) {
+    console.error('Error getting pattern details:', error);
+    return null;
+  }
+})
+
+ipcMain.handle('comments:add', (event, patternId, text) => {
+  try {
+    const trimmed = (text ?? '').trim();
+    if (!trimmed) return db.getPatternDetails(patternId);
+    db.addComment(patternId, trimmed);
+    return db.getPatternDetails(patternId);
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('comments:edit', (event, patternId, commentId, text) => {
+  try {
+    const trimmed = (text ?? '').trim();
+    if (!trimmed) return db.getPatternDetails(patternId);
+    db.editComment(commentId, trimmed);
+    return db.getPatternDetails(patternId);
+  } catch (error) {
+    console.error('Error editing comment:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('comments:delete', (event, patternId, commentId) => {
+  try {
+    db.deleteComment(commentId);
+    return db.getPatternDetails(patternId);
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('sharedFiles:getAll', (event) => {
+  try {
+    return db.getAllSharedFiles();
+  } catch (error) {
+    console.error('Error getting shared files:', error);
+    return [];
+  }
+});
+
+
+// returns the new pattern's id (or null if the database insert fails), so the app can open its details page
+ipcMain.handle('patterns:addNew', (event, pattern) => {
 
   var photos = [];
   var techDrawings = [];
   var files = [];
+  var newSharedFiles = [];
 
   const newFolderPath = path.join(patternFolderPath, pattern.name);
   // Create folder
@@ -93,6 +254,7 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
 
   // Create sub folder
   fs.mkdirSync(path.join(newFolderPath, "pictures"));
+  fs.mkdirSync(path.join(newFolderPath, "techDrawings"));
 
   //copy pictures in folder
   pattern.photos.forEach(filePath => {
@@ -105,44 +267,66 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
 
   pattern.techDrawings.forEach(filePath => {
     const fileName = path.basename(filePath);
-    const destPath = path.join(newFolderPath, "pictures", fileName);
+    const destPath = path.join(newFolderPath, "techDrawings", fileName);
 
     fs.copyFileSync(filePath, destPath);
     techDrawings.push(destPath);
   });
 
-  //update JSON index
-  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
+  // Copy new shared files in the folder "shared"
+  pattern.newSharedFiles.forEach(filePath => {
+    const fileName = path.basename(filePath);
+    const destPath = path.join(patternFolderPath, "shared", fileName);
+    // Create the "shared" folder if it doesn't exist
+    if (!fs.existsSync(path.join(patternFolderPath, "shared"))) {
+      fs.mkdirSync(path.join(patternFolderPath, "shared"));
+    }
+
+    fs.copyFileSync(filePath, destPath);
+    newSharedFiles.push(destPath);
+  });
+
+  
+
+  //update database
   const newPattern = {
     name: pattern.name,
-    category: pattern.category,
+    brand: pattern.brand ?? null,
+    difficulty: pattern.difficulty,
+    free: pattern.free ?? true,
+    used: pattern.used ?? false,
+    fabric: pattern.fabric ?? [],
+    materials: pattern.materials ?? [],
+    categoryIds: pattern.categoryIds ?? [],
+    description: pattern.description,
     files: files,
     photos: photos,
-    techDrawings: techDrawings
+    techDrawings: techDrawings,
+    newSharedFiles: newSharedFiles,
+    sharedFiles: pattern.sharedFiles ?? [],
+    comments: []
   }
 
-  if(fs.existsSync(patternIndexPath)) {
-        const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-        var patterns = JSON.parse(patternsJSON);
-        patterns.push(newPattern);
-
-        fs.writeFileSync(patternIndexPath, JSON.stringify(patterns));
-        event.sender.send('patterns:update', patterns);
+  try {
+    const id = Number(db.addPattern(newPattern));
+    const patterns = db.getAllPatterns();
+    event.sender.send('patterns:update', patterns);
+    return id;
+  } catch (error) {
+    console.error('Error adding pattern to database:', error);
+    return null;
   }
-
-  else {
-    event.sender.send('patterns:addNew:response', []);
-  }
-
-  //database operations
-  //db.run('INSERT INTO patterns (name, files) VALUES (?, ?)', [pattern.name, pattern])
 })
+
+
 
 ipcMain.on('patterns:openFile', (event, file) => {
   shell.openPath(file).then( res => {
     if(res != "") shell.showItemInFolder(file);
   })
 })
+
+
 
 ipcMain.on('patterns:delete', (event, pattern) => {
   //delete folder
@@ -157,36 +341,71 @@ ipcMain.on('patterns:delete', (event, pattern) => {
     });   
   }
 
-  //get old list
-  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
-  if(fs.existsSync(patternIndexPath)) {
-    const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-    var patterns = JSON.parse(patternsJSON);
-    
-    //delete pattern from list
-    patterns = patterns.filter(obj => obj.name !== pattern.name);
-    try {
-      fs.writeFileSync(patternIndexPath, JSON.stringify(patterns, null, 2));
-    } catch (err) {
-      console.error('Error writing JSON file:', err);
-    }
+  //delete from database
+  try {
+    db.deletePattern(pattern.id);
+    const patterns = db.getAllPatterns();
     event.sender.send('patterns:update', patterns);
-  }
-
-  else {
+  } catch (error) {
+    console.error('Error deleting pattern from database:', error);
     event.sender.send('patterns:delete:response', []);
   }
 })
 
-ipcMain.on('patterns:edit', (event, newPattern, patternEdit) => {
+
+
+ipcMain.handle('patterns:edit', (event, oldPattern, newPattern) => {
+  // old pattern of type Pattern
+  // new pattern of type NewPattern (extra field for new shared files)
+
   console.log('edit is called')
+
   var pattern = newPattern;
   const folderPath = path.join(patternFolderPath, newPattern.name);
-  //delete files
-  for( let i = 0; i < patternEdit.delPhotos.length; i++) {
-    console.log('photo', patternEdit.delPhotos[i])
-    if(fs.existsSync(patternEdit.delPhotos[i])) 
-      fs.unlinkSync(patternEdit.delPhotos[i], { recursive: true, force: true }, (err) => {
+
+  // make sure the pictures and techDrawings subfolders exist before copying files into them
+  ['pictures', 'techDrawings'].forEach(subFolder => {
+    const subFolderPath = path.join(folderPath, subFolder);
+    if (!fs.existsSync(subFolderPath)) {
+      fs.mkdirSync(subFolderPath, { recursive: true });
+    }
+  });
+
+  function copyAndReplacePaths(targetList, sourcePaths, destinationBuilder) {
+    const replacements = new Map();
+
+    sourcePaths.forEach(sourcePath => {
+      const fileName = path.basename(sourcePath);
+      const destinationPath = destinationBuilder(fileName);
+
+      fs.copyFileSync(sourcePath, destinationPath);
+
+      if (!replacements.has(sourcePath)) {
+        replacements.set(sourcePath, []);
+      }
+      replacements.get(sourcePath).push(destinationPath);
+    });
+
+    return (targetList || []).map(existingPath => {
+      const replacementQueue = replacements.get(existingPath);
+      if (replacementQueue && replacementQueue.length > 0) {
+        return replacementQueue.shift();
+      }
+      return existingPath;
+    });
+  }
+
+  // PHOTOS
+  // photos to be removed (present in oldPattern but not in newPattern)
+  const delPhotos = oldPattern.photos.filter(photo => !newPattern.photos.includes(photo));
+  // photos to be added (present in newPattern but not in oldPattern)
+  const addPhotos = newPattern.photos.filter(photo => !oldPattern.photos.includes(photo));
+
+  // delete photos
+  for( let i = 0; i < delPhotos.length; i++) {
+    console.log('photo', delPhotos[i])
+    if(fs.existsSync(delPhotos[i])) 
+      fs.unlinkSync(delPhotos[i], { recursive: true, force: true }, (err) => {
         if (err) {
           console.error('Error while deleting the folder:', err);
         } else {
@@ -194,63 +413,94 @@ ipcMain.on('patterns:edit', (event, newPattern, patternEdit) => {
         }
       })
   }
-  for( let i=0; i < patternEdit.delTechDrawings.length; i++) {
-    if(fs.existsSync(patternEdit.delTechDrawings[i])) 
-      fs.unlinkSync(patternEdit.delTechDrawings[i], { recursive: true, force: true }, (err) => {
-      if (err) {
-        console.error('Error while deleting the folder:', err);
-      } else {
-        console.log('Folder and its contents deleted successfully');
-      }
-    })
-  }
-  for( let i=0; i < patternEdit.delFiles.length; i++) {
-    if(fs.existsSync(patternEdit.delFiles[i])) 
-      fs.unlinkSync(patternEdit.delFiles[i], { recursive: true, force: true }, (err) => {
-      if (err) {
-        console.error('Error while deleting the folder:', err);
-      } else {
-        console.log('Folder and its contents deleted successfully');
-      }
-    })
-  }
+
+  // add photos
+    pattern.photos = copyAndReplacePaths(
+    pattern.photos,
+    addPhotos,
+    fileName => path.join(folderPath, "pictures", fileName)
+  );
   
-  //add files
-  patternEdit.newFiles.forEach(filePath => {
-    const fileName = path.basename(filePath);
-    const destPath = path.join(folderPath, fileName);
-    
-    fs.copyFileSync(filePath, destPath);
-    pattern.files.push(destPath);
-  })
-  //and add pictures
-  patternEdit.newPhotos.forEach(filePath => {
-    const fileName = path.basename(filePath);
-    const destPath = path.join(folderPath, "pictures", fileName);
+  // TECH DRAWINGS
+  // tech drawings to be removed (present in oldPattern but not in newPattern)
+  const delTechDrawings = oldPattern.techDrawings.filter(td => !newPattern.techDrawings.includes(td));
+  // tech drawings to be added (present in newPattern but not in oldPattern)
+  const addTechDrawings = newPattern.techDrawings.filter(td => !oldPattern.techDrawings.includes(td));
 
-    fs.copyFileSync(filePath, destPath);
-    pattern.photos.push(destPath);
-  })
-  patternEdit.newTechDrawings.forEach(filePath => {
-    const fileName = path.basename(filePath);
-    const destPath = path.join(folderPath, "pictures", fileName);
+  // delete tech drawings
+  for( let i=0; i < delTechDrawings.length; i++) {
+    if(fs.existsSync(delTechDrawings[i])) 
+      fs.unlinkSync(delTechDrawings[i], { recursive: true, force: true }, (err) => {
+      if (err) {
+        console.error('Error while deleting the folder:', err);
+      } else {
+        console.log('Folder and its contents deleted successfully');
+      }
+    })
+  }
 
-    fs.copyFileSync(filePath, destPath);
-    pattern.techDrawings.push(destPath);
-  })
+  // add tech drawings
+  pattern.techDrawings = copyAndReplacePaths(
+    pattern.techDrawings,
+    addTechDrawings,
+    fileName => path.join(folderPath, "techDrawings", fileName)
+  );
 
-  //update json
-  const patternIndexPath = path.join(patternFolderPath, 'patternIndex.json');
-  if(fs.existsSync(patternIndexPath)) {
-    const patternsJSON = fs.readFileSync(patternIndexPath, 'utf-8');
-    var patterns = JSON.parse(patternsJSON);
-    const index = patterns.findIndex((item) => item.name == pattern.name);
-    //console.log("index", index, patterns[index])
-    patterns.splice(index, 1, pattern);
-    fs.writeFileSync(patternIndexPath, JSON.stringify(patterns));
+  // FILES
+  // files to be removed (present in oldPattern but not in newPattern)
+  const delFiles = oldPattern.files.filter(f => !newPattern.files.includes(f));
+  // files to be added (present in newPattern but not in oldPattern)
+  const addFiles = newPattern.files.filter(f => !oldPattern.files.includes(f));
+
+  // delete files
+  for( let i=0; i < delFiles.length; i++) {
+    if(fs.existsSync(delFiles[i])) 
+      fs.unlinkSync(delFiles[i], { recursive: true, force: true }, (err) => {
+      if (err) {
+        console.error('Error while deleting the folder:', err);
+      } else {
+        console.log('Folder and its contents deleted successfully');
+      }
+    })
+  }
+
+  // add files
+  pattern.files = copyAndReplacePaths(
+    pattern.files,
+    addFiles,
+    fileName => path.join(folderPath, fileName)
+  );
+
+  // SHARED FILES
+
+  // shared files to be removed (present in oldPattern but not in newPattern)
+  // const delSharedFiles = oldPattern.sharedFiles.filter(sf => !newPattern.sharedFiles.includes(sf));
+  // const addSharedFiles = newPattern.sharedFiles.filter(sf => !oldPattern.sharedFiles.includes(sf)); 
+  // => no need to handle old shared files, they are already in the right folder, only db references need to be updated
+  
+  // shared files to be added (new shared files field in newPattern type)
+  const addSharedFiles = newPattern.newSharedFiles;
+
+  // delete shared files
+  // = > no files to delete for shared files only db references need to be updated
+
+  //and add shared files
+  pattern.newSharedFiles = copyAndReplacePaths(
+    pattern.newSharedFiles,
+    addSharedFiles,
+    fileName => path.join(patternFolderPath, "shared", fileName)
+  );
+
+
+
+  //update database
+  try {
+    // Update the pattern in database with the edits
+    db.updatePattern(pattern.id, pattern);
+    const patterns = db.getAllPatterns();
     event.sender.send('patterns:update', patterns);
+  } catch (error) {
+    console.error('Error updating pattern in database:', error);
   }
-
-  
 
 })

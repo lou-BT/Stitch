@@ -1,34 +1,38 @@
 <div class="container-fluid" style="height: 100vh;" id="page">
   <div class="row" style="height: 100%;">
     <div class="col-3 col-xl-2" id="nav-column">
-      <div class="d-flex flex-column" id="nav">
+      <nav class="d-flex flex-column" id="nav" aria-label="Main navigation">
         <div class="p-2" id="nav-topper">
             <img src="assets/illustrations/logoStitchLarge.png" alt="Logo" id="logo">
-            <h2 style="font-weight: bold;">stitch</h2>
+            <h2 style="font-weight: var(--font-weight-bold);">stitch</h2>
         </div>
         <div class="p-2" id="nav-links" role="group">
-            <!-- <div class="nav-item" (click)="tabGroup.selectedIndex=0"> -->
-            <div class="nav-item" [routerLink]="['/patterns']" routerLinkActive="router-link-active" >
-                <!-- <fa-icon [icon]='images' size="xl" ></fa-icon> -->
-                <h5 class="item-name">patterns</h5>
-            </div>
+            <a class="nav-item" routerLink="/patterns" routerLinkActive="nav-item-active">
+                <fa-icon [icon]='patternsIcon' class="nav-icon"></fa-icon>
+                <span class="item-name">Patterns</span>
+            </a>
+            <!-- no route yet: stays a div until the fabrics page exists -->
             <div class="nav-item">
-            <!-- <div class="nav-item" (click)="tabGroup.selectedIndex=0"> -->
-                <!-- <fa-icon [icon]='scroll' size="xl" style="margin-left: 2px;"></fa-icon> -->
-                <h5 class="item-name">fabrics</h5>
+                <fa-icon [icon]='fabricsIcon' class="nav-icon"></fa-icon>
+                <span class="item-name">Fabrics</span>
             </div>
-    
         </div>
-        <div class="mt-auto p-2 align-self-center" id="nav-bottom" [routerLink]="['/settings']" routerLinkActive="router-link-active">
-          <a><span><fa-icon [icon]='settingsIcon' style="margin-right: 5px;"></fa-icon></span>settings</a>
+        <div class="mt-auto p-2" id="nav-bottom-container">
+          <a class="nav-item nav-settings" routerLink="/settings" routerLinkActive="nav-item-active">
+            <fa-icon [icon]='settingsIcon' class="settings-icon"></fa-icon>
+            <span class="item-name">Settings</span>
+          </a>
         </div>
-      </div>
+      </nav>
     </div>
-    <div class="col-9 col-xl-10" id="main-div">
-      <router-outlet></router-outlet >
-    </div>
+    <main class="col-9 col-xl-10" id="main-div">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 </div>
+
+<!-- the app's confirmation modal, opened through ConfirmDialogService -->
+<app-confirm-dialog></app-confirm-dialog>
 
 
 

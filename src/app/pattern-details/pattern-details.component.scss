@@ -1,19 +1,192 @@
-carousel-inner {
-    height: 400px;
+// OVERVIEW CARD
+
+.details-carousel {
+    border-radius: var(--inner-card-radius);
+    overflow: hidden;
+    margin-bottom: var(--space-4);
 }
 
 mdb-carousel {
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
     background-color: var(--background-color-grey);
 }
 
-.file-block {
-    border-color: black;
-    border-radius: 10px;
-    border-width: 1.5px;
-    border-style: solid;
-    padding: 15px;
-    margin-bottom: 15px;
+.carousel-image {
+    height: 400px;
+    object-fit: contain;
+}
+
+.details-categories {
+    margin-bottom: 0;
+}
+
+.details-title {
+    margin: 0 var(--space-1) 0 0;
+}
+
+.difficulty-star {
+    color: var(--light-black);
+}
+
+// visible on white and on grey (the old color was the page background grey)
+.star-empty {
+    color: var(--light-grey);
+}
+
+.paid-icon {
+    color: var(--gold);
+}
+
+.pattern-meta-card {
+    margin-top: var(--space-3);
+}
+
+.details-description {
+    margin: var(--space-4) 0 0;
+    text-align: justify;
+    hyphens: auto;
+}
+
+// FILES AND COMMENTS
+
+.empty-section {
+    margin: 0;
+}
+
+.meta-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--pill-radius);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.2;
+}
+
+.badge-positive {
+    color: var(--green); 
+    background-color: var(--light-green);
+}
+
+.badge-neutral {
+    color: var(--medium-grey);
+    background-color: var(--lighter-grey);
+}
+
+// <dl> of label/value pairs: Brand and Materials on the left, Fabrics (often a longer list) on the right
+.meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+        "brand     fabrics"
+        "materials fabrics";
+    align-items: start;
+    gap: var(--space-3);
+    margin: 0;
+}
+
+.meta-brand     { grid-area: brand; }
+.meta-materials { grid-area: materials; }
+.meta-fabrics   { grid-area: fabrics; }
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    // remove Bootstrap's default <dt> bold and <dd> margins (the classes set the look)
+    dt,
+    dd {
+        margin: 0;
+    }
+}
+
+.meta-list {
+    margin: 0;
+    padding-left: var(--space-4);
+}
+
+.meta-value {
+    color: var(--light-black);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-medium);
+    overflow-wrap: anywhere;
+}
+
+.file-info {
+    flex: 1;
+    min-width: 0;
+    margin-right: var(--space-3);
+}
+
+.file-info fa-icon {
+    flex-shrink: 0;
+}
+
+.file-name {
+    font-size: var(--font-size-body);
+    line-height: 1.2;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    hyphens: auto;
+}
+
+// COMMENTS
+
+.comment-form {
+    margin-bottom: var(--space-3);
+}
+
+.comment-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-2);
+}
+
+.comment-meta {
+    font-size: var(--font-size-label);
+    margin-bottom: var(--space-2);
+}
+
+.comment-text {
+    margin-bottom: var(--space-3);
+    white-space: pre-wrap;
+}
+
+.comment-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    padding: var(--space-1) var(--space-2);
+    cursor: pointer;
+    color: var(--black);
+    font-size: var(--font-size-icon);
+    border-radius: var(--icon-radius);
+    &:hover {
+        background-color: var(--background-color-grey);
+    }
+}
+
+@media (max-width: 768px) {
+    .meta-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "brand"
+            "materials"
+            "fabrics";
+    }
 }
 

@@ -1,0 +1,693 @@
+{
+  "communities": {
+    "0": [
+      "database_check_db",
+      "database_database",
+      "database_database_addcategory",
+      "database_database_addcomment",
+      "database_database_addpattern",
+      "database_database_database",
+      "database_database_db",
+      "database_database_dbpath",
+      "database_database_deletecategory",
+      "database_database_deletecomment",
+      "database_database_deletepattern",
+      "database_database_editcomment",
+      "database_database_getallpatterns",
+      "database_database_getallsharedfiles",
+      "database_database_getcategories",
+      "database_database_getcategorybyid",
+      "database_database_getpatterndetails",
+      "database_database_hydratepatternfields",
+      "database_database_insertcategorystmt",
+      "database_database_normalizeboolean",
+      "database_database_normalizebrand",
+      "database_database_normalizedifficulty",
+      "database_database_normalizeoptionaltext",
+      "database_database_normalizeresourceitems",
+      "database_database_path",
+      "database_database_statements",
+      "database_database_updatecategory",
+      "database_database_updatepattern",
+      "database_migrate",
+      "database_migrate_fs",
+      "database_migrate_path",
+      "database_migrate_patternindexpath",
+      "database_migration",
+      "database_migration_database",
+      "database_migration_db",
+      "database_migration_dbpath",
+      "database_migration_ensuremigrationstable",
+      "database_migration_fs",
+      "database_migration_getappliedmigrations",
+      "database_migration_getmigrationfiles",
+      "database_migration_migrationsdir",
+      "database_migration_path",
+      "database_migration_runmigrations",
+      "database_migrations_20261110_005_add_category_table",
+      "default_categories",
+      "default_categories_defaultcategories",
+      "main",
+      "main_app_browserwindow_ipcmain_shell_ipcrenderer",
+      "main_copyandreplacepaths",
+      "main_createpatternfolder",
+      "main_createwindow",
+      "main_fs",
+      "main_loadconfig",
+      "main_path",
+      "main_settings",
+      "main_updateconfig",
+      "main_url",
+      "ref_fs",
+      "ref_path",
+      "ref_url",
+      "src_app_save",
+      "src_app_save_app_browserwindow_ipcmain_ipcrenderer",
+      "src_app_save_createwindow",
+      "src_app_save_fs",
+      "src_app_save_path",
+      "src_app_save_url"
+    ],
+    "1": [
+      "src_app_classes_pattern",
+      "src_app_classes_patternpartial",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_addresourcerow",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_allowdrop",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_closemodal",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_constructor",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_deletepattern",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_extractfilename",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_filteredavailablesharedfiles",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_filterednewsharedfiles",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_gettargetlist",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_issharedfileselected",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_loadpattern",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_matchesfilter",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_ngonchanges",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_ngoninit",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_ondifficultychange",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_onfiledrop",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_onfileselect",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_onreorderdrop",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_openfilepicker",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_removeitem",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_removenewsharedfile",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_removeresourcerow",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_submitform",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_testfunction",
+      "src_app_pattern_edit_pattern_edit_component_patterneditcomponent_togglesharedfile",
+      "src_app_pattern_edit_pattern_edit_component_ts_component",
+      "src_app_pattern_edit_pattern_edit_component_ts_input",
+      "src_app_pattern_edit_pattern_edit_component_ts_output",
+      "src_app_patterns_patterns_component_patternscomponent_getpreviewimage",
+      "src_app_services_data_service_dataservice",
+      "src_app_services_data_service_dataservice_addcomment",
+      "src_app_services_data_service_dataservice_addpattern",
+      "src_app_services_data_service_dataservice_checkpatternnamevalidity",
+      "src_app_services_data_service_dataservice_constructor",
+      "src_app_services_data_service_dataservice_deletecategory",
+      "src_app_services_data_service_dataservice_deletecomment",
+      "src_app_services_data_service_dataservice_deletepattern",
+      "src_app_services_data_service_dataservice_editcomment",
+      "src_app_services_data_service_dataservice_editpattern",
+      "src_app_services_data_service_dataservice_getallsharedfiles",
+      "src_app_services_data_service_dataservice_getpatterndetails",
+      "src_app_services_data_service_dataservice_getpatternnamelist",
+      "src_app_services_data_service_dataservice_loadpatterns",
+      "src_app_services_data_service_dataservice_openfile",
+      "src_app_services_data_service_ts_injectable"
+    ],
+    "2": [
+      "package_dependencies_angular_platform_browser",
+      "ref_angular_cdk",
+      "ref_angular_common",
+      "ref_angular_core",
+      "ref_angular_forms",
+      "ref_angular_platform_browser",
+      "ref_fortawesome_angular_fontawesome",
+      "ref_fortawesome_free_regular_svg_icons",
+      "ref_fortawesome_free_solid_svg_icons",
+      "ref_rxjs",
+      "src_app_add_pattern_add_pattern_component",
+      "src_app_add_pattern_add_pattern_component_spec",
+      "src_app_app_component",
+      "src_app_app_component_appcomponent",
+      "src_app_app_component_spec",
+      "src_app_app_component_ts_component",
+      "src_app_app_config",
+      "src_app_app_config_appconfig",
+      "src_app_app_config_routes",
+      "src_app_classes",
+      "src_app_classes_category",
+      "src_app_classes_comment",
+      "src_app_classes_createpattern",
+      "src_app_classes_fabric",
+      "src_app_classes_material",
+      "src_app_classes_newpattern",
+      "src_app_classes_sharedfile",
+      "src_app_pattern_details_pattern_details_component",
+      "src_app_pattern_details_pattern_details_component_spec",
+      "src_app_pattern_edit_pattern_edit_component",
+      "src_app_pattern_edit_pattern_edit_component_spec",
+      "src_app_patterns_patterns_component",
+      "src_app_patterns_patterns_component_patternscomponent_setcategory",
+      "src_app_patterns_patterns_component_spec",
+      "src_app_services_data_service",
+      "src_app_services_data_service_dataservice_addcategory",
+      "src_app_services_data_service_dataservice_getcategorybyid",
+      "src_app_services_data_service_dataservice_updatecategory",
+      "src_app_services_data_service_spec",
+      "src_app_settings_settings_component",
+      "src_app_settings_settings_component_editablecategory",
+      "src_app_settings_settings_component_settingscomponent_iselse",
+      "src_app_settings_settings_component_spec",
+      "src_main"
+    ],
+    "3": [
+      "angular_architect_build",
+      "angular_architect_extract_i18n",
+      "angular_architect_serve",
+      "angular_architect_test",
+      "angular_build_builder",
+      "angular_build_configurations",
+      "angular_build_defaultconfiguration",
+      "angular_build_options",
+      "angular_configurations_development",
+      "angular_configurations_production",
+      "angular_development_buildtarget",
+      "angular_development_extractlicenses",
+      "angular_development_optimization",
+      "angular_development_sourcemap",
+      "angular_extract_i18n_builder",
+      "angular_extract_i18n_options",
+      "angular_options_assets",
+      "angular_options_browser",
+      "angular_options_buildtarget",
+      "angular_options_index",
+      "angular_options_inlinestylelanguage",
+      "angular_options_outputpath",
+      "angular_options_polyfills",
+      "angular_options_scripts",
+      "angular_options_styles",
+      "angular_options_tsconfig",
+      "angular_production_budgets",
+      "angular_production_buildtarget",
+      "angular_production_outputhashing",
+      "angular_serve_builder",
+      "angular_serve_configurations",
+      "angular_serve_defaultconfiguration",
+      "angular_stitch_architect",
+      "angular_test_builder",
+      "angular_test_options"
+    ],
+    "4": [
+      "angular",
+      "angular_newprojectroot",
+      "angular_projects",
+      "angular_projects_stitch",
+      "angular_schema",
+      "angular_schematics",
+      "angular_schematics_angular_component_style",
+      "angular_schematics_angular_component_type",
+      "angular_schematics_angular_directive_type",
+      "angular_schematics_angular_guard_typeseparator",
+      "angular_schematics_angular_interceptor_typeseparator",
+      "angular_schematics_angular_module_typeseparator",
+      "angular_schematics_angular_pipe_typeseparator",
+      "angular_schematics_angular_resolver_typeseparator",
+      "angular_schematics_angular_service_type",
+      "angular_schematics_schematics_angular_component",
+      "angular_schematics_schematics_angular_directive",
+      "angular_schematics_schematics_angular_guard",
+      "angular_schematics_schematics_angular_interceptor",
+      "angular_schematics_schematics_angular_module",
+      "angular_schematics_schematics_angular_pipe",
+      "angular_schematics_schematics_angular_resolver",
+      "angular_schematics_schematics_angular_service",
+      "angular_stitch_prefix",
+      "angular_stitch_projecttype",
+      "angular_stitch_root",
+      "angular_stitch_schematics",
+      "angular_stitch_sourceroot",
+      "angular_version"
+    ],
+    "5": [
+      "package_devdependencies",
+      "package_devdependencies_angular_build",
+      "package_devdependencies_angular_cli",
+      "package_devdependencies_angular_compiler_cli",
+      "package_devdependencies_cross_env",
+      "package_devdependencies_electron_rebuild",
+      "package_devdependencies_jasmine_core",
+      "package_devdependencies_karma",
+      "package_devdependencies_karma_chrome_launcher",
+      "package_devdependencies_karma_coverage",
+      "package_devdependencies_karma_jasmine_html_reporter",
+      "package_devdependencies_ts_node",
+      "package_devdependencies_types_better_sqlite3",
+      "package_devdependencies_types_bootstrap",
+      "package_devdependencies_types_jquery",
+      "ref_angular_build",
+      "ref_angular_cli",
+      "ref_angular_compiler_cli",
+      "ref_cross_env",
+      "ref_electron_rebuild",
+      "ref_jasmine_core",
+      "ref_karma",
+      "ref_karma_chrome_launcher",
+      "ref_karma_coverage",
+      "ref_karma_jasmine_html_reporter",
+      "ref_ts_node",
+      "ref_types_better_sqlite3",
+      "ref_types_bootstrap",
+      "ref_types_jquery"
+    ],
+    "6": [
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_addfiles",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_addresourcerow",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_allowdrop",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_checknamevalidity",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_checknamevaliditybis",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_closemodal",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_extractfilename",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_filteredavailablesharedfiles",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_filterednewsharedfiles",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_gettargetlist",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_issharedfileselected",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_loadcategories",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_loadsharedfiles",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_matchesfilter",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_ngoninit",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_ondifficultychange",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_onfiledrop",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_onfileselect",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_onreorderdrop",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_openfilepicker",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_removeitem",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_removenewsharedfile",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_removeresourcerow",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_submitform",
+      "src_app_add_pattern_add_pattern_component_addpatterncomponent_togglesharedfile",
+      "src_app_add_pattern_add_pattern_component_ts_component",
+      "src_app_add_pattern_add_pattern_component_ts_output"
+    ],
+    "7": [
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_addcomment",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_canceleditcomment",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_deletecomment",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_loadpatterndetails",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_ngonchanges",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_ngoninit",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_reload",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_savecomment",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_scrolltocomments",
+      "src_app_pattern_details_pattern_details_component_patterndetailscomponent_starteditcomment",
+      "src_app_pattern_details_pattern_details_component_ts_component",
+      "src_app_pattern_details_pattern_details_component_ts_input",
+      "src_app_patterns_patterns_component_patternscomponent",
+      "src_app_patterns_patterns_component_patternscomponent_closemodal",
+      "src_app_patterns_patterns_component_patternscomponent_constructor",
+      "src_app_patterns_patterns_component_patternscomponent_filtercategory",
+      "src_app_patterns_patterns_component_patternscomponent_ngafterviewinit",
+      "src_app_patterns_patterns_component_patternscomponent_ngoninit",
+      "src_app_patterns_patterns_component_patternscomponent_onpatternsaved",
+      "src_app_patterns_patterns_component_patternscomponent_openmodal",
+      "src_app_patterns_patterns_component_patternscomponent_opennewpatternmodal",
+      "src_app_patterns_patterns_component_patternscomponent_openpatternmodal",
+      "src_app_patterns_patterns_component_patternscomponent_showmodal",
+      "src_app_patterns_patterns_component_patternscomponent_togglepreviewsource",
+      "src_app_patterns_patterns_component_ts_component",
+      "src_app_services_data_service_dataservice_getcategories",
+      "viewchild"
+    ],
+    "8": [
+      "package_dependencies",
+      "package_dependencies_angular_animations",
+      "package_dependencies_angular_cdk",
+      "package_dependencies_angular_common",
+      "package_dependencies_angular_core",
+      "package_dependencies_angular_forms",
+      "package_dependencies_angular_platform_browser_dynamic",
+      "package_dependencies_bootstrap",
+      "package_dependencies_bootswatch",
+      "package_dependencies_dotenv",
+      "package_dependencies_fortawesome_angular_fontawesome",
+      "package_dependencies_fortawesome_free_brands_svg_icons",
+      "package_dependencies_fortawesome_free_regular_svg_icons",
+      "package_dependencies_fortawesome_free_solid_svg_icons",
+      "package_dependencies_jquery",
+      "package_dependencies_mdb_angular_ui_kit",
+      "package_dependencies_rxjs",
+      "package_dependencies_tslib",
+      "ref_angular_animations",
+      "ref_angular_platform_browser_dynamic",
+      "ref_bootstrap",
+      "ref_bootswatch",
+      "ref_dotenv",
+      "ref_fortawesome_free_brands_svg_icons",
+      "ref_jquery",
+      "ref_mdb_angular_ui_kit",
+      "ref_tslib"
+    ],
+    "9": [
+      "package",
+      "package_dependencies_angular_compiler",
+      "package_dependencies_angular_material",
+      "package_dependencies_bootstrap_icons",
+      "package_dependencies_jquery_ui",
+      "package_dependencies_material_design_icons_iconfont",
+      "package_dependencies_ngx_electron",
+      "package_main",
+      "package_name",
+      "package_private",
+      "package_version",
+      "ref_angular_compiler",
+      "ref_angular_material",
+      "ref_bootstrap_icons",
+      "ref_jquery_ui",
+      "ref_material_design_icons_iconfont",
+      "ref_ngx_electron"
+    ],
+    "10": [
+      "ref_tsconfig_json",
+      "tsconfig_node",
+      "tsconfig_node_compileroptions",
+      "tsconfig_node_compileroptions_allowsyntheticdefaultimports",
+      "tsconfig_node_compileroptions_esmoduleinterop",
+      "tsconfig_node_compileroptions_module",
+      "tsconfig_node_compileroptions_moduleresolution",
+      "tsconfig_node_compileroptions_resolvejsonmodule",
+      "tsconfig_node_extends",
+      "tsconfig_node_ts_node",
+      "tsconfig_node_ts_node_compileroptions",
+      "tsconfig_node_ts_node_transpileonly"
+    ],
+    "11": [
+      "src_app_settings_settings_component_settingscomponent",
+      "src_app_settings_settings_component_settingscomponent_addcategory",
+      "src_app_settings_settings_component_settingscomponent_canceledit",
+      "src_app_settings_settings_component_settingscomponent_deletecategory",
+      "src_app_settings_settings_component_settingscomponent_extracterrormessage",
+      "src_app_settings_settings_component_settingscomponent_isduplicatename",
+      "src_app_settings_settings_component_settingscomponent_loadcategories",
+      "src_app_settings_settings_component_settingscomponent_ngoninit",
+      "src_app_settings_settings_component_settingscomponent_saveedit",
+      "src_app_settings_settings_component_settingscomponent_startedit",
+      "src_app_settings_settings_component_ts_component"
+    ],
+    "12": [
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_db_migrate",
+      "package_scripts_electron",
+      "package_scripts_electron_dev",
+      "package_scripts_ng",
+      "package_scripts_start",
+      "package_scripts_test",
+      "package_scripts_watch"
+    ],
+    "13": [
+      "src_app_services_modals_service",
+      "src_app_services_modals_service_modalsservice",
+      "src_app_services_modals_service_modalsservice_constructor",
+      "src_app_services_modals_service_spec",
+      "src_app_services_modals_service_ts_injectable"
+    ],
+    "14": [
+      "package_devdependencies_electron",
+      "preload",
+      "preload_ipcrenderer_webutils",
+      "ref_electron"
+    ],
+    "15": [
+      "package_dependencies_angular_router",
+      "ref_angular_router"
+    ],
+    "16": [
+      "package_dependencies_better_sqlite3",
+      "ref_better_sqlite3"
+    ],
+    "17": [
+      "package_dependencies_electron_reload",
+      "ref_electron_reload"
+    ],
+    "18": [
+      "package_dependencies_electron_settings",
+      "ref_electron_settings"
+    ],
+    "19": [
+      "package_dependencies_electron_store",
+      "ref_electron_store"
+    ],
+    "20": [
+      "package_dependencies_fortawesome_fontawesome_svg_core",
+      "ref_fortawesome_fontawesome_svg_core"
+    ],
+    "21": [
+      "package_dependencies_graphifyy",
+      "ref_graphifyy"
+    ],
+    "22": [
+      "package_dependencies_popperjs_core",
+      "ref_popperjs_core"
+    ],
+    "23": [
+      "package_dependencies_sqlite3",
+      "ref_sqlite3"
+    ],
+    "24": [
+      "package_dependencies_zone_js",
+      "ref_zone_js"
+    ],
+    "25": [
+      "package_devdependencies_concurrently",
+      "ref_concurrently"
+    ],
+    "26": [
+      "package_devdependencies_karma_jasmine",
+      "ref_karma_jasmine"
+    ],
+    "27": [
+      "package_devdependencies_types_jasmine",
+      "ref_types_jasmine"
+    ],
+    "28": [
+      "package_devdependencies_typescript",
+      "ref_typescript"
+    ],
+    "29": [
+      "package_devdependencies_wait_on",
+      "ref_wait_on"
+    ],
+    "30": [
+      "src_types_index_d",
+      "src_types_index_d_window"
+    ],
+    "31": [
+      "database_migrations_20260430_001_add_brand_and_difficulty"
+    ],
+    "32": [
+      "database_migrations_20260430_002_add_pattern_usage_and_fabric_fields"
+    ],
+    "33": [
+      "database_migrations_20260505_003_add_fabrics_and_materials_tables"
+    ],
+    "34": [
+      "database_migrations_20261031_004_add_shared_files_usage"
+    ],
+    "35": [
+      "src_assets_config"
+    ],
+    "36": [
+      "src_assets_config_pattern_folder_path"
+    ]
+  },
+  "cohesion": {
+    "0": 0.05128205128205128,
+    "1": 0.06028368794326241,
+    "2": 0.1109936575052854,
+    "3": 0.07058823529411765,
+    "4": 0.07142857142857142,
+    "5": 0.06896551724137931,
+    "6": 0.10846560846560846,
+    "7": 0.09523809523809523,
+    "8": 0.07407407407407407,
+    "9": 0.11764705882352941,
+    "10": 0.18181818181818182,
+    "11": 0.34545454545454546,
+    "12": 0.2222222222222222,
+    "13": 0.5,
+    "14": 0.5,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0,
+    "36": 1.0
+  },
+  "gods": [
+    {
+      "id": "src_app_pattern_edit_pattern_edit_component_patterneditcomponent",
+      "label": "PatternEditComponent",
+      "degree": 35
+    },
+    {
+      "id": "src_app_add_pattern_add_pattern_component_addpatterncomponent",
+      "label": "AddPatternComponent",
+      "degree": 34
+    },
+    {
+      "id": "src_app_services_data_service_dataservice",
+      "label": "DataService",
+      "degree": 28
+    },
+    {
+      "id": "src_app_patterns_patterns_component_patternscomponent",
+      "label": "PatternsComponent",
+      "degree": 20
+    },
+    {
+      "id": "ref_angular_core",
+      "label": "@angular/core",
+      "degree": 19
+    },
+    {
+      "id": "src_app_pattern_details_pattern_details_component_patterndetailscomponent",
+      "label": "PatternDetailsComponent",
+      "degree": 18
+    },
+    {
+      "id": "src_app_classes_pattern",
+      "label": "Pattern",
+      "degree": 18
+    },
+    {
+      "id": "src_app_classes_category",
+      "label": "Category",
+      "degree": 18
+    },
+    {
+      "id": "src_app_settings_settings_component_settingscomponent",
+      "label": "SettingsComponent",
+      "degree": 14
+    },
+    {
+      "id": "src_app_classes_sharedfile",
+      "label": "SharedFile",
+      "degree": 13
+    }
+  ],
+  "surprises": [
+    {
+      "source": "PatternsComponent",
+      "target": "Category",
+      "source_files": [
+        "src/app/patterns/patterns.component.ts",
+        "src/app/classes.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "PatternDetailsComponent",
+      "target": "Category",
+      "source_files": [
+        "src/app/pattern-details/pattern-details.component.ts",
+        "src/app/classes.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "PatternDetailsComponent",
+      "target": "Pattern",
+      "source_files": [
+        "src/app/pattern-details/pattern-details.component.ts",
+        "src/app/classes.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "PatternEditComponent",
+      "target": "Category",
+      "source_files": [
+        "src/app/pattern-edit/pattern-edit.component.ts",
+        "src/app/classes.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "PatternEditComponent",
+      "target": "NewPattern",
+      "source_files": [
+        "src/app/pattern-edit/pattern-edit.component.ts",
+        "src/app/classes.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `better-sqlite3` connect `better-sqlite3` to `database.js`, `package.json`?",
+      "why": "High betweenness centrality (0.114) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `./tsconfig.json`, `PATTERN_FOLDER_PATH` to the rest of the system?",
+      "why": "2 weakly-connected nodes found - possible missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `database.js` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05128205128205128 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `@angular/core` connect `patterns.component.ts` to `dependencies`, `package.json`, `ModalsService`?",
+      "why": "High betweenness centrality (0.105) - this node is a cross-community bridge."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `PatternEditComponent` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.06028368794326241 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `AddPatternComponent` connect `AddPatternComponent` to `patterns.component.ts`?",
+      "why": "High betweenness centrality (0.092) - this node is a cross-community bridge."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `patterns.component.ts` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.1109936575052854 - nodes in this community are weakly interconnected."
+    }
+  ]
+}

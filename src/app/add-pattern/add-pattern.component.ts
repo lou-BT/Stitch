@@ -1,78 +1,122 @@
-import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output, OnInit } from '@angular/core';
-import { NgForm, FormsModule, FormControl } from '@angular/forms';
-import { Pattern, Category, NewPattern } from '../classes';
-import { NgClass, NgFor, NgIf } from '@angular/common';
-//import { PatternService } from '../services/pattern.service';
-import { MatGridListModule } from '@angular/material/grid-list';
+import { Component, ViewEncapsulation, ChangeDetectorRef, OnInit, inject, ViewChild, ElementRef, Injector, afterNextRender } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule, NgForm } from '@angular/forms';
+import { Material, NewPattern, SharedFile, createPattern, Category } from '../classes';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
 import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DataService } from '../services/data.service';
+import { fileName } from '../utils/pattern-format';
+import { CategoryPickerComponent } from '../category-picker/category-picker.component';
+import { PatternNameValidatorDirective } from '../validators/pattern-name.validator';
 
 @Component({
-  selector: 'app-add-pattern',
-  standalone: true,
-  imports: [FormsModule, NgFor, NgIf, NgClass, MatGridListModule, FontAwesomeModule, ScrollingModule],
-  templateUrl: './add-pattern.component.html',
-  styleUrl: './add-pattern.component.scss',
-  encapsulation: ViewEncapsulation.None 
+    selector: 'app-add-pattern',
+    imports: [FormsModule, FontAwesomeModule, ScrollingModule, DragDropModule, RouterLink, CategoryPickerComponent, PatternNameValidatorDirective],
+    templateUrl: './add-pattern.component.html', 
+    styleUrl: './add-pattern.component.scss',
+    encapsulation: ViewEncapsulation.None
 })
 export class AddPatternComponent implements OnInit {
-  @Output() closeModalEvent = new EventEmitter<any>();
-  //patternService = new PatternService();
-  patternNameList : string[] = [];
-  patternName: string = '';
-  pattern =  new Pattern();
+  pattern: NewPattern =  createPattern();
+  availableSharedFiles: SharedFile[] = [];
+  sharedFilesFilter = '';
 
-  pdf = icons.faFilePdf;
-  xmark = solidIcons.faCircleXmark; // faXmarkCircle;
+  fileIcon = icons.faFile;
+  plusIcon = solidIcons.faPlus;
+  dragHandleIcon = solidIcons.faGripVertical;
 
-  constructor(private cdr: ChangeDetectorRef, private data: DataService) {}
+  categories: Category[] = [];
 
-  ngOnInit(): void {}
+  // VALIDATION
+  // set by the first click on "Add pattern": from then on, every error message is shown
+  submitted = false;
+  // while the pattern is being added (files copied): the submit button is disabled
+  saving = false;
+  // adding failed in the main process (file copy or database): shows an alert above the buttons
+  addFailed = false;
 
-  extractFileName(filePath: string): string {
-    // Split the filePath by '/' to separate into parts
-    const pathParts = filePath.split(/[\\/]/);
+  @ViewChild('nameInput') nameInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('addFilesButton') addFilesButton?: ElementRef<HTMLButtonElement>;
 
-    // Get the last part of the path, which is the filename
-    const fileName = pathParts[pathParts.length -1];
-    return fileName || ''; // Return the extracted filename or an empty string if not found
+  private cdr = inject(ChangeDetectorRef);
+  private data = inject(DataService);
+  private router = inject(Router);
+  private injector = inject(Injector);
+
+  // empty form content (after the default category is applied), compared by hasUnsavedChanges()
+  private initialSnapshot = JSON.stringify(this.pattern);
+  // set after the pattern is added, so leaving the page doesn't ask about unsaved changes
+  private skipUnsavedCheck = false;
+
+  private loadSharedFiles(): void {
+    this.data.getAllSharedFiles().then(files  => {
+      this.availableSharedFiles = files;
+      this.cdr.detectChanges();
+    });
+  }
+
+  private loadCategories(): void {
+    this.data.getCategories().then((categories: Category[]) => {
+      this.categories = categories;
+      // Initialize with "Else" category if none provided
+      if (!this.pattern.categoryIds || this.pattern.categoryIds.length === 0) {
+        const elseCategory = this.categories.find(category => category.name === 'Else') ?? this.categories[0];
+        if (elseCategory) {
+          this.pattern.categoryIds = [elseCategory.id];
+        }
+        // the default category is not a change made by the user
+        this.initialSnapshot = JSON.stringify(this.pattern);
+      }
+      this.cdr.detectChanges();
+    });
   }
   
-  checkNameValidity() {
-    if (!this.data.checkPatternNameValidity(this.pattern.name)) {
-      const inputField = document.getElementById('patternNameInput');
-      inputField?.classList.add('is-invalid');
-    } else {
-      const inputField = document.getElementById('patternNameInput');
-      inputField?.classList.remove('is-invalid');
-    }
+  ngOnInit(): void {
+    this.loadSharedFiles();
+    this.loadCategories();
   }
 
-  checkNameValidityBis() {
-    return this.data.checkPatternNameValidity(this.pattern.name);
+  fileName(path: string): string {
+    return fileName(path);
+  }
+  
+  // at least one pattern file is required
+  get filesMissing(): boolean {
+    return this.pattern.files.length === 0;
   }
 
-  onFileDrop(event: DragEvent, type: string): void {
-    event.preventDefault();
-    const files = event.dataTransfer!.files;
+  onDifficultyChange(): void {
+    this.pattern.difficulty = Math.min(5, Math.max(1, Number(this.pattern.difficulty) || 1));
+  }
+
+  // FILES HANDLING 
+  private addFiles(files: FileList, type: string): void {
     switch (type) {
-      case "photos" :
-        for(let i=0; i<files.length; i++) {
-          console.log("file",files[i])
-          this.pattern.photos.push(files[i].path);
+      case "photos":
+        for (let i = 0; i < files.length; i++) {
+          const filePath = window.electronAPI.getFilePath(files[i]);
+          this.pattern.photos.push(filePath);
         }
         break;
-      case "techDrawings" :
-        for(let i=0; i<files.length; i++) {
-          this.pattern.techDrawings.push(files[i].path);
+      case "techDrawings":
+        for (let i = 0; i < files.length; i++) {
+          const filePath = window.electronAPI.getFilePath(files[i]);
+          this.pattern.techDrawings.push(filePath);
         }
         break;
-      case "files" :
-        for(let i=0; i<files.length; i++) {
-          this.pattern.files.push(files[i].path);
+      case "files":
+        for (let i = 0; i < files.length; i++) {
+          const filePath = window.electronAPI.getFilePath(files[i]);
+          this.pattern.files.push(filePath);
+        }
+        break;
+      case "newSharedFiles":
+        for (let i = 0; i < files.length; i++) {
+          const filePath = window.electronAPI.getFilePath(files[i]);
+          this.pattern.newSharedFiles.push(filePath);
         }
         break;
       default:
@@ -80,50 +124,141 @@ export class AddPatternComponent implements OnInit {
         break;
     }
     this.cdr.detectChanges();
-    //console.log("new file",  this.files, this.pattern);
+  }
+
+  openFilePicker(input: HTMLInputElement): void {
+    input.click();
+  }
+
+  onFileSelect(event: Event, type: string): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    this.addFiles(input.files, type);
+    input.value = '';
+  }
+
+  onFileDrop(event: DragEvent, type: string): void {
+    event.preventDefault();
+    const files = event.dataTransfer!.files;
+    if (!files || files.length === 0) return;
+    this.addFiles(files, type);
   }
 
   allowDrop(event: DragEvent): void {
     event.preventDefault();
   }
 
-  deleteItem(list: number , item: string) {
-    switch(list) {
-      case 0 :
-        var index = this.pattern.photos.indexOf(item);
-        if ( index != -1 ) this.pattern.photos.splice(index,1);
-        break;
-      case 1 :
-        var index = this.pattern.techDrawings.indexOf(item);
-        if ( index != -1 ) this.pattern.techDrawings.splice(index,1);
-        break;
-      case 2 :
-        var index = this.pattern.files.indexOf(item);
-        if ( index != -1 ) this.pattern.files.splice(index,1);
-        break;
-      default :
-        break;
+  private getTargetList(list: number): string[] | undefined {
+    switch (list) {
+      case 0:
+        return this.pattern.photos;
+      case 1:
+        return this.pattern.techDrawings;
+      case 2:
+        return this.pattern.files;
+      default:
+        return undefined;
     }
   }
 
-  submitForm(): void {
-    // Validate form data
-    if (!this.pattern.name || this.pattern.files.length === 0 || !this.data.checkPatternNameValidity(this.pattern.name)) {
-      console.error('Pattern name and files are required.');
+  onReorderDrop(event: CdkDragDrop<string[]>, list: number): void {
+    const targetList = this.getTargetList(list);
+    if (!targetList) return;
+    moveItemInArray(targetList, event.previousIndex, event.currentIndex);
+  }
+
+  removeItem(list: number, index: number): void {
+    this.getTargetList(list)?.splice(index, 1);
+  }
+
+  // SHARED FILES
+  // available files + any newly added ones, filtered by the search text
+  private matchesFilter(path: string): boolean {
+    const q = this.sharedFilesFilter.trim().toLowerCase();
+    return !q || this.fileName(path).toLowerCase().includes(q);
+  }
+
+  get filteredAvailableSharedFiles(): SharedFile[] {
+    return this.availableSharedFiles.filter(f => this.matchesFilter(f.filePath));
+  }
+
+  get filteredNewSharedFiles(): string[] {
+    return this.pattern.newSharedFiles.filter(p => this.matchesFilter(p));
+  }
+
+  isSharedFileSelected(file: SharedFile): boolean {
+    return this.pattern.sharedFiles.some(f => f.id === file.id);
+  }
+
+  toggleSharedFile(file: SharedFile, checked: boolean): void {
+    if (checked) {
+      if (!this.isSharedFileSelected(file)) this.pattern.sharedFiles.push(file);
+    } else {
+      this.pattern.sharedFiles = this.pattern.sharedFiles.filter(f => f.id !== file.id);
+    }
+  }
+
+  removeNewSharedFile(path: string): void {
+    this.pattern.newSharedFiles = this.pattern.newSharedFiles.filter(p => p !== path);
+  }
+
+  addResourceRow(type: 'fabric' | 'materials'): void {
+    const nextItem: Material = { type: '', requirement: '' };
+    if (type === 'fabric') {
+      this.pattern.fabric.push(nextItem);
+      return;
+    }
+    this.pattern.materials.push(nextItem);
+  }
+
+  removeResourceRow(type: 'fabric' | 'materials', index: number): void {
+    if (type === 'fabric') {
+      this.pattern.fabric.splice(index, 1);
+      return;
+    }
+    this.pattern.materials.splice(index, 1);
+  }
+
+  async submitForm(form: NgForm): Promise<void> {
+    this.submitted = true;
+    this.addFailed = false;
+    this.onDifficultyChange();
+
+    // invalid: the error messages are now shown, move the focus to the first problem
+    if (form.invalid || this.filesMissing) {
+      this.focusFirstError(form);
       return;
     }
 
-    else {
-      console.log(this.pattern);
-      this.data.addPattern(this.pattern);
-      this.closeModal();
+    this.saving = true;
+    // spaces at the ends are not kept (" Calliope " -> "Calliope"), the folder is named after it
+    const newPatternId = await this.data.addPattern({ ...this.pattern, name: this.pattern.name.trim() });
+    this.saving = false;
+
+    if (newPatternId === null) {
+      // stay on the form so nothing typed is lost, and say so (role="alert" in the template)
+      this.addFailed = true;
+      return;
     }
+    // open the new pattern's details page
+    this.skipUnsavedCheck = true;
+    this.router.navigate(['/patterns', newPatternId]);
   }
 
-  closeModal() {
-    console.log('close modale 1');
-    this.closeModalEvent.emit(true);
-    this.pattern = new Pattern();
+  // once the error messages are drawn, focus the first field to fix (name first, then the files)
+  private focusFirstError(form: NgForm): void {
+    afterNextRender(() => {
+      if (form.controls['name']?.invalid) {
+        this.nameInput?.nativeElement.focus();
+      } else if (this.filesMissing) {
+        this.addFilesButton?.nativeElement.focus();
+      }
+    }, { injector: this.injector });
   }
 
+  // used by unsavedChangesGuard when leaving the page
+  hasUnsavedChanges(): boolean {
+    if (this.skipUnsavedCheck) return false;
+    return JSON.stringify(this.pattern) !== this.initialSnapshot;
+  }
 }

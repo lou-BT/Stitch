@@ -1,0 +1,207 @@
+// ============================================================
+// Bootstrap overrides
+// ============================================================
+
+// BUTTONS
+
+// BUTTON OFFSET SHADOW
+.btn-retro {
+//   font-family: var(--bs-font-monospace);
+//   font-size: 0.8125rem;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  width: fit-content;
+  padding: 0.5rem 1.10rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--medium-grey);
+  background-color: var(--dark-bg);
+  color: white;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+  position: relative;
+
+  &:hover {
+    transform: translate(1px, 1px) !important;
+    background-color: var(--button-bg)!important;
+    border: 1.5px solid var(--outline-grey)!important;
+  }
+
+  &:active {
+    background-color: var(--button-bg)!important;
+    border: 1.5px solid var(--outline-grey)!important;
+    transform: translate(3px, 3px)!important;
+    box-shadow: none !important;
+  }
+}
+
+/* -- Pink  -- */
+.btn-retro.btn-retro-pink {
+  box-shadow: 3px 3px 0 var(--warning-pink);
+
+  &:hover {
+    box-shadow: 2px 2px 0 var(--warning-pink);
+  }
+}
+
+/* -- Blue  -- */
+.btn-retro.btn-retro-blue {
+  box-shadow: 3px 3px 0 var(--primary-color);
+
+  &:hover {
+    box-shadow: 2px 2px 0 var(--primary-color);
+  }
+}
+ 
+/* -- Ghost (indigo outline, transparent bg) -- */
+.btn-retro.btn-retro-ghost {
+  box-shadow: 3px 3px 0 var(--secondary-color);
+
+  &:hover {
+    box-shadow: 2px 2px 0 var(--secondary-color);
+  }
+}
+
+// BUTTON DOUBLE RING PILL
+.btn-retro-pill {
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  width: fit-content;
+  padding: 0.5rem 1.10rem;
+  border-radius: 10px;
+//   font-size: 0.75rem;
+  border: 1.5px solid var(--outline-grey)!important;
+  transition: filter 80ms ease, opacity 80ms ease;
+  background-color: transparent !important;
+}
+
+/* -- Pink / warning-pink -- */
+.btn-retro-pill.btn-pill-pink {
+  color: #ff5db8;
+  border-color: var(--warning-pink);
+  outline: 1px solid var(--warning-pink);
+  outline-offset: 3px;
+}
+.btn-retro-pill.btn-pill-pink:hover {
+  color: #ff5db8;
+  border-color: var(--warning-pink);
+  filter: brightness(1.2);
+}
+.btn-retro-pill.btn-pill-pink:active,
+.btn-retro-pill.btn-pill-pink.active {
+  color: #ff5db8;
+  border-color: var(--warning-pink);
+  opacity: 0.7;
+  filter: none;
+}
+ 
+/* -- Indigo / primary-color -- */
+.btn-retro-pill.btn-pill-indigo {
+  background-color: transparent;
+  color: #a8aaff;
+  border-color: var(--primary-color);
+  outline: 1px solid var(--primary-color);
+  outline-offset: 3px;
+}
+.btn-retro-pill.btn-pill-indigo:hover {
+  background-color: transparent;
+  color: #a8aaff;
+  border-color: var(--primary-color);
+  filter: brightness(1.2);
+}
+.btn-retro-pill.btn-pill-indigo:active,
+.btn-retro-pill.btn-pill-indigo.active {
+  background-color: transparent;
+  color: #a8aaff;
+  border-color: var(--primary-color);
+  opacity: 0.7;
+  filter: none;
+}
+ 
+/* -- Filled (indigo solid) -- */
+.btn-retro-pill.btn-pill-filled {
+  background-color: var(--primary-color);
+  color: #d4d6ff;
+  border-color: #a8aaff;
+  outline: none;
+}
+.btn-retro-pill.btn-pill-filled:hover {
+  background-color: var(--primary-color);
+  color: #d4d6ff;
+  filter: brightness(1.15);
+}
+.btn-retro-pill.btn-pill-filled:active,
+.btn-retro-pill.btn-pill-filled.active {
+  background-color: var(--primary-color);
+  color: #d4d6ff;
+  opacity: 0.8;
+  filter: none;
+}
+ 
+/* -- Neutral / disabled -- */
+.btn-retro-pill.btn-pill-neutral,
+.btn-retro-pill:disabled,
+.btn-retro-pill.disabled {
+  background-color: transparent;
+  color: #555568;
+  border-color: #2a2a38;
+  outline: 1px solid #2a2a38;
+  outline-offset: 3px;
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 1;
+}
+
+// CARDS
+
+.card {
+  background-color: var(--light-bg);
+  color: white;
+
+  border-radius: 0px;
+
+  .card-header {
+    border-bottom: none;
+    text-transform: uppercase;
+  }
+
+  .card-body {
+    color: #92929d;
+    h2, h3, h4, h5, h6 {
+      color: white;
+    } 
+
+
+  }
+
+  .card-footer {
+    border-color: var(--outline-grey) ;
+  }
+}
+
+.card-pink {
+  border: 2px solid var(--warning-pink);
+  box-shadow: 4px 4px 0 var(--warning-pink);
+  .card-header {
+    color: var(--warning-pink);
+  }
+
+  .accent {
+    color: var(--warning-pink);
+  }
+}
+
+:root {
+    --dark-bg: #111118;
+    --light-bg: #161620;
+    --button-bg: #1e1e2b;
+    --outline-grey: #575760;
+    --primary-color: #6066FF;
+    --secondary-color: #999CFF;
+    --tertiary-color: #D6D8FF;
+    --background-color-grey: #F4F5F6;
+    --light-black: #1f1f1f;
+    --lighter-black: #2c2c2c;
+    --dark-warning-pink: #A1025C;
+    --warning-pink: #c30771;
+    --light-pink: #ff5db8;
+    --text-light-grey: #ffd6ec;
+}

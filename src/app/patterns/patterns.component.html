@@ -1,84 +1,119 @@
-<div style="height: 100%; display:flex; flex-direction: column;">
-  <h1 class="title">Patterns</h1>
-
-  <!-- search section -->
-  <div class="d-flex flex-row" style="padding-bottom: 20px;">
-      <div class="category-item" (click)="setCategory('all')">
-          <a>all</a>
+<div class="patterns-page">
+  <header class="header-section">
+    <h1 class="title">Patterns</h1>
+    <div class="d-flex justify-content-between">
+      <p class="text-grey subtitle-text">Explore and manage your pattern collection</p>
+      <div class="form-check form-switch">
+        <label class="form-check-label" for="techDrawingSwitch">Tech drawing</label>
+        <input
+          id="techDrawingSwitch"
+          type="checkbox"
+          role="switch"
+          class="form-check-input"
+          [checked]="filters.previewSource === 'techDrawing'"
+          (change)="togglePreviewSource()"
+        />
       </div>
-      <div *ngFor="let category of categories">
-          <div [ngClass]="{'category-item': selectedCategory !== category, 'selected-category-item': selectedCategory === category}"
-                (click)="setCategory(category)">
-              <a>{{category}}</a>
-          </div>
-      </div>
-  </div>
-  <!-- end of search section -->
+    </div>
+  </header>
 
-  <!-- pattern list -->
-  <div id="pattern-page-content" style="flex-grow: 1; overflow-y: auto;">
+  <search>
+    <div class="search-section">
+      <!-- search bar: live filter on pattern name and brand -->
+      <div class="search-bar">
+        <i class="bi bi-search search-bar-icon" aria-hidden="true"></i>
+        <input type="text" class="form-control" placeholder="Search by name or brand..."
+              [(ngModel)]="filters.patternSearch" aria-label="Search patterns by name or brand">
+        @if (filters.patternSearch) {
+          <button type="button" class="search-bar-clear" (click)="clearSearch()" aria-label="Clear search">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+
+      <!-- category filter dropdown (stays open while ticking categories) -->
+      <div class="dropdown">
+        <button class="secondary-button dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+          Categories
+          @if (filters.selectedCategoryIds.length > 0) {
+            <span class="filter-count">{{filters.selectedCategoryIds.length}}<span class="visually-hidden"> selected</span></span>
+          }
+        </button>
+        <div class="dropdown-menu dropdown-menu-end filter-dropdown-menu">
+          <input type="text" class="form-control" placeholder="Search categories..."
+                [(ngModel)]="categorySearch" aria-label="Search categories">
+          <fieldset class="filter-dropdown-list">
+            <legend class="visually-hidden">Categories</legend>
+            @for (category of filteredCategories; track category.id) {
+              <label class="dropdown-item filter-option" [for]="'categoryFilter' + category.id">
+                <input class="form-check-input" type="checkbox" [id]="'categoryFilter' + category.id"
+                      [checked]="isCategorySelected(category.id)" (change)="toggleCategory(category.id)">
+                <span>{{category.name}}</span>
+              </label>
+            } @empty {
+              <p class="text-grey filter-empty">No category found</p>
+            }
+          </fieldset>
+          @if (filters.selectedCategoryIds.length > 0) {
+            <div class="dropdown-divider"></div>
+            <button type="button" class="dropdown-item text-grey" (click)="clearCategories()">Clear selection</button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- selected categories as removable chips, on their own line -->
+    @if (selectedCategories.length > 0) {
+      <ul class="category-section list-unstyled mb-0" aria-label="Selected categories">
+        @for (category of selectedCategories; track category.id) {
+          <li class="filter-chip">
+            {{category.name}}
+            <button type="button" (click)="toggleCategory(category.id)" [attr.aria-label]="'Remove ' + category.name">
+              <fa-icon [icon]="removeIcon"></fa-icon>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </search>
+
+  <section id="pattern-page-content" class="pattern-section" aria-label="Pattern list">
+      <!-- live region: screen readers announce the result count when the filters change (must stay outside any @if) -->
+      <p class="visually-hidden" role="status">
+        {{filteredPatterns.length}} {{filteredPatterns.length === 1 ? 'pattern' : 'patterns'}} found
+      </p>
       <div class="container-fluid">
-          <div class="row gy-4" id="patterns-list">
-              <div class="col-4" *ngFor="let pattern of patternList.filter(filterCategory)">
-                  <!-- individual pattern block -->
-                  <div class="pattern-block d-flex flex-column" (click)="openPatternModal(pattern)">
+          <ul class="row gy-2 gx-2 list-unstyled" id="patterns-list" [class.tech-drawing-preview]="filters.previewSource === 'techDrawing'">
+            @for (pattern of filteredPatterns; track pattern.id) {
+              <li class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                  <article class="pattern-block">
                       <div class="image-container">
-                          <img [src]="pattern.photos[0]" alt="Logo">
+                          <!-- no image: the container's grey background acts as a placeholder -->
+                          @if (getPreviewImage(pattern); as previewImage) {
+                            <img [src]="previewImage" alt="">
+                          }
+                          <div class="pattern-overlay">
+                            <span class="overlay-text" aria-hidden="true">View Details</span>
+                          </div>
                       </div>
-                      <span class="subtitle" style="margin-left: 10px; margin-bottom: -5px;">{{pattern.category}}</span>
-                      <span style="margin-left: 10px;">{{pattern.name}}</span>
-                  </div>
-                  <!-- end of individual pattern block -->
-              </div>
-          </div>
+                      <div class="pattern-info">
+                        <span class="label-upper">{{getCategoryNames(pattern.categoryIds)}}</span>
+                        <!-- stretched-link: the link's click area covers the whole card -->
+                        <h2><a class="pattern-name stretched-link" [routerLink]="['/patterns', pattern.id]">
+                          {{pattern.name}}
+                        </a></h2>
+                      </div>
+                  </article>
+              </li>
+            } @empty {
+              <li class="text-grey text-center empty-list-message">No pattern found</li>
+            }
+          </ul>
       </div>
-  </div>
-  <!-- end of pattern list -->
+  </section>
 
-  <button class="plus-button" (click)="openNewPatternModal()">
-    <fa-icon [icon]='plusIcon' size="xl" ></fa-icon>
-  </button>
-    
-  <!-- single pattern modal -->
-  <div class="modal fade" id="patternModal" tabindex="-1" aria-labelledby="pattern Modal" aria-hidden="true" #patternModal>
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="width: 80%; max-width: 800px;">
-      <div class="modal-content" style="border-radius: 10px;">
-        <div class="modal-body" *ngIf="selectedPattern" style="padding:3px; border-radius: 8px;">
-          <app-pattern-details [pattern]="selectedPattern" (editEvent)="openModal('edit')"></app-pattern-details>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="secondary-button" (click)="openModal('edit', selectedPattern)">edit</button>
-          <button type="button" class="button" (click)="closeModal()">close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- add pattern modal -->
-  <div class="modal fade" id="addPatternModal" tabindex="-1" aria-labelledby="add pattern Modal" aria-hidden="true" #addPatternModal>
-    <div class="modal-dialog modal-dialog-centered " style="width: 80%; max-width: 800px;">
-      <div class="modal-content" style="border-radius: 10px;">
-        <div class="modal-body" style="padding:3px; border-radius: 8px;">
-          <app-add-pattern (closeModalEvent)="closeModal()"></app-add-pattern>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- edit pattern modal -->
-  <div class="modal fade" id="patternEditModal" tabindex="-1" aria-labelledby="pattern edit Modal" aria-hidden="true" #patternEditModal>
-    <div class="modal-dialog modal-dialog-centered " style="width: 80%; max-width: 800px;">
-      <div class="modal-content" style="border-radius: 10px;">
-        <div class="modal-body" *ngIf="selectedPattern" style="padding:3px; border-radius: 8px;">
-          <app-pattern-edit [oldPattern]="selectedPattern"></app-pattern-edit>
-        </div>
-      </div>
-    </div>
-  </div>
+  <a class="plus-button" routerLink="/patterns/new" title="Add New Pattern" aria-label="Add New Pattern">
+    <fa-icon [icon]='plusIcon' size="xl"></fa-icon>
+  </a>
 </div>
-
-
-
-
-
-

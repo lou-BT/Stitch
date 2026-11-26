@@ -1,181 +1,197 @@
-@if (pattern == null) {
-  <p style="padding: var(--space-5);">Loading...</p>
-} @else {
-  <!-- carousel -->
-  <div style="border-radius: var(--inner-card-radius) 0px 0px 0px; overflow: hidden;">
-    <mdb-carousel [controls]="true" [indicators]="true">
-      @for (photo of pattern.photos; track photo) {
-        <mdb-carousel-item>
-          <img
-            style="height: 400px; object-fit: contain;"
-            [src]="photo"
-            class="d-block w-100"
-            alt="{{pattern.name}} photo"
-          />
-        </mdb-carousel-item>
-      }
-      @for (drawing of pattern.techDrawings; track drawing) {
-        <mdb-carousel-item>
-          <img
-            style="height: 400px; object-fit: contain;"
-            [src]="drawing"
-            class="d-block w-100"
-            alt="{{pattern.name}} technical drawing"
-          />
-        </mdb-carousel-item>
-      }
-    </mdb-carousel>
-  </div>
-  <!-- end of carousel -->
+<div class="page">
+  <div class="page-content">
+    <nav class="page-topbar" aria-label="Back navigation">
+      <a routerLink="/patterns" class="back-link">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i> Patterns
+      </a>
+    </nav>
 
-  <!-- pattern content -->
-  <div style="padding: var(--space-5);">
-    <h5 class="text-grey" style="margin-bottom: -3px; margin-top: var(--space-1);">{{getCategoryNames()}}</h5>
-    <div class="pattern-header d-flex justify-content-between align-items-center">
-      <div class="d-flex flex-row align-items-center gap-1">
-        <h3 style="margin-right: var(--space-1);">{{pattern.name}}</h3> 
-        @for (n of [1, 2, 3, 4, 5]; track n) {
-            <i class="bi bi-star-fill" style="margin-bottom: var(--space-1);" [class.grey-color]="pattern.difficulty < n"></i>
-        }
-      </div>
-      <div class="d-flex flex-row gap-2">
-        <button type="button" class="icon-button" (click)="scrollToComments()" title="Go to comments">
-          <i class="bi bi-chat-dots-fill"></i>
-        </button>
-        <span class="meta-badge" [class.badge-positive]="pattern.used" [class.badge-neutral]="!pattern.used">
-          <i class="bi bi-scissors" style="margin-right: var(--space-1);"></i>
-          {{pattern.used ? 'Tested' : 'Not tested yet'}}
-        </span>
-      </div>
-    </div>
-    <div class="grey-box pattern-meta-card" style="margin-left: var(--space-4);">
-      <div class="meta-grid">
-        <div class="meta-column">
-          <div class="meta-item">
-            <span class="label-upper">Brand</span>
-            <span class="meta-value">{{pattern.brand || 'Not specified'}} @if(!pattern.free){<i class="bi bi-coin" style="color: var(--gold)"></i>}</span>  
-          </div>
-          <div class="meta-item">
-            <span class="label-upper">Materials</span>
-            <span class="meta-value">
-              @if (pattern.materials.length) {
-                @for (material of pattern.materials; track $index; let i = $index) {
-                  <span>{{material.type}} ({{material.requirement}}){{i < pattern.materials.length - 1 ? ', ' : ''}}</span>
-                }
-              } @else {
-                Not specified
-              }
-            </span>
-          </div>
+    @if (pattern == null) {
+      <p class="page-card">Loading...</p>
+    } @else {
+      <!-- overview: pictures, name, metadata, description -->
+      <section class="page-card" aria-labelledby="patternTitle">
+        <!-- no carousel (empty grey frame with arrows) when there is nothing to show -->
+        @if (pattern.photos.length || pattern.techDrawings.length) {
+        <div class="details-carousel">
+          <mdb-carousel [controls]="true" [indicators]="true">
+            <!-- alt includes the position, e.g. "Summer Dress, photo 2 of 4" -->
+            @for (photo of pattern.photos; track photo; let i = $index, count = $count) {
+              <mdb-carousel-item>
+                <img class="d-block w-100 carousel-image" [src]="photo" alt="{{pattern.name}}, photo {{i + 1}} of {{count}}" />
+              </mdb-carousel-item>
+            }
+            @for (drawing of pattern.techDrawings; track drawing; let i = $index, count = $count) {
+              <mdb-carousel-item>
+                <img class="d-block w-100 carousel-image" [src]="drawing" alt="{{pattern.name}}, technical drawing {{i + 1}} of {{count}}" />
+              </mdb-carousel-item>
+            }
+          </mdb-carousel>
         </div>
-        <div class="meta-column">
-          <div class="meta-item">
-            <span class="label-upper">Fabrics</span>
-            @if (pattern.fabric.length) {
-              <ul class="meta-list meta-value">
-                @for (fabric of pattern.fabric; track $index) {
-                  <li>{{fabric.type}} ({{fabric.requirement}})</li>
-                }
-              </ul>
-            } @else {
-              <span class="meta-value">Not specified</span>
+        }
+
+        <p class="h5 text-grey details-categories"><span class="visually-hidden">Categories: </span>{{getCategoryNames()}}</p>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex flex-row align-items-center gap-1">
+            <!-- tabindex -1: receives the focus when the page has loaded (announces the pattern to screen readers) -->
+            <h1 class="h3 details-title" id="patternTitle" tabindex="-1" #patternTitle>{{pattern.name}}</h1>
+            <span class="visually-hidden">Difficulty {{pattern.difficulty}} out of 5</span>
+            @for (n of [1, 2, 3, 4, 5]; track n) {
+              <i class="bi bi-star-fill difficulty-star" [class.star-empty]="pattern.difficulty < n" aria-hidden="true"></i>
             }
           </div>
-        </div>
-      </div>
-    </div>
-    <div class="d-flex flex-row">
-      <p class="preserve-whitespace" 
-      style="margin-left: var(--space-4); 
-             margin: 1em; 
-             text-align: justify;
-             hyphens: auto;">{{pattern.description}}</p>
-    </div>
-
-    <!-- files -->
-    <div class="container-fluid" style="margin-top: var(--space-5);">
-      <div class="row justify-content-center">
-        <div class="col-8">
-          <h5 style="margin-left: var(--space-4);">Files</h5>
-          @for (file of pattern.files; track file) {
-            <div class="black-box d-flex flex-row align-items-center justify-content-between">
-              <div class="d-flex flex-row align-items-center file-info">
-                <fa-icon [icon]="fileIcon" style="margin-right: var(--space-3);"></fa-icon>
-                <span class="file-name">{{file.split("\\").pop()}}</span>
-              </div>
-
-              <button class="justify-self-end primary-button" (click)="data.openFile(file)">open</button>
-            </div>
-          }
-          @for (file of pattern.sharedFiles; track $index; let i = $index) {
-            <div class="black-box d-flex flex-row align-items-center justify-content-between">
-              <div class="d-flex flex-row align-items-center file-info">
-                <fa-icon [icon]="fileIcon" style="margin-right: var(--space-3);"></fa-icon>
-                <span class="file-name">{{file.filePath.split("\\").pop()}}</span>
-              </div>
-
-              <button class="justify-self-end primary-button" (click)="data.openFile(file.filePath)">open</button>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- comments -->
-    <div class="container-fluid" style="margin-top: var(--space-5);" id="comments-section">
-      <div class="row justify-content-center">
-        <div class="col-8">
-          <h5 style="margin-left: var(--space-4);">Comments</h5>
-
-          <div class="grey-box comment-form">
-            <textarea
-              class="form-control"
-              name="newComment"
-              rows="3"
-              placeholder="Add a comment"
-              [(ngModel)]="newCommentText"
-            ></textarea>
-            <div class="comment-form-actions">
-              <button type="button" class="primary-button" (click)="addComment()">Add comment</button>
-            </div>
+          <div class="d-flex flex-row align-items-center gap-2">
+            <span class="meta-badge" [class.badge-positive]="pattern.used" [class.badge-neutral]="!pattern.used">
+              <i class="bi bi-scissors me-1" aria-hidden="true"></i>
+              {{pattern.used ? 'Tested' : 'Not tested yet'}}
+            </span>
+            <button type="button" class="icon-button" (click)="scrollToComments()" title="Go to comments" aria-label="Go to comments">
+              <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+            </button>
+            <a class="secondary-button" [routerLink]="['/patterns', pattern.id, 'edit']">
+              <i class="bi bi-pencil me-1" aria-hidden="true"></i> Edit
+            </a>
           </div>
-
-          @if (!pattern.comments.length) {
-            <p class="text-grey empty-comments">No comments yet.</p>
-          }
-
-          @for (comment of pattern.comments; track comment.id) {
-            <div class="black-box">
-              <div class="text-grey comment-meta d-flex justify-content-between align-items-center">
-                <span>{{comment.date | date:'medium'}}</span>
-              </div>
-
-              @if (editingCommentId === comment.id) {
-                <textarea
-                  class="form-control"
-                  [name]="'editComment' + comment.id"
-                  rows="3"
-                  [(ngModel)]="editingCommentText"
-                ></textarea>
-                <div class="comment-actions">
-                  <button type="button" class="primary-button" (click)="saveComment(comment.id)">Save</button>
-                  <button type="button" class="secondary-button" (click)="cancelEditComment()">Cancel</button>
-                </div>
-              } @else {
-                <p class="comment-text">{{comment.text}}</p>
-                <div class="comment-actions">
-                  <button type="button" class="primary-button" (click)="startEditComment(comment.id, comment.text)">
-                    <!-- <fa-icon [icon]="editIcon" style="margin-right: var(--space-2);"></fa-icon> -->
-                    <!-- <i class="fa-solid fa-pencil"></i>
-                    <i class="bi bi-pencil"></i> -->
-                    edit</button>
-                  <button type="button" class="subtle-warning-button" (click)="deleteComment(comment.id)">Delete</button>
-                </div>
-              }
-            </div>
-          }
         </div>
-      </div>
-    </div>
+
+        <!-- label/value pairs: <dt> = label, <dd> = value (layout: grid areas in the scss) -->
+        <div class="grey-box pattern-meta-card">
+          <dl class="meta-grid">
+            <div class="meta-item meta-brand">
+              <dt class="label-upper">Brand</dt>
+              <dd class="meta-value">
+                {{pattern.brand || 'Not specified'}}
+                @if (!pattern.free) {
+                  <i class="bi bi-coin paid-icon" title="Paid pattern" aria-hidden="true"></i>
+                  <span class="visually-hidden">(paid pattern)</span>
+                }
+              </dd>
+            </div>
+            <div class="meta-item meta-materials">
+              <dt class="label-upper">Materials</dt>
+              <dd class="meta-value">
+                @if (pattern.materials.length) {
+                  <ul class="meta-list">
+                    @for (material of pattern.materials; track $index) {
+                      <li>{{material.type}} ({{material.requirement}})</li>
+                    }
+                  </ul>
+                } @else {
+                  Not specified
+                }
+              </dd>
+            </div>
+            <div class="meta-item meta-fabrics">
+              <dt class="label-upper">Fabrics</dt>
+              <dd class="meta-value">
+                @if (pattern.fabric.length) {
+                  <ul class="meta-list">
+                    @for (fabric of pattern.fabric; track $index) {
+                      <li>{{fabric.type}} ({{fabric.requirement}})</li>
+                    }
+                  </ul>
+                } @else {
+                  Not specified
+                }
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <p class="preserve-whitespace details-description">{{pattern.description}}</p>
+      </section>
+
+      <!-- files -->
+      <section class="page-card" aria-labelledby="filesTitle">
+        <h2 class="h5" id="filesTitle">Files</h2>
+        @if (pattern.files.length || pattern.sharedFiles.length) {
+          <ul class="list-unstyled mb-0">
+            @for (file of pattern.files; track file) {
+              <li class="light-box d-flex flex-row align-items-center justify-content-between">
+                <div class="d-flex flex-row align-items-center file-info">
+                  <fa-icon [icon]="fileIcon" class="me-3"></fa-icon>
+                  <span class="file-name">{{fileName(file)}}</span>
+                </div>
+                <button type="button" class="secondary-button" (click)="data.openFile(file)">
+                  Open<span class="visually-hidden"> {{fileName(file)}}</span>
+                </button>
+              </li>
+            }
+            @for (file of pattern.sharedFiles; track $index) {
+              <li class="light-box d-flex flex-row align-items-center justify-content-between">
+                <div class="d-flex flex-row align-items-center file-info">
+                  <fa-icon [icon]="fileIcon" class="me-3"></fa-icon>
+                  <span class="file-name">{{fileName(file.filePath)}}</span>
+                  <span class="meta-badge badge-neutral ms-2">Shared</span>
+                </div>
+                <button type="button" class="secondary-button" (click)="data.openFile(file.filePath)">
+                  Open<span class="visually-hidden"> {{fileName(file.filePath)}}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="text-grey empty-section">No files.</p>
+        }
+      </section>
+
+      <section class="page-card" aria-labelledby="commentsTitle">
+        <!-- tabindex -1: focusable by "Go to comments" without being in the Tab order -->
+        <h2 class="h5" id="commentsTitle" tabindex="-1" #commentsHeading>Comments</h2>
+
+        <div class="comment-form">
+          <textarea
+            class="form-control"
+            name="newComment"
+            rows="3"
+            placeholder="Add a comment"
+            aria-label="Add a comment"
+            [(ngModel)]="newCommentText"
+          ></textarea>
+          <div class="comment-form-actions">
+            <button type="button" class="primary-button" [disabled]="!newCommentText.trim()" (click)="addComment()">Add comment</button>
+          </div>
+        </div>
+
+        @if (!pattern.comments.length) {
+          <p class="text-grey empty-section">No comments yet.</p>
+        }
+
+        <ul class="list-unstyled mb-0">
+        @for (comment of pattern.comments; track comment.id) {
+          <li class="light-box">
+            <div class="text-grey comment-meta">
+              <time [attr.datetime]="comment.date | date:'yyyy-MM-ddTHH:mm:ss'">{{comment.date | date:'medium'}}</time>
+            </div>
+
+            @if (editingCommentId === comment.id) {
+              <textarea
+                class="form-control"
+                [name]="'editComment' + comment.id"
+                rows="3"
+                aria-label="Edit comment"
+                [(ngModel)]="editingCommentText"
+              ></textarea>
+              <div class="comment-actions">
+                <button type="button" class="primary-button" [disabled]="!editingCommentText.trim()" (click)="saveComment(comment.id)">Save</button>
+                <button type="button" class="secondary-button" (click)="cancelEditComment()">Cancel</button>
+              </div>
+            } @else {
+              <p class="comment-text">{{comment.text}}</p>
+              <div class="comment-actions">
+                <!-- hidden text: tells screen readers which comment the button acts on -->
+                <button type="button" class="primary-button" (click)="startEditComment(comment.id, comment.text)">
+                  Edit<span class="visually-hidden"> comment from {{comment.date | date:'medium'}}</span>
+                </button>
+                <button type="button" class="subtle-warning-button" (click)="deleteComment(comment.id)">
+                  Delete<span class="visually-hidden"> comment from {{comment.date | date:'medium'}}</span>
+                </button>
+              </div>
+            }
+          </li>
+        }
+        </ul>
+      </section>
+    }
   </div>
-}
+</div>

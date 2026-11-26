@@ -4,6 +4,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
 import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 
 
 @Component({
@@ -12,7 +13,8 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
         MatIconModule,
         RouterOutlet,
         RouterLink,
-        RouterLinkActive],
+        RouterLinkActive,
+        ConfirmDialogComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
     encapsulation: ViewEncapsulation.None

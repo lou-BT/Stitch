@@ -11,7 +11,8 @@
 - `/src/app/app.config.ts` : Angular app routes definitions.
 - `/src/app/classes.ts` : Typescript types/classes/interfaces used by the Angular application
 - `/src/app/services/data.service.ts`: Angular service used to load/create/update data stored localy (Database and pattern folder)
-- `/config.json`: conatins the path to the pattern folder
+- `/.env` (`PATTERN_FOLDER_PATH`): path to the pattern folder, read by `main.js` on startup (hard-coded fallback in `main.js` if not set)
+- `/config.json`: pattern folder path for `loadConfig()` / `updateConfig()` in `main.js`, which are currently not called — not read at startup
 - `/main.js`: main file where electron is configured, the angular data service is translated into real actions (folder interaction and database update) via ipcmain from the electron librairy
 - `database`: folder with database definition and migration system
 

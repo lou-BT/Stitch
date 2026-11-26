@@ -80,13 +80,21 @@ export class DataService {
     return this._patternList.value.map(pattern => pattern.name);
   }
 
-  checkPatternNameValidity(patternName: string) {
-    const invalidChars = /[<>:"/\\|?*]/;
-    return !this._patternList.value.find((pattern => pattern.name === patternName)) && !invalidChars.test(patternName);
+  // pattern names become folder names, so they are compared like Windows compares folder names:
+  // ignoring case and spaces at the ends ("summer dress " = "Summer Dress")
+  isPatternNameTaken(patternName: string): boolean {
+    const normalizedName = patternName.trim().toLowerCase();
+    return this._patternList.value.some(pattern => pattern.name.trim().toLowerCase() === normalizedName);
   }
 
-  addPattern( pattern: NewPattern ) {
-    window.electronAPI.addPattern(pattern);
+  // returns the new pattern's id, or null if adding it failed (file copy or database error)
+  async addPattern( pattern: NewPattern ): Promise<number | null> {
+    try {
+      return await window.electronAPI.addPattern(pattern);
+    } catch (error) {
+      console.error('Error adding pattern:', error);
+      return null;
+    }
   }
 
   openFile( file: string ) {

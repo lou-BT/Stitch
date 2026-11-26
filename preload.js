@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // PATTERNS
   loadPatterns: () => ipcRenderer.invoke('patterns:getAll'),
   getPatternDetails: (patternId) => ipcRenderer.invoke('patterns:getDetails', patternId),
-  addPattern: (pattern) => ipcRenderer.send('patterns:addNew', pattern),
+  addPattern: (pattern) => ipcRenderer.invoke('patterns:addNew', pattern),
   deletePattern: (pattern) => ipcRenderer.send('patterns:delete', pattern),
   editPattern: (oldPattern, newPattern) => ipcRenderer.invoke('patterns:edit', oldPattern, newPattern),
   // COMMENTS

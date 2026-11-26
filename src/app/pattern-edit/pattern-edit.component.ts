@@ -1,7 +1,11 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { NgForm, FormsModule } from '@angular/forms';
+import { ChangeDetectorRef, Component, Input, numberAttribute, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Material, Pattern, NewPattern, SharedFile, Category } from '../classes';
 import { DataService } from '../services/data.service';
+import { fileName } from '../utils/pattern-format';
+import { ConfirmDialogService } from '../services/confirm-dialog.service';
+import { CategoryPickerComponent } from '../category-picker/category-picker.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import * as icons from '@fortawesome/free-regular-svg-icons';
@@ -9,13 +13,21 @@ import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-pattern-edit',
-  imports: [FormsModule, FontAwesomeModule, DragDropModule],
+  imports: [FormsModule, FontAwesomeModule, DragDropModule, RouterLink, CategoryPickerComponent],
     templateUrl: './pattern-edit.component.html',
     styleUrl: './pattern-edit.component.scss'
 })
 export class PatternEditComponent implements OnInit, OnChanges{
-  @Input() oldPatternId?: number;
-  @Output() savedEvent = new EventEmitter<void>();
+  // filled from the route /patterns/:patternId/edit (route params are text, numberAttribute converts "12" to 12)
+  @Input({ transform: numberAttribute }) patternId?: number;
+
+  private router = inject(Router);
+  private confirmDialog = inject(ConfirmDialogService);
+
+  // form content when the page was loaded, compared by hasUnsavedChanges()
+  private initialSnapshot = '';
+  // set after saving or deleting, so leaving the page doesn't ask about unsaved changes
+  private skipUnsavedCheck = false;
 
   oldPattern?: Pattern;
   newPattern?: NewPattern;
@@ -28,9 +40,7 @@ export class PatternEditComponent implements OnInit, OnChanges{
 
   categories: Category[] = [];
 
-  constructor(private data: DataService, private cdr: ChangeDetectorRef) {
-    console.log("constructor", this.oldPatternId);
-  }
+  constructor(private data: DataService, private cdr: ChangeDetectorRef) {}
 
   onDifficultyChange() {
     if (!this.newPattern) return;
@@ -38,8 +48,8 @@ export class PatternEditComponent implements OnInit, OnChanges{
   }
 
   private loadPattern(): void {
-    if (!this.oldPatternId) return;
-    this.data.getPatternDetails(this.oldPatternId.toString()).then((details: any) => {
+    if (!this.patternId) return;
+    this.data.getPatternDetails(this.patternId.toString()).then((details: any) => {
       this.oldPattern = details;
       this.newPattern = structuredClone(details) as NewPattern;
       this.newPattern.newSharedFiles = this.newPattern.newSharedFiles ?? [];
@@ -47,7 +57,7 @@ export class PatternEditComponent implements OnInit, OnChanges{
       if (!this.newPattern.categoryIds || !Array.isArray(this.newPattern.categoryIds)) {
         this.newPattern.categoryIds = [];
       }
-      console.log("category ids", this.newPattern.categoryIds, this.oldPattern, this.newPattern);
+      this.initialSnapshot = JSON.stringify(this.newPattern);
       this.cdr.detectChanges();
     });
   }
@@ -61,16 +71,15 @@ export class PatternEditComponent implements OnInit, OnChanges{
       this.categories = categories;
       this.cdr.detectChanges();
     });
-    this.loadPattern();
   }
 
+  // runs when the route gives the pattern id (on opening the page, and if the id changes)
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['oldPatternId']) this.loadPattern();
+    if (changes['patternId']) this.loadPattern();
   }
 
-  extractFileName(filePath: string): string {
-    const pathParts = filePath.split(/[\\/]/);
-    return pathParts[pathParts.length - 1] || '';
+  fileName(path: string): string {
+    return fileName(path);
   }
 
   addResourceRow(type: 'fabric' | 'materials'): void {
@@ -98,7 +107,9 @@ export class PatternEditComponent implements OnInit, OnChanges{
       this.newPattern.free = !!this.newPattern.free;
       this.newPattern.used = !!this.newPattern.used;
       await this.data.editPattern(this.oldPattern, this.newPattern);
-      this.savedEvent.emit();
+      // back to the details page, which loads the saved version
+      this.skipUnsavedCheck = true;
+      this.router.navigate(['/patterns', this.oldPattern.id]);
     }
   }
 
@@ -215,7 +226,7 @@ export class PatternEditComponent implements OnInit, OnChanges{
   // available files + any newly added ones, filtered by the search text
   private matchesFilter(path: string): boolean {
     const q = this.sharedFilesFilter.trim().toLowerCase();
-    return !q || this.extractFileName(path).toLowerCase().includes(q);
+    return !q || this.fileName(path).toLowerCase().includes(q);
   }
 
   get filteredAvailableSharedFiles(): SharedFile[] {
@@ -244,42 +255,25 @@ export class PatternEditComponent implements OnInit, OnChanges{
     this.newPattern.newSharedFiles = this.newPattern.newSharedFiles.filter(p => p !== path);
   }
 
-  // CATEGORY HANDLING
-  isCategorySelected(categoryId: number): boolean {
-    return this.newPattern?.categoryIds.includes(categoryId) ?? false;
-  }
-
-  toggleCategory(categoryId: number, checked: boolean): void {
-    if (!this.newPattern) return;
-    if (checked) {
-      // Add category if not already selected and under max 5
-      if (!this.newPattern.categoryIds.includes(categoryId) && this.newPattern.categoryIds.length < 5) {
-        this.newPattern.categoryIds.push(categoryId);
-      }
-    } else {
-      // Remove category, but ensure at least one remains
-      const newCategoryIds = this.newPattern.categoryIds.filter(id => id !== categoryId);
-      if (newCategoryIds.length > 0) {
-        this.newPattern.categoryIds = newCategoryIds;
-      }
-    }
-  }
-
-  canAddMoreCategories(): boolean {
-    return (this.newPattern?.categoryIds.length ?? 0) < 5;
-  }
-
-  testFunction() {
-    console.log("");
-  }
-
-  deletePattern() {
+  async deletePattern() {
     if( !this.oldPattern) return;
+    const confirmed = await this.confirmDialog.confirm(
+      `Delete "${this.oldPattern.name}"?`,
+      'This permanently removes the pattern and its folder (photos, technical drawings and files).',
+      'Delete pattern',
+      true
+    );
+    if (!confirmed) return;
+
     this.data.deletePattern(this.oldPattern);
+    // the pattern no longer exists: back to the list
+    this.skipUnsavedCheck = true;
+    this.router.navigate(['/patterns']);
   }
 
-  closeModal() {
-    // this.modalInstance.hide();
+  // used by unsavedChangesGuard when leaving the page
+  hasUnsavedChanges(): boolean {
+    if (this.skipUnsavedCheck || !this.newPattern) return false;
+    return JSON.stringify(this.newPattern) !== this.initialSnapshot;
   }
-
 }

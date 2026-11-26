@@ -231,7 +231,8 @@ ipcMain.handle('sharedFiles:getAll', (event) => {
 });
 
 
-ipcMain.on('patterns:addNew', (event, pattern) => {
+// returns the new pattern's id (or null if the database insert fails), so the app can open its details page
+ipcMain.handle('patterns:addNew', (event, pattern) => {
 
   var photos = [];
   var techDrawings = [];
@@ -307,12 +308,13 @@ ipcMain.on('patterns:addNew', (event, pattern) => {
   }
 
   try {
-    db.addPattern(newPattern);
+    const id = Number(db.addPattern(newPattern));
     const patterns = db.getAllPatterns();
     event.sender.send('patterns:update', patterns);
+    return id;
   } catch (error) {
     console.error('Error adding pattern to database:', error);
-    event.sender.send('patterns:addNew:response', []);
+    return null;
   }
 })
 

@@ -1,59 +1,56 @@
-<form (ngSubmit)="submitForm()" #patternForm="ngForm">
-  <div class="modal-form-wrapper scrollable-div">
+<div class="page">
+<div class="page-content">
+<nav class="page-topbar" aria-label="Back navigation">
+  <a class="back-link" routerLink="/patterns">
+    <i class="bi bi-arrow-left" aria-hidden="true"></i> Patterns
+  </a>
+</nav>
+
+<form class="page-card p-0" (ngSubmit)="submitForm(patternForm)" #patternForm="ngForm">
+  <div class="page-form-body">
     <h1 class="title">Add a new pattern</h1>
     
       <div class="container">
         <!-- name & category -->
         <div class="row">
           <div class="col-12 col-md-6 col-lg-5 col-xl-4">
-            <label class="form-label">Pattern name *</label><br>
-            <input type="text" 
-                   class="inputField form-control" 
-                   name="name" 
+            <label class="form-label" for="name">Pattern name *</label>
+            <!-- errors shown once the field was edited/left, or after a first click on "Add pattern" -->
+            @let nameErrorShown = name.invalid && (name.dirty || name.touched || submitted);
+            <input type="text"
+                   class="inputField form-control"
+                   name="name"
                    id="name"
                    #name="ngModel"
+                   #nameInput
                    required
+                   appPatternName
                    [(ngModel)]="pattern.name"
                    placeholder="Calliope"
-                   [ngClass]="{'is-invalid': name.invalid && (name.touched || name.dirty)}"
-                   (ngModelChange)="checkNameValidity()">
-              <!-- <div  *ngIf="(name && name.invalid  && (name.touched || name.dirty))" id="validationNameFeedback" class="invalid-feedback">
-                Pattern name already used.
-              </div> -->
-              <!-- @if (!checkNameValidityBis()) { -->
-              <div [hidden]="name.valid || name.pristine" id="validationNameFeedback" class="invalid-feedback">
-                Pattern name already used or invalid characters.
+                   [class.is-invalid]="nameErrorShown"
+                   [attr.aria-invalid]="nameErrorShown"
+                   [attr.aria-describedby]="nameErrorShown ? 'nameError' : null">
+            @if (nameErrorShown) {
+              <div id="nameError" class="invalid-feedback d-block">
+                @if (name.errors?.['required']) {
+                  A name is required.
+                } @else if (name.errors?.['duplicateName']) {
+                  A pattern named "{{pattern.name.trim()}}" already exists.
+                } @else if (name.errors?.['invalidCharacters']) {
+                  The name can't contain these characters: &lt; &gt; : " / \ | ? *
+                } @else if (name.errors?.['invalidEnding']) {
+                  The name can't end with a dot.
+                }
               </div>
-              <!-- } -->
+            }
           </div>
           <div class="col-12 col-md-6 col-lg-5 col-xl-4">
-            <label class="form-label">Categories (max 5)</label><br>
-            <div class="category-checkboxes">
-              @for (category of categories; track category.id) {
-                <div class="form-check">
-                  <input class="form-check-input" 
-                         type="checkbox" 
-                         [id]="'category-' + category.id"
-                         [checked]="isCategorySelected(category.id)"
-                         [disabled]="!isCategorySelected(category.id) && !canAddMoreCategories()"
-                         (change)="toggleCategory(category.id, $any($event.target).checked)">
-                  <label class="form-check-label" [for]="'category-' + category.id">
-                    {{category.name}}
-                  </label>
-                </div>
-              }
-            </div>
-            @if (!pattern.categoryIds.length) {
-              <div class="text-danger small mt-2">At least one category is required</div>
-            }
-            @if (pattern.categoryIds.length === 5) {
-              <div class="text-muted small mt-2">Maximum 5 categories reached</div>
-            }
+            <app-category-picker [categories]="categories" [(selectedIds)]="pattern.categoryIds"></app-category-picker>
           </div>
         </div>
         <div class="row">
           <div class="col">
-            <label class="form-label">Brand</label><br>
+            <label class="form-label" for="patternBrandInput">Brand</label>
             <input type="text" 
               class="inputField form-control" 
               name="patternBrandInput" 
@@ -62,22 +59,24 @@
               [(ngModel)]="pattern.brand"
               placeholder="Simplicity">
           </div>
-          <div class="col">
-            <label class="form-label">Difficulty</label>
+          <!-- fieldset + legend: screen readers announce "Difficulty" with each radio -->
+          <fieldset class="col">
+            <legend class="form-label">Difficulty</legend>
             <div class="difficulty-radios">
               @for (n of [1,2,3,4,5]; track n) {
                 <div class="form-check difficulty-radio">
                   <input class="form-check-input" type="radio" name="patternDifficulty"
+                         [attr.aria-label]="n + ' out of 5'"
                          [value]="n" [(ngModel)]="pattern.difficulty"
                          [class.filled]="n <= pattern.difficulty">
                 </div>
               }
             </div>
-          </div>
+          </fieldset>
         </div>
         <div class="row">
           <div class="col">
-            <label class="form-label">Description</label><br>
+            <label class="form-label" for="patternDescriptionInput">Description</label>
             <textarea
               class="inputField form-control auto-grow-textarea" 
               rows="1"
@@ -88,7 +87,7 @@
               placeholder=""></textarea>
           </div>
         </div>
-        <div class="row" style="margin-top: var(--space-3);">
+        <div class="row mt-3">
           <div class="col-12 col-md-6 d-flex align-items-center gap-4">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="patternFree" name="patternFree" [(ngModel)]="pattern.free">
@@ -100,10 +99,10 @@
             </div>
           </div>
         </div>
-        <div class="row" style="margin-top: var(--space-2);">
+        <div class="row mt-2">
           <div class="col-12">
             <div class="d-flex align-items-center justify-content-between">
-              <label class="form-label">Fabrics</label>
+              <h2 class="form-section-title">Fabrics</h2>
               <button type="button" class="primary-button" (click)="addResourceRow('fabric')">Add fabric</button>
             </div>
             @if (!pattern.fabric.length) {
@@ -115,6 +114,7 @@
                   <input type="text"
                     class="inputField form-control"
                     [name]="'fabricType' + i"
+                    [attr.aria-label]="'Fabric ' + (i + 1) + ' type'"
                     [(ngModel)]="fabric.type"
                     placeholder="Cotton poplin">
                 </div>
@@ -122,19 +122,20 @@
                   <input type="text"
                     class="inputField form-control"
                     [name]="'fabricRequirement' + i"
+                    [attr.aria-label]="'Fabric ' + (i + 1) + ' quantity'"
                     [(ngModel)]="fabric.requirement"
                     placeholder="1.5m at 140cm wide">
                 </div>
                 <div class="col-1 d-flex justify-content-end">
-                  <button type="button" class="subtle-warning-button" (click)="removeResourceRow('fabric', i)">x</button>
+                  <button type="button" class="subtle-warning-button" (click)="removeResourceRow('fabric', i)" [attr.aria-label]="'Remove fabric ' + (i + 1)"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
                 </div>
               </div>
             }
           </div>
 
-          <div class="col-12" style="margin-top: var(--space-4);">
+          <div class="col-12 mt-3">
             <div class="d-flex align-items-center justify-content-between">
-              <label class="form-label">Materials</label>
+              <h2 class="form-section-title">Materials</h2>
               <button type="button" class="primary-button" (click)="addResourceRow('materials')">Add material</button>
             </div>
             @if (!pattern.materials.length) {
@@ -146,6 +147,7 @@
                   <input type="text"
                     class="inputField form-control"
                     [name]="'materialType' + i"
+                    [attr.aria-label]="'Material ' + (i + 1) + ' type'"
                     [(ngModel)]="material.type"
                     placeholder="Buttons">
                 </div>
@@ -153,134 +155,145 @@
                   <input type="text"
                     class="inputField form-control"
                     [name]="'materialRequirement' + i"
+                    [attr.aria-label]="'Material ' + (i + 1) + ' quantity'"
                     [(ngModel)]="material.requirement"
                     placeholder="6">
                 </div>
                 <div class="col-1 d-flex justify-content-end">
-                  <button type="button" class="subtle-warning-button" (click)="removeResourceRow('materials', i)">x</button>
+                  <button type="button" class="subtle-warning-button" (click)="removeResourceRow('materials', i)" [attr.aria-label]="'Remove material ' + (i + 1)"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
                 </div>
               </div>
             }
           </div>
         </div>
         <!-- PHOTOS -->
-        <label class="form-label" style="margin-top: var(--space-5)!important;">Photos</label><br>
+        <h2 class="form-section-title form-section">Photos</h2>
         <div class="reorder-list" cdkDropList [cdkDropListData]="pattern.photos" (cdkDropListDropped)="onReorderDrop($event, 0)">
           @for (photo of pattern.photos; track $index; let i = $index) {
-            <div class="black-box image-block d-flex flex-row align-items-center justify-content-between" [class.cover-item]="i === 0" cdkDrag>
+            <div class="light-box image-block d-flex flex-row align-items-center justify-content-between" [class.cover-item]="i === 0" cdkDrag>
               <div class="d-flex flex-row align-items-center">
                 <div class="item-thumbnail">
-                  <img [src]="photo" alt="Photo">
+                  <img [src]="photo" alt="">
                 </div>
-                <div class="d-flex flex-column" style="margin-left: var(--space-3)">
+                <div class="d-flex flex-column file-row-text">
                   @if (i === 0) { <span class="label-upper cover-badge">cover</span> }
-                  <span>{{extractFileName(photo)}}</span>
+                  <span>{{fileName(photo)}}</span>
                 </div>
               </div>
-              <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
-                <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+              <div class="d-flex align-items-center gap-2 file-row-actions">
+                <button type="button" class="secondary-button drag-handle" cdkDragHandle title="Drag to reorder" [attr.aria-label]="'Reorder ' + fileName(photo)">
                   <fa-icon [icon]='dragHandleIcon'></fa-icon>
                 </button>
-                <button type="button" class="subtle-warning-button" (click)="removeItem(0, i)">delete</button>
+                <button type="button" class="subtle-warning-button" (click)="removeItem(0, i)">Delete<span class="visually-hidden"> {{fileName(photo)}}</span></button>
               </div>
             </div>
           }
         </div>
 
         <input #photosInput type="file" hidden multiple accept="image/*" (change)="onFileSelect($event, 'photos')">
-        <div class="grey-box new-item-block d-flex align-items-center justify-content-center"
+        <button type="button" class="grey-box new-item-block d-flex align-items-center justify-content-center"
+             aria-label="Add photos" title="Add photos (click or drop files here)"
              (drop)="onFileDrop($event, 'photos')" (dragover)="allowDrop($event)" (click)="openFilePicker(photosInput)">
-          <fa-icon [icon]='plusIcon' style="color:var(--medium-grey)"></fa-icon>
-        </div>
+          <fa-icon [icon]='plusIcon'></fa-icon>
+        </button>
 
         <!-- TECHNICAL DRAWINGS -->
-        <label class="form-label" style="margin-top: var(--space-5)!important;">Technical drawings</label><br>
+        <h2 class="form-section-title form-section">Technical drawings</h2>
         <div class="reorder-list" cdkDropList [cdkDropListData]="pattern.techDrawings" (cdkDropListDropped)="onReorderDrop($event, 1)">
           @for (drawing of pattern.techDrawings; track $index; let i = $index) {
-            <div class="black-box image-block d-flex flex-row align-items-center justify-content-between" [class.cover-item]="i === 0" cdkDrag>
+            <div class="light-box image-block d-flex flex-row align-items-center justify-content-between" [class.cover-item]="i === 0" cdkDrag>
               <div class="d-flex flex-row align-items-center">
                 <div class="item-thumbnail">
-                  <img [src]="drawing" alt="Technical drawing">
+                  <img [src]="drawing" alt="">
                 </div>
-                <div class="d-flex flex-column" style="margin-left: var(--space-3)">
+                <div class="d-flex flex-column file-row-text">
                   @if (i === 0) { <span class="label-upper cover-badge">cover</span> }
-                  <span>{{extractFileName(drawing)}}</span>
+                  <span>{{fileName(drawing)}}</span>
                 </div>
               </div>
-              <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
-                <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+              <div class="d-flex align-items-center gap-2 file-row-actions">
+                <button type="button" class="secondary-button drag-handle" cdkDragHandle title="Drag to reorder" [attr.aria-label]="'Reorder ' + fileName(drawing)">
                   <fa-icon [icon]='dragHandleIcon'></fa-icon>
                 </button>
-                <button type="button" class="subtle-warning-button" (click)="removeItem(1, i)">delete</button>
+                <button type="button" class="subtle-warning-button" (click)="removeItem(1, i)">Delete<span class="visually-hidden"> {{fileName(drawing)}}</span></button>
               </div>
             </div>
           }
         </div>
 
         <input #drawingsInput type="file" hidden multiple accept="image/*" (change)="onFileSelect($event, 'techDrawings')">
-        <div class="grey-box new-item-block d-flex align-items-center justify-content-center"
+        <button type="button" class="grey-box new-item-block d-flex align-items-center justify-content-center"
+             aria-label="Add technical drawings" title="Add technical drawings (click or drop files here)"
              (drop)="onFileDrop($event, 'techDrawings')" (dragover)="allowDrop($event)" (click)="openFilePicker(drawingsInput)">
-          <fa-icon [icon]='plusIcon' style="color:var(--medium-grey)"></fa-icon>
-        </div>
+          <fa-icon [icon]='plusIcon'></fa-icon>
+        </button>
 
         <!-- PATTERN FILES -->
-        <label class="form-label" style="margin-top: var(--space-5)!important;">Pattern files *</label><br>
+        <h2 class="form-section-title form-section">Pattern files *</h2>
         <div class="reorder-list" cdkDropList [cdkDropListData]="pattern.files" (cdkDropListDropped)="onReorderDrop($event, 2)">
           @for (file of pattern.files; track $index; let i = $index) {
-            <div class="black-box d-flex flex-row align-items-center justify-content-between" cdkDrag>
+            <div class="light-box d-flex flex-row align-items-center justify-content-between" cdkDrag>
               <div class="d-flex flex-row align-items-center">
-                <fa-icon [icon]='fileIcon' style="margin-right: var(--space-3);"></fa-icon>
-                <span style="margin-left: var(--space-3)">{{extractFileName(file)}}</span>
+                <fa-icon [icon]='fileIcon' class="file-row-icon"></fa-icon>
+                <span class="file-row-text">{{fileName(file)}}</span>
               </div>
-              <div class="d-flex align-items-center gap-2" style="margin-right: var(--space-3);">
-                <button type="button" class="secondary-button drag-handle" cdkDragHandle>
+              <div class="d-flex align-items-center gap-2 file-row-actions">
+                <button type="button" class="secondary-button drag-handle" cdkDragHandle title="Drag to reorder" [attr.aria-label]="'Reorder ' + fileName(file)">
                   <fa-icon [icon]='dragHandleIcon'></fa-icon>
                 </button>
-                <button type="button" class="subtle-warning-button" (click)="removeItem(2, i)">delete</button>
+                <button type="button" class="subtle-warning-button" (click)="removeItem(2, i)">Delete<span class="visually-hidden"> {{fileName(file)}}</span></button>
               </div>
             </div>
           }
         </div>
 
         <input #filesInput type="file" hidden multiple (change)="onFileSelect($event, 'files')">
-        <div class="grey-box new-item-block d-flex align-items-center justify-content-center"
+        @if (submitted && filesMissing) {
+          <div id="filesError" class="invalid-feedback d-block mb-2">Add at least one pattern file.</div>
+        }
+        <button type="button" class="grey-box new-item-block d-flex align-items-center justify-content-center"
+             #addFilesButton
+             aria-label="Add pattern files" title="Add pattern files (click or drop files here)"
+             [attr.aria-describedby]="submitted && filesMissing ? 'filesError' : null"
              (drop)="onFileDrop($event, 'files')" (dragover)="allowDrop($event)" (click)="openFilePicker(filesInput)">
-          <fa-icon [icon]='plusIcon' style="color:var(--medium-grey)"></fa-icon>
-        </div>
+          <fa-icon [icon]='plusIcon'></fa-icon>
+        </button>
 
         <!-- SHARED FILES -->
-        <div class="d-flex align-items-center justify-content-between" style="margin-top: var(--space-5);">
-          <label class="form-label mb-0">Shared instruction files</label>
+        <div class="d-flex align-items-center justify-content-between form-section">
+          <h2 class="form-section-title mb-0" id="sharedFilesTitle">Shared instruction files</h2>
           <span class="text-muted small">{{ pattern.sharedFiles.length + pattern.newSharedFiles.length }} selected</span>
         </div>
 
         <input type="text"
               class="inputField form-control mt-2 mb-2"
               name="sharedFilesFilter"
+              aria-label="Search shared instruction files"
               [(ngModel)]="sharedFilesFilter"
               placeholder="Search files...">
 
-        <div class="list-group shared-files-list">
+        <!-- role="group" + aria-labelledby: same meaning as a fieldset/legend, keeping the title row layout -->
+        <div class="list-group shared-files-list" role="group" aria-labelledby="sharedFilesTitle">
           <!-- new files (not saved yet) -->
           @for (path of filteredNewSharedFiles; track path) {
-            <label class="list-group-item d-flex align-items-center gap-2" style="cursor: pointer;">
+            <label class="list-group-item d-flex align-items-center gap-2">
               <input type="checkbox"
                     class="form-check-input mt-0"
                     checked
                     (change)="removeNewSharedFile(path)">
-              <span class="text-truncate">{{ extractFileName(path) }}</span>
+              <span class="text-truncate">{{ fileName(path) }}</span>
               <span class="badge text-bg-secondary ms-auto">new</span>
             </label>
           }
 
           <!-- existing files (already in the db) -->
           @for (file of filteredAvailableSharedFiles; track file.id) {
-            <label class="list-group-item d-flex align-items-center gap-2" style="cursor: pointer;">
+            <label class="list-group-item d-flex align-items-center gap-2">
               <input type="checkbox"
                     class="form-check-input mt-0"
                     [checked]="isSharedFileSelected(file)"
                     (change)="toggleSharedFile(file, $any($event.target).checked)">
-              <span class="text-truncate">{{ extractFileName(file.filePath) }}</span>
+              <span class="text-truncate">{{ fileName(file.filePath) }}</span>
             </label>
           }
 
@@ -293,22 +306,32 @@
 
         <!-- Add new shared file(s) -->
         <input #sharedFilesInput type="file" hidden multiple (change)="onFileSelect($event, 'newSharedFiles')">
-        <div class="grey-box new-item-block d-flex align-items-center justify-content-center mt-2"
+        <button type="button" class="grey-box new-item-block d-flex align-items-center justify-content-center mt-2"
+            aria-label="Add shared instruction files" title="Add shared instruction files (click or drop files here)"
             (drop)="onFileDrop($event, 'newSharedFiles')"
             (dragover)="allowDrop($event)"
             (click)="openFilePicker(sharedFilesInput)">
-          <fa-icon [icon]="plusIcon" style="color: var(--medium-grey)"></fa-icon>
-        </div>
+          <fa-icon [icon]="plusIcon"></fa-icon>
+        </button>
       </div>
 
 
-      <!-- <button class="btn btn-outline-dark align-self-end justify-self-center" type="submit" [disabled]="patternForm.invalid">Submit</button> -->
   </div>
-  <div class="modal-footer">
-    <button type="button" class="primary-button"  type="submit" [disabled]="patternForm.invalid">
+  <!-- role="alert": announced by screen readers as soon as it appears -->
+  @if (addFailed) {
+    <div class="form-error" role="alert">
+      The pattern couldn't be added. A folder with this name may already exist in the pattern folder,
+      or one of the selected files may no longer be available. Please check and try again.
+    </div>
+  }
+  <div class="form-actions">
+    <a class="secondary-button" routerLink="/patterns">Cancel</a>
+    <!-- always enabled (except while saving): clicking it with errors shows them and focuses the first one -->
+    <button type="submit" class="primary-button" [disabled]="saving">
       <fa-icon [icon]="plusIcon"></fa-icon>
-      add pattern</button>
-    <button type="button" class="secondary-button" (click)="closeModal()">cancel</button>
+      {{saving ? 'Adding pattern…' : 'Add pattern'}}</button>
   </div>
 </form>
+</div>
+</div>
   

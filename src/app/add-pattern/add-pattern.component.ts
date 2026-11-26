@@ -1,25 +1,25 @@
-import { Component, ViewEncapsulation, ChangeDetectorRef, EventEmitter, Output, OnInit, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, ViewEncapsulation, ChangeDetectorRef, OnInit, inject, ViewChild, ElementRef, Injector, afterNextRender } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Material, NewPattern, SharedFile, createPattern, Category } from '../classes';
-import { NgClass} from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import * as icons from '@fortawesome/free-regular-svg-icons';
 import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DataService } from '../services/data.service';
+import { fileName } from '../utils/pattern-format';
+import { CategoryPickerComponent } from '../category-picker/category-picker.component';
+import { PatternNameValidatorDirective } from '../validators/pattern-name.validator';
 
 @Component({
     selector: 'app-add-pattern',
-    imports: [FormsModule, NgClass, FontAwesomeModule, ScrollingModule, DragDropModule],
+    imports: [FormsModule, FontAwesomeModule, ScrollingModule, DragDropModule, RouterLink, CategoryPickerComponent, PatternNameValidatorDirective],
     templateUrl: './add-pattern.component.html', 
     styleUrl: './add-pattern.component.scss',
     encapsulation: ViewEncapsulation.None
 })
 export class AddPatternComponent implements OnInit {
-  @Output() closeModalEvent = new EventEmitter<any>();
-  patternNameList : string[] = [];
-  patternName: string = '';
   pattern: NewPattern =  createPattern();
   availableSharedFiles: SharedFile[] = [];
   sharedFilesFilter = '';
@@ -30,8 +30,26 @@ export class AddPatternComponent implements OnInit {
 
   categories: Category[] = [];
 
+  // VALIDATION
+  // set by the first click on "Add pattern": from then on, every error message is shown
+  submitted = false;
+  // while the pattern is being added (files copied): the submit button is disabled
+  saving = false;
+  // adding failed in the main process (file copy or database): shows an alert above the buttons
+  addFailed = false;
+
+  @ViewChild('nameInput') nameInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('addFilesButton') addFilesButton?: ElementRef<HTMLButtonElement>;
+
   private cdr = inject(ChangeDetectorRef);
   private data = inject(DataService);
+  private router = inject(Router);
+  private injector = inject(Injector);
+
+  // empty form content (after the default category is applied), compared by hasUnsavedChanges()
+  private initialSnapshot = JSON.stringify(this.pattern);
+  // set after the pattern is added, so leaving the page doesn't ask about unsaved changes
+  private skipUnsavedCheck = false;
 
   private loadSharedFiles(): void {
     this.data.getAllSharedFiles().then(files  => {
@@ -49,6 +67,8 @@ export class AddPatternComponent implements OnInit {
         if (elseCategory) {
           this.pattern.categoryIds = [elseCategory.id];
         }
+        // the default category is not a change made by the user
+        this.initialSnapshot = JSON.stringify(this.pattern);
       }
       this.cdr.detectChanges();
     });
@@ -57,26 +77,15 @@ export class AddPatternComponent implements OnInit {
   ngOnInit(): void {
     this.loadSharedFiles();
     this.loadCategories();
-    console.log(this.categories);
   }
 
-  extractFileName(filePath: string): string {
-    const pathParts = filePath.split(/[\\/]/);
-    return pathParts[pathParts.length - 1] || '';
+  fileName(path: string): string {
+    return fileName(path);
   }
   
-  checkNameValidity() {
-    if (!this.data.checkPatternNameValidity(this.pattern.name)) {
-      const inputField = document.getElementById('name');
-      inputField?.classList.add('is-invalid');
-    } else {
-      const inputField = document.getElementById('name');
-      inputField?.classList.remove('is-invalid');
-    }
-  }
-
-  checkNameValidityBis() {
-    return this.data.checkPatternNameValidity(this.pattern.name);
+  // at least one pattern file is required
+  get filesMissing(): boolean {
+    return this.pattern.files.length === 0;
   }
 
   onDifficultyChange(): void {
@@ -166,7 +175,7 @@ export class AddPatternComponent implements OnInit {
   // available files + any newly added ones, filtered by the search text
   private matchesFilter(path: string): boolean {
     const q = this.sharedFilesFilter.trim().toLowerCase();
-    return !q || this.extractFileName(path).toLowerCase().includes(q);
+    return !q || this.fileName(path).toLowerCase().includes(q);
   }
 
   get filteredAvailableSharedFiles(): SharedFile[] {
@@ -193,29 +202,6 @@ export class AddPatternComponent implements OnInit {
     this.pattern.newSharedFiles = this.pattern.newSharedFiles.filter(p => p !== path);
   }
 
-  // CATEGORY HANDLING
-  isCategorySelected(categoryId: number): boolean {
-    return this.pattern.categoryIds.includes(categoryId);
-  }
-
-  toggleCategory(categoryId: number, checked: boolean): void {
-    if (checked) {
-      // Add category if not already selected and under max 5
-      if (!this.pattern.categoryIds.includes(categoryId) && this.pattern.categoryIds.length < 5) {
-        this.pattern.categoryIds.push(categoryId);
-      }
-    } else {
-      // Remove category, but ensure at least one remains
-      const newCategoryIds = this.pattern.categoryIds.filter(id => id !== categoryId);
-      if (newCategoryIds.length > 0) {
-        this.pattern.categoryIds = newCategoryIds;
-      }
-    }
-  }
-
-  canAddMoreCategories(): boolean {
-    return this.pattern.categoryIds.length < 5;
-  }
   addResourceRow(type: 'fabric' | 'materials'): void {
     const nextItem: Material = { type: '', requirement: '' };
     if (type === 'fabric') {
@@ -233,32 +219,46 @@ export class AddPatternComponent implements OnInit {
     this.pattern.materials.splice(index, 1);
   }
 
-  submitForm(): void {
+  async submitForm(form: NgForm): Promise<void> {
+    this.submitted = true;
+    this.addFailed = false;
     this.onDifficultyChange();
-    // Validate form data
-    if (!this.pattern.name || this.pattern.files.length === 0 || !this.data.checkPatternNameValidity(this.pattern.name)) {
-      console.error('Pattern name and files are required.');
+
+    // invalid: the error messages are now shown, move the focus to the first problem
+    if (form.invalid || this.filesMissing) {
+      this.focusFirstError(form);
       return;
     }
 
-    else {
-      console.log(this.pattern);
-      this.data.addPattern(this.pattern);
-      this.loadSharedFiles();
-      this.loadCategories();
-      this.closeModal();
+    this.saving = true;
+    // spaces at the ends are not kept (" Calliope " -> "Calliope"), the folder is named after it
+    const newPatternId = await this.data.addPattern({ ...this.pattern, name: this.pattern.name.trim() });
+    this.saving = false;
+
+    if (newPatternId === null) {
+      // stay on the form so nothing typed is lost, and say so (role="alert" in the template)
+      this.addFailed = true;
+      return;
     }
+    // open the new pattern's details page
+    this.skipUnsavedCheck = true;
+    this.router.navigate(['/patterns', newPatternId]);
   }
 
-  closeModal() {
-    console.log('close modale 1');
-    this.closeModalEvent.emit(true);
-    this.pattern = createPattern();
-    // Initialize with "Else" category
-    const elseCategory = this.categories.find(category => category.name === 'Else') ?? this.categories[0];
-    if (elseCategory) {
-      this.pattern.categoryIds = [elseCategory.id];
-    }
+  // once the error messages are drawn, focus the first field to fix (name first, then the files)
+  private focusFirstError(form: NgForm): void {
+    afterNextRender(() => {
+      if (form.controls['name']?.invalid) {
+        this.nameInput?.nativeElement.focus();
+      } else if (this.filesMissing) {
+        this.addFilesButton?.nativeElement.focus();
+      }
+    }, { injector: this.injector });
   }
 
+  // used by unsavedChangesGuard when leaving the page
+  hasUnsavedChanges(): boolean {
+    if (this.skipUnsavedCheck) return false;
+    return JSON.stringify(this.pattern) !== this.initialSnapshot;
+  }
 }

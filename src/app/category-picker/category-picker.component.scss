@@ -1,0 +1,8 @@
+// dropdown button and selected chips on one line, wrapping when needed
+.category-picker,
+.category-picker-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+}

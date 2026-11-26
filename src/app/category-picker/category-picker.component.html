@@ -1,0 +1,47 @@
+<span class="form-label d-block">Categories ({{selectedIds.length}}/{{max}})</span>
+
+<div class="category-picker">
+  <!-- dropdown stays open while ticking categories -->
+  <div class="dropdown">
+    <button type="button" class="secondary-button dropdown-toggle"
+            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+            [attr.aria-describedby]="idPrefix + 'hint'">
+      Choose categories
+    </button>
+    <div class="dropdown-menu filter-dropdown-menu">
+      <!-- Enter would submit the surrounding add/edit form -->
+      <input type="text" class="form-control" placeholder="Search categories..."
+             aria-label="Search categories"
+             [(ngModel)]="search" [ngModelOptions]="{standalone: true}"
+             (keydown.enter)="$event.preventDefault()">
+      <fieldset class="filter-dropdown-list">
+        <legend class="visually-hidden">Categories</legend>
+        @for (category of filteredCategories; track category.id) {
+          <label class="dropdown-item filter-option" [for]="idPrefix + category.id">
+            <input class="form-check-input" type="checkbox" [id]="idPrefix + category.id"
+                   [checked]="isSelected(category.id)"
+                   [disabled]="isDisabled(category.id)"
+                   (change)="toggle(category.id)">
+            <span>{{category.name}}</span>
+          </label>
+        } @empty {
+          <p class="text-grey filter-empty">No category found</p>
+        }
+      </fieldset>
+    </div>
+  </div>
+
+  <ul class="category-picker-chips list-unstyled mb-0" aria-label="Selected categories">
+    @for (category of selectedCategories; track category.id) {
+      <li class="filter-chip">
+        {{category.name}}
+        <button type="button" (click)="toggle(category.id)" [disabled]="isDisabled(category.id)"
+                [attr.aria-label]="'Remove ' + category.name">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </li>
+    }
+  </ul>
+</div>
+
+<!-- <p class="text-grey small mt-2 mb-0" [id]="idPrefix + 'hint'">Choose between 1 and {{max}} categories.</p> -->

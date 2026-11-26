@@ -6,7 +6,7 @@ declare global {
     electronAPI: {
       loadPatterns: () => Promise<Pattern[]>;
       getPatternDetails: (patternId: string) => Promise<Pattern | null>;
-      addPattern: (pattern: NewPattern) => void;
+      addPattern: (pattern: NewPattern) => Promise<number | null>;
       deletePattern: (pattern: Pattern) => void;
       editPattern: (oldPattern: Pattern, newPattern: NewPattern) => Promise<void>;
       //COMMENTS

@@ -1,18 +1,55 @@
-carousel-inner {
-    height: 400px;
+// OVERVIEW CARD
+
+.details-carousel {
+    border-radius: var(--inner-card-radius);
+    overflow: hidden;
+    margin-bottom: var(--space-4);
 }
 
 mdb-carousel {
     background-color: var(--background-color-grey);
 }
 
-.pattern-meta-card {
-    margin-top: var(--space-2);
-    margin-right: var(--space-4);
+.carousel-image {
+    height: 400px;
+    object-fit: contain;
 }
 
-.grey-color {
-    color: var(--background-color-grey)
+.details-categories {
+    margin-bottom: 0;
+}
+
+.details-title {
+    margin: 0 var(--space-1) 0 0;
+}
+
+.difficulty-star {
+    color: var(--light-black);
+}
+
+// visible on white and on grey (the old color was the page background grey)
+.star-empty {
+    color: var(--light-grey);
+}
+
+.paid-icon {
+    color: var(--gold);
+}
+
+.pattern-meta-card {
+    margin-top: var(--space-3);
+}
+
+.details-description {
+    margin: var(--space-4) 0 0;
+    text-align: justify;
+    hyphens: auto;
+}
+
+// FILES AND COMMENTS
+
+.empty-section {
+    margin: 0;
 }
 
 .meta-badge {
@@ -26,7 +63,7 @@ mdb-carousel {
 }
 
 .badge-positive {
-    color: var(--green);
+    color: var(--green); 
     background-color: var(--light-green);
 }
 
@@ -35,24 +72,33 @@ mdb-carousel {
     background-color: var(--lighter-grey);
 }
 
+// <dl> of label/value pairs: Brand and Materials on the left, Fabrics (often a longer list) on the right
 .meta-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+        "brand     fabrics"
+        "materials fabrics";
+    align-items: start;
     gap: var(--space-3);
+    margin: 0;
 }
+
+.meta-brand     { grid-area: brand; }
+.meta-materials { grid-area: materials; }
+.meta-fabrics   { grid-area: fabrics; }
 
 .meta-item {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-}
 
-.meta-column {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    min-width: 0;
+    // remove Bootstrap's default <dt> bold and <dd> margins (the classes set the look)
+    dt,
+    dd {
+        margin: 0;
+    }
 }
 
 .meta-list {
@@ -121,10 +167,6 @@ mdb-carousel {
     margin-top: var(--space-2);
 }
 
-.empty-comments {
-    margin: var(--space-2) 0 var(--space-3) var(--space-1);
-}
-
 .icon-button {
     background: none;
     border: none;
@@ -139,12 +181,12 @@ mdb-carousel {
 }
 
 @media (max-width: 768px) {
-    .pattern-meta-card {
-        margin-right: 0;
-    }
-
     .meta-grid {
         grid-template-columns: 1fr;
+        grid-template-areas:
+            "brand"
+            "materials"
+            "fabrics";
     }
 }
 
